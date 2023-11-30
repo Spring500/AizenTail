@@ -1,0 +1,82 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background: #f5f5f5;
+    /* overflow: scroll; */
+}
+
+html,
+body,
+#app {
+    background:#2e2c33;
+    height: 100%;
+}
+
+h1{
+    color: #fff;
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+    margin: 10px 0;
+
+}
+
+.content {
+    word-break: break-all;
+    white-space: nowrap;
+    font: 14px/1.2 "SimSun";
+}
+
+#app {
+    display: flex;
+    flex-direction: row;
+}
+
+.title {
+    background:#2e2c33;
+    color:white
+}
+
+.logContainer{
+    background:#3c3a40;
+    color:white
+}
+
+.logList{
+    width: auto;
+}
+
+.logList::-webkit-scrollbar {
+    width: 20px; 
+ }
+
+.logList::-webkit-scrollbar-track {
+    background-color: #352f45;
+}
+
+.logList::-webkit-scrollbar-thumb {
+  background: #9b9b9b;
+  border-radius: 5px;
+  min-height: 30px;
+}
+
+input[type=file] {
+    border: none;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    /* font: 14px; */
+}
+input[type=file]::-webkit-file-upload-button {
+    color: #fff;
+    background-color: #998541;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+input[type=file]::-webkit-file-upload-button:hover {
+    background-color: #ccaf4f;
+}
