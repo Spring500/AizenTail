@@ -123,7 +123,7 @@ export function App() {
         const resize = new ResizeObserver((e) => {
             if (!Array.isArray(e) || !e.length) return;
             for (const ent of e)
-                setScale(ent.contentRect.height - 20);
+                setScale(ent.contentRect.height - 4);
         });
         // 传入监听对象
         resize.observe(logContainerRef.current);
@@ -153,15 +153,17 @@ export function App() {
             setTimeout(() => logListRef.current?.scrollToItem(logData.logs.length - 1), 0);
             setHint(`打开文件耗时：${Date.now() - start}ms`);
         });
-
-        // reader.readAsText(file);
-        
     }
+    const closeWindow = () => window.close();
     return <div style={{ flex: "1 1 auto", display: "flex", flexDirection: "column"}}>
         <div 
             className="title"
             style={{ flex: "none"}}>
-            <div><h1>{fileName}</h1>{fileUrl}</div>
+            <div className='titleBar' style={{display: "flex", flexDirection:"row"}}>
+                <h1 style={{flex:"auto"}}>{fileName}</h1>
+                <button id="closeButton" onClick={closeWindow} style={{flex:"0 0 auto"}}>x</button>
+            </div>
+            {fileUrl}
             <input type="file" onChange={onOpenFile} name={"日志文件路径"} />
             {hint}
         </div>

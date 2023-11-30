@@ -19,9 +19,10 @@ h1{
     color: #fff;
     font-size: 18px;
     font-weight: 400;
+    height: 30px;
+    -webkit-app-region: drag;
     text-align: center;
-    margin: 10px 0;
-
+    user-select: none;
 }
 
 .content {
@@ -38,6 +39,23 @@ h1{
 .title {
     background:#2e2c33;
     color:white
+}
+
+#closeButton {
+    -webkit-app-region: no-drag;
+    background: #ffffff00;
+    color:#fff;
+    width: 30px;
+    height: 30px;
+    border: none;
+    display: inline-block;
+    margin: 0 5px;
+    position: relative;
+    top: 1px;
+}
+
+#closeButton:hover {
+    background: #ffc38e;
 }
 
 .logContainer{
