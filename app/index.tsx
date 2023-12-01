@@ -21,6 +21,9 @@ const logData = {
     logs: [] as LogMeta[],
 }
 
+let filting = false;
+const filtedLogIds = new Array<number>();
+
 const rules = {
     color: [
         {
@@ -66,9 +69,13 @@ const rules = {
     ]
 }
 function getLogLine(index: number) {
+    if (filting) {
+        const logId = filtedLogIds[index];
+        return logData.logs[logId] ?? '';
+    }
     return logData.logs[index] ?? '';
 }
-function checkLogColor(log: string):{background?:string, color?:string} {
+function checkLogColor(log: string): { background?: string, color?: string } {
     for (const rule of rules.color) {
         if (rule.reg.test(log)) {
             return rule;
@@ -93,8 +100,8 @@ function Row({ index = 0, style }: {
     const text = log.text;
     const replacedText = replaceLog(text);
     const color = checkLogColor(replacedText);
-    return <div className="content" style={{ ...style, minWidth:"110%", backgroundColor: color.background, color:color.color }}>
-        <i style={{position:"relative", userSelect:"none", color: "#ffffff77", marginRight:10, marginLeft:20,}}>{index}</i>
+    return <div className="log" style={{ ...style, minWidth: "110%", backgroundColor: color.background, color: color.color }}>
+        <i style={{ position: "relative", userSelect: "none", color: "#ffffff77", marginRight: 10, marginLeft: 20, }}>{index}</i>
         {replacedText}
     </div >
 }
@@ -108,6 +115,8 @@ const ItemWrapper = ({ data, index, style }: {
     return <ItemRenderer index={index} style={style} />;
 };
 
+
+
 export function App() {
     const [logCount, setLogCount] = React.useState(0);
     const [fileName, setFileName] = React.useState('Filename' as string);
@@ -116,14 +125,13 @@ export function App() {
     const [scale, setScale] = React.useState(300);
     const logContainerRef = React.useRef<HTMLDivElement>(null);
     const logListRef = React.useRef<FixedSizeList>(null);
+
     React.useEffect(() => {
         const div = logContainerRef.current;
         console.log('div', div);
         if (!div) return;
         const resize = new ResizeObserver((e) => {
-            if (!Array.isArray(e) || !e.length) return;
-            for (const ent of e)
-                setScale(ent.contentRect.height - 4);
+            setScale(div.getBoundingClientRect().height)
         });
         // 传入监听对象
         resize.observe(logContainerRef.current);
@@ -134,7 +142,7 @@ export function App() {
         console.log('打开文件', event);
         const file = event.target.files?.[0];
         // file.slice(0, 1000); file.slice
-        if (!file){
+        if (!file) {
             return;
         }
         const start = Date.now();
@@ -148,40 +156,82 @@ export function App() {
             }
             setFileName(file.name);
             setFileUrl(file.path);
-            setLogCount(result.length);
-            // 等待列表刷新完毕后，滚动到最后一行
-            setTimeout(() => logListRef.current?.scrollToItem(logData.logs.length - 1), 0);
             setHint(`打开文件耗时：${Date.now() - start}ms`);
+            refreshFilter();
         });
     }
+    const refreshFilter = () => {
+        console.log('刷新过滤')
+        if (filting) {
+            const start = Date.now();
+            filtedLogIds.length = 0;
+            for (let i = 0; i < logData.logs.length; i++) {
+                const log = logData.logs[i];
+                let exclude = false;
+                let include = false;
+                for (const rule of rules.filter) {
+                    if (rule.reg.test(log.text)) {
+                        if (rule.exclude) {
+                            exclude = true;
+                            break;
+                        }
+                        include = true;
+                        break;
+                    }
+                }
+                if (include && !exclude) {
+                    filtedLogIds.push(i);
+                }
+            }
+            setHint(`过滤耗时：${Date.now() - start}ms`);
+        } else {
+            filtedLogIds.length = 0;
+        }
+
+        if (filting) {
+            setLogCount(filtedLogIds.length);
+            setTimeout(() => logListRef.current?.scrollToItem(filtedLogIds.length - 1), 0);
+        }
+        else {
+            setLogCount(logData.logs.length);
+            setTimeout(() => logListRef.current?.scrollToItem(logData.logs.length - 1), 0);
+        }
+    }
+
     const closeWindow = () => window.close();
-    return <div style={{ flex: "1 1 auto", display: "flex", flexDirection: "column"}}>
-        <div 
-            className="title"
-            style={{ flex: "none"}}>
-            <div className='titleBar' style={{display: "flex", flexDirection:"row"}}>
-                <h1 style={{flex:"auto"}}>{fileName}</h1>
-                <button id="closeButton" onClick={closeWindow} style={{flex:"0 0 auto"}}>x</button>
-            </div>
-            {fileUrl}
+    document.onkeyup = (e) => {
+        if (e.ctrlKey && e.key === 'h') {
+            console.log('ctrl+h');
+            filting = !filting;
+            refreshFilter();
+        }
+    }
+    return <>
+        <div className='titleBar'>
+            <div className='titleBarText'>{fileName}</div>
+            <button className='titleBarButton' id="minimizeButton" onClick={() => null}>▁</button>
+            <button className='titleBarButton' id="maximizeButton" onClick={() => null}>▢</button>
+            <button className='titleBarButton' id="closeButton" onClick={closeWindow}>╳</button>
+        </div >
+        <div className="content">
             <input type="file" onChange={onOpenFile} name={"日志文件路径"} />
-            {hint}
-        </div>
-        <div className="logContainer"
-            style={{ flex: "auto" }} 
-            ref={logContainerRef}>
-            <FixedSizeList
-                className="logList"
-                ref={logListRef}
-                itemData={{ ItemRenderer: Row }}
-                height={scale} itemCount={logCount}
-                itemSize={17} width={""}
-                overscanCount={10}
+            <div className="logContainer" ref={logContainerRef}>
+                <FixedSizeList
+                    className="logList"
+                    ref={logListRef}
+                    itemData={{ ItemRenderer: Row }}
+                    height={scale} itemCount={logCount}
+                    itemSize={17} width={""}
+                    overscanCount={10}
                 >
-                {ItemWrapper}
-            </FixedSizeList>
-        </div>
-    </div>;
+                    {ItemWrapper}
+                </FixedSizeList>
+            </div>
+            <div id='hintBar' className='systemInfo'>
+                <div>{fileUrl}</div>
+                {hint}
+            </div>
+        </div></>;
 }
 
 const root = createRoot(document.getElementById('app')!);

@@ -3,98 +3,160 @@
     margin: 0;
 }
 
+:root {
+    --theme-color-background: #2e2c33;
+    --theme-color-content: #3c3a40;
+    --theme-color-info-text: #707070;
+    --theme-color-info-text-highlight: #ffffff;
+    --theme-color-log: #ffffff;
+    --theme-color-scrollbar-track: #303134;
+    --theme-color-scrollbar-thumb: #514e55;
+    --theme-color-scrollbar-thumb-hover: #7d7a7f;
+    --theme-color-button: #ffffff00;
+    --theme-color-button-hover: #ffffff10;
+    --theme-color-button-close-hover: #ef3c54;
+    --theme-font-system: 12px/1.0 "Microsoft Yahei";
+    --theme-font-log: 13px/1.2 "SimSun";
+}
+
 body {
-    background: #f5f5f5;
-    /* overflow: scroll; */
+    background:var(--theme-color-background);
 }
 
 html,
 body,
 #app {
-    background:#2e2c33;
     height: 100%;
 }
 
-h1{
-    color: #fff;
-    font-size: 18px;
-    font-weight: 400;
-    height: 30px;
-    -webkit-app-region: drag;
-    text-align: center;
-    user-select: none;
-}
-
-.content {
+.log {
     word-break: break-all;
     white-space: nowrap;
-    font: 14px/1.2 "SimSun";
+    font: var(--theme-font-log);
 }
 
-#app {
-    display: flex;
-    flex-direction: row;
+.systemInfo{
+    color: var(--theme-color-info-text);
+    white-space: nowrap;
+    user-select: none;
+    font: var(--theme-font-system);
 }
 
 .title {
-    background:#2e2c33;
-    color:white
+    background:var(--theme-color-background);
+    flex: none;
+}
+.titleBar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    -webkit-app-region: drag;
+    background: var(--theme-color-background);
+    height: 30px;
 }
 
-#closeButton {
+.titleBarText{
+    color: var(--theme-color-info-text);
+    font-size: 16px;
+    font-weight: bold;
+    -webkit-app-region: drag;
+    vertical-align: middle;
+    text-align: center;
+    user-select: none;
+    flex: auto;
+}
+
+.titleBarButton{
     -webkit-app-region: no-drag;
-    background: #ffffff00;
-    color:#fff;
-    width: 30px;
-    height: 30px;
+    background: var(--theme-color-button);
+    color: var(--theme-color-info-text);
+    width: 40px;
+    height: 100%;
     border: none;
     display: inline-block;
-    margin: 0 5px;
     position: relative;
-    top: 1px;
+    text-align: center;
+    user-select: none;
+    flex: 0 0 auto;
+}
+
+.titleBarButton:hover {
+    background: var(--theme-color-button-hover);
+    color: var(--theme-color-info-text-highlight);
 }
 
 #closeButton:hover {
-    background: #ffc38e;
+    background: var(--theme-color-button-close-hover);
+}
+
+.content{
+    display: flex;
+    flex: auto;
+    flex-direction: column;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 100%;
 }
 
 .logContainer{
-    background:#3c3a40;
-    color:white
+    background:var(--theme-color-content);
+    color:var(--theme-color-log);
+    flex: 1 1 0;
+    min-height: 0;
 }
 
 .logList{
     width: auto;
 }
 
-.logList::-webkit-scrollbar {
-    width: 20px; 
+*::-webkit-scrollbar {
+    width: 16px; 
  }
 
-.logList::-webkit-scrollbar-track {
-    background-color: #352f45;
+ *::-webkit-scrollbar-track {
+    background-color: var(--theme-color-scrollbar-track);
 }
 
-.logList::-webkit-scrollbar-thumb {
-  background: #9b9b9b;
-  border-radius: 5px;
-  min-height: 30px;
+*::-webkit-scrollbar-thumb {
+  background: var(--theme-color-scrollbar-thumb);
+  border-radius: 2px;
+  min-height: 25%;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-color-scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--theme-color-background);
 }
 
 input[type=file] {
     border: none;
-    color: white;
+    color: #a8a5ca;
     text-align: center;
     display: inline-block;
     /* font: 14px; */
 }
 input[type=file]::-webkit-file-upload-button {
-    color: #fff;
-    background-color: #998541;
+    color: var(--theme-color-info-text);
+    background-color: var(--theme-color-button);
     border: none;
-    border-radius: 5px;
+    border-radius: 2px;
     padding: 5px 10px;
 }
 input[type=file]::-webkit-file-upload-button:hover {
-    background-color: #ccaf4f;
+    background-color: var(--theme-color-button-hover);
+    color: var(--theme-color-info-text-highlight);
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+}
+
+#hintBar{
+    height: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
