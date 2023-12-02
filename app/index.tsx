@@ -100,8 +100,8 @@ function Row({ index = 0, style }: {
     const text = log.text;
     const replacedText = replaceLog(text);
     const color = checkLogColor(replacedText);
-    return <div className="log" style={{ ...style, minWidth: "110%", backgroundColor: color.background, color: color.color }}>
-        <i style={{ position: "relative", userSelect: "none", color: "#ffffff77", marginRight: 10, marginLeft: 20, }}>{index}</i>
+    return <div className="log" style={{ ...style, backgroundColor: color.background, color: color.color }}>
+        <div className="logIndex">{index}</div>
         {replacedText}
     </div >
 }

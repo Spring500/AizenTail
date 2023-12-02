@@ -9,6 +9,7 @@
     --theme-color-info-text: #707070;
     --theme-color-info-text-highlight: #ffffff;
     --theme-color-log: #ffffff;
+    --theme-color-log-index: #ffffff44;
     --theme-color-scrollbar-track: #303134;
     --theme-color-scrollbar-thumb: #514e55;
     --theme-color-scrollbar-thumb-hover: #7d7a7f;
@@ -27,12 +28,6 @@ html,
 body,
 #app {
     height: 100%;
-}
-
-.log {
-    word-break: break-all;
-    white-space: nowrap;
-    font: var(--theme-font-log);
 }
 
 .systemInfo{
@@ -107,6 +102,24 @@ body,
 
 .logList{
     width: auto;
+}
+
+.log {
+    word-break: break-all;
+    white-space: nowrap;
+    font: var(--theme-font-log);
+    width: 110%;
+}
+
+.logIndex{
+    position: relative;
+    display: inline-block;
+    user-select: none;
+    color: var(--theme-color-log-index);
+    font-style: italic;
+    margin-right: 12px;
+    text-align: right;
+    width: 50px;
 }
 
 *::-webkit-scrollbar {
