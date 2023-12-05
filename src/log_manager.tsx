@@ -1,62 +1,44 @@
-import { ipcRenderer } from "electron";
-
 class LogManager {
     readonly logs = new Array<LogMeta>();
     isFiltering = false;
     filtedLogIds = new Array<number>();
 
-    rules = {
-        color: [
-            {
-                color: 'red',
-                reg: /error/i,
-            },
-            {
-                background: 'green',
-                reg: /Wwise/i,
-            },
-            {
-                color: 'yellow',
-                reg: /warn/i,
-            }
-        ],
-        replacing: [
-            {
-                reg: /^\[(\d+.\d+.\d+-(\d+)\.(\d+)\.(\d+):(\d+))\]\[\s*(\d+)\]/,
-                replace: '[$2:$3:$4.$5($6帧)]',
-            },
-            {
-                reg: /\[GameThread\].*\[(信息|警告|错误)\]/,
-                replace: '[$1]',
-            },
-            {
-                reg: /\[(信息|警告|错误)\]\[(\w+)\](\[[^\[\]]+\])*/,
-                replace: '[$1][$2]',
-            },
-            {
-                reg: /D:\\aki\\Source\\Client/,
-                replace: ' ..项目路径',
-            },
-            {
-                reg: /Puerts: \(0x[0-9a-fA-F]+\)?/,
-                replace: '',
-            },
-        ],
-        filter: [
-            {
-                reg: /buff/,
-                exclude: false,
-            },
-        ]
-    };
+    rules: LogConfig = { color: [], replacing: [], filter: [] };
 
     constructor() {
         console.log("LogManager constructor");
         this.init();
     }
 
-    init() {
+    async init() {
         (window as any).electron.setOnWatchFile(this.updateFile);
+
+        // 解析setting.json
+        this.rules = await this.initSetting();
+    }
+
+    async initSetting() {
+        let setting: any = undefined;
+        try {
+            const settingString = await (window as any).electron.readSettings();
+            console.log("initSetting file", settingString);
+            if (settingString !== null)
+                setting = JSON.parse(settingString);
+        } catch (e) {
+            console.log("initSetting error", e);
+        }
+        setting = setting ?? { color: [], replacing: [], filter: [] };
+        const rules: LogConfig = { color: [], replacing: [], filter: [] };
+        for (const rule of setting.color ?? [])
+            rules.color.push({ reg: new RegExp(rule.reg), background: rule.background, color: rule.color });
+
+        for (const rule of setting.replacing ?? [])
+            rules.replacing.push({ reg: new RegExp(rule.reg), replace: rule.replace });
+
+        for (const rule of setting.filter ?? [])
+            rules.filter.push({ reg: new RegExp(rule.reg), exclude: rule.exclude });
+        console.log("initSetting", rules);
+        return rules;
     }
 
     getLogLine(index: number) {

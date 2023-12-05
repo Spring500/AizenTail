@@ -6,8 +6,8 @@ import { logManager } from './log_manager';
 // TODO：(1)优化内存占用，不要直接存储text，而是存储offset，然后在渲染的时候去文件中读取
 // TODO：(2)优化性能，把LogMeta拆分成多个分页，避免生成超大的数组
 // TODO：(3)增加过滤功能，可以根据关键字过滤日志
-// TODO：(4)增加自动滚动功能，可以根据日志的增加自动滚动到最新的日志
-// TODO：(5)允许用户自定义高亮、过滤规则
+// TODO：(4)增加自动滚动功能开关
+// TODO：(5)增加规则配置界面，让用户不用直接编辑setting.json
 
 
 function Row({ index = 0, style }: {
@@ -46,8 +46,8 @@ export function App() {
 
     React.useEffect(() => {
         const div = logContainerRef.current;
-        console.log('div', div);
         if (!div) return;
+
         const resize = new ResizeObserver((e) => {
             setScale(div.getBoundingClientRect().height)
         });
@@ -88,6 +88,9 @@ export function App() {
         switch (e.key) {
             case 'h':
                 if (e.ctrlKey) logManager.toggleFilter();
+                break;
+            case 'F12':
+                (window as any).electron.openDevTools();
                 break;
         }
     }

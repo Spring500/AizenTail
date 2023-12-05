@@ -6,3 +6,25 @@ type LogMeta = {
     /**后续去除对text的直接存储 */
     text: string,
 }
+
+type ColorConfig = {
+    color?: string,
+    background?: string,
+    reg: RegExp,
+}
+
+type ReplaceConfig = {
+    reg: RegExp,
+    replace: string,
+}
+
+type FilterConfig = {
+    reg: RegExp,
+    exclude: false
+}
+
+type LogConfig = {
+    color: ColorConfig[],
+    replacing: ReplaceConfig[],
+    filter: FilterConfig[],
+}

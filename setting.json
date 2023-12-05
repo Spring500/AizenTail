@@ -1,0 +1,44 @@
+{
+    "color": [
+        {
+            "color": "red",
+            "reg": "error"
+        },
+        {
+            "background": "green",
+            "reg": "Wwise"
+        },
+        {
+            "color": "yellow",
+            "reg": "warn"
+        }
+    ],
+    "replacing": [
+        {
+            "reg": "^\\[(\\d+.\\d+.\\d+-(\\d+)\\.(\\d+)\\.(\\d+):(\\d+))\\]\\[\\s*(\\d+)\\]",
+            "replace": "[$2:$3:$4.$5($6帧)]"
+        },
+        {
+            "reg": "\\[GameThread\\].*\\[(信息|警告|错误)\\]",
+            "replace": "[$1]"
+        },
+        {
+            "reg": "\\[(信息|警告|错误)\\]\\[(\\w+)\\](\\[[^\\[\\]]+\\])*",
+            "replace": "[$1][$2]"
+        },
+        {
+            "reg": "D:\\\\aki\\\\Source\\\\Client",
+            "replace": " ..项目路径"
+        },
+        {
+            "reg": "Puerts: \\(0x[0-9a-fA-F]+\\)?",
+            "replace": ""
+        }
+    ],
+    "filter": [
+        {
+            "reg": "buff",
+            "exclude": false
+        }
+    ]
+}

@@ -25,7 +25,6 @@ const createWindow = () => {
     });
     // and load the index.html of the app.
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
 }
 
 app.on('window-all-closed', () => {
@@ -34,6 +33,19 @@ app.on('window-all-closed', () => {
 });
 
 app.whenReady().then(() => {
+    ipcMain.handle('read-settings', async () => {
+        console.log('reading settings');
+        const promise = new Promise<string | null>((resolve, reject) => {
+            fs.readFile('setting.json', (err, data) => {
+                if (err) {
+                    console.error('read settings failed', err);
+                    return resolve(null);
+                }
+                return resolve(data.toString());
+            });
+        });
+        return await promise;
+    });
     ipcMain.handle('open-file', async (event, filename) => {
         console.log('loading', filename);
         const promise = new Promise<string | null>((resolve, reject) => {
@@ -68,6 +80,9 @@ app.whenReady().then(() => {
         watcher?.close();
         watcher = null;
         fileCurrentSize = 0;
+    });
+    ipcMain.on('open-dev-tools', () => {
+        BrowserWindow.getFocusedWindow()?.webContents.openDevTools({ mode: 'detach' });
     });
     createWindow();
 });
