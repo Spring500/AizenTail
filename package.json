@@ -1,35 +1,47 @@
 {
-  "name": "aizen_log_watcher",
+  "name": "aizen-log-watcher",
   "version": "1.0.0",
   "description": "实时日志查看工具",
-  "main": "index.js",
+  "main": ".webpack/main",
   "scripts": {
-    "build": "gulp build",
-    "start": "electron ./dist/main.js",
-    "webpack watch": "webpack --watch"
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
   },
-  "author": "sp5h",
+  "author": "spring500",
   "license": "ISC",
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "node-watch": "^0.7.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-window": "^1.8.10"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.2.0",
+    "@electron-forge/maker-deb": "^7.2.0",
+    "@electron-forge/maker-rpm": "^7.2.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron-forge/maker-zip": "^7.2.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.2.0",
+    "@electron-forge/plugin-webpack": "^7.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "@types/react": "^18.2.39",
     "@types/react-dom": "^18.2.17",
     "@types/react-window": "^1.8.8",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "css-loader": "^6.8.1",
     "electron": "^27.1.2",
-    "gulp": "^4.0.2",
-    "gulp-sourcemaps": "^3.0.0",
-    "gulp-typescript": "^6.0.0-alpha.1",
-    "merge2": "^1.4.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-import": "^2.29.0",
+    "fork-ts-checker-webpack-plugin": "^7.3.0",
+    "node-loader": "^2.0.0",
+    "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
-    "typescript": "^5.3.2",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1",
-    "webpack-stream": "^7.0.0"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
   }
 }

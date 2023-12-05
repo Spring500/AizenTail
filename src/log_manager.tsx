@@ -56,7 +56,7 @@ class LogManager {
     }
 
     init() {
-        window.electron.setOnWatchFile(this.updateFile);
+        (window as any).electron.setOnWatchFile(this.updateFile);
     }
 
     getLogLine(index: number) {
@@ -83,10 +83,10 @@ class LogManager {
     }
 
     async openFile(filename: string) {
-        window.electron.unwatchFile();
-        const resultText = await window.electron.openFile(filename);
+        (window as any).electron.unwatchFile();
+        const resultText = await (window as any).electron.openFile(filename);
         if (resultText === null) return;
-        window.electron.watchFile(filename);
+        (window as any).electron.watchFile(filename);
         this.logs.length = 0;
         await this.updateFile(null, resultText);
     }
