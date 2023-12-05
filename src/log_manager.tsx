@@ -1,6 +1,7 @@
 class LogManager {
     readonly logs = new Array<LogMeta>();
     isFiltering = false;
+    autoScroll = true;
     filtedLogIds = new Array<number>();
 
     rules: LogConfig = { color: [], replacing: [], filter: [] };
@@ -75,6 +76,10 @@ class LogManager {
 
     toggleFilter() {
         this.refreshFilter(!this.isFiltering);
+    }
+
+    toggleAutoScroll() {
+        this.autoScroll = !this.autoScroll;
     }
 
     updateFile = async (event: Electron.IpcRendererEvent | null, data: string) => {

@@ -48,9 +48,7 @@ export function App() {
         const div = logContainerRef.current;
         if (!div) return;
 
-        const resize = new ResizeObserver((e) => {
-            setScale(div.getBoundingClientRect().height)
-        });
+        const resize = new ResizeObserver(() => setScale(div.getBoundingClientRect().height));
         // 传入监听对象
         resize.observe(logContainerRef.current);
         // 及时销毁监听函数（重要!!!）
@@ -75,11 +73,13 @@ export function App() {
         if (isFiltering) {
             setHint(`开启过滤`);
             setLogCount(logManager.filtedLogIds.length);
-            setTimeout(() => logListRef.current?.scrollToItem(logManager.filtedLogIds.length - 1), 0);
+            if (logManager.autoScroll)
+                setTimeout(() => logListRef.current?.scrollToItem(logManager.filtedLogIds.length - 1), 0);
         } else {
             setHint(`关闭过滤`);
             setLogCount(logManager.logs.length);
-            setTimeout(() => logListRef.current?.scrollToItem(logManager.logs.length - 1), 0);
+            if (logManager.autoScroll)
+                setTimeout(() => logListRef.current?.scrollToItem(logManager.logs.length - 1), 0);
         }
     }
 
@@ -93,6 +93,9 @@ export function App() {
                 break;
         }
     }
+
+    const [autoScroll, setAutoScroll] = React.useState(true);
+    const [isFiltering, setIsFiltering] = React.useState(false);
     return <>
         <div className='titleBar'>
             <div className='titleBarText'>{fileName}</div>
@@ -101,16 +104,14 @@ export function App() {
             <button className='titleBarButton' id="closeButton" onClick={() => window.close()}>╳</button>
         </div >
         <div className="content">
-            <input type="file" onChange={onOpenFile} name={"日志文件路径"} />
+            <input type="file" id="openLogButton" onChange={onOpenFile} name={"日志文件路径"} style={{ display: "none" }} />
+            <div>
+                <button className='menuButton' onClick={() => document.getElementById('openLogButton')?.click()}>打开文件</button>
+                <button className='menuButton' onClick={() => { logManager.toggleAutoScroll(); setAutoScroll(logManager.autoScroll) }}>{`自动滚动: ${autoScroll ? "开" : "关"}`}</button>
+                <button className='menuButton' onClick={() => { logManager.toggleFilter(); setIsFiltering(logManager.isFiltering) }}>{`日志筛选: ${isFiltering ? "开" : "关"}`}</button>
+            </div>
             <div className="logContainer" ref={logContainerRef}>
-                <FixedSizeList
-                    className="logList"
-                    ref={logListRef}
-                    itemData={{ ItemRenderer: Row }}
-                    height={scale} itemCount={logCount}
-                    itemSize={17} width={""}
-                    overscanCount={10}
-                >
+                <FixedSizeList className="logList" ref={logListRef} itemData={{ ItemRenderer: Row }} height={scale} itemCount={logCount} itemSize={17} width={""} overscanCount={30}>
                     {ItemWrapper}
                 </FixedSizeList>
             </div>

@@ -1,16 +1,17 @@
 {
     "color": [
         {
-            "color": "red",
-            "reg": "error"
-        },
-        {
-            "background": "green",
-            "reg": "Wwise"
+            "background": "red",
+            "color": "white",
+            "reg": "\\[错误\\]"
         },
         {
             "color": "yellow",
-            "reg": "warn"
+            "reg": "\\[警告\\]"
+        },
+        {
+            "color": "gray",
+            "reg": "\\[协议\\]"
         }
     ],
     "replacing": [
@@ -33,6 +34,10 @@
         {
             "reg": "Puerts: \\(0x[0-9a-fA-F]+\\)?",
             "replace": ""
+        },
+        {
+            "reg": "\\[调试\\]\\[Net\\]\\[ZQ\\].* Net\\.\\w+\\.(\\w+)",
+            "replace": "[协议]$1"
         }
     ],
     "filter": [

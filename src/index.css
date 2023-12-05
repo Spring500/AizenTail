@@ -80,6 +80,25 @@ body,
     color: var(--theme-color-info-text-highlight);
 }
 
+.menuButton{
+    -webkit-app-region: no-drag;
+    background: var(--theme-color-button);
+    color: var(--theme-color-info-text);
+    width: 100px;
+    height: 100%;
+    border: none;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    user-select: none;
+    flex: 0 0 auto;
+}
+
+.menuButton:hover {
+    background: var(--theme-color-button-hover);
+    color: var(--theme-color-info-text-highlight);
+}
+
 #closeButton:hover {
     background: var(--theme-color-button-close-hover);
 }
