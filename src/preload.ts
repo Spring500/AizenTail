@@ -7,4 +7,6 @@ contextBridge.exposeInMainWorld("electron", {
     removeOnWatchFile: (callback: (event: Electron.IpcRendererEvent, text: string) => void) => ipcRenderer.removeListener("watch-file-reply", callback),
     unwatchFile: () => ipcRenderer.send("unwatch-file"),
     openDevTools: () => ipcRenderer.send("open-dev-tools"),
+    windowMinimize: () => ipcRenderer.send("window-minimize"),
+    windowMaximize: () => ipcRenderer.send("window-maximize"),
 });

@@ -84,5 +84,16 @@ app.whenReady().then(() => {
     ipcMain.on('open-dev-tools', () => {
         BrowserWindow.getFocusedWindow()?.webContents.openDevTools({ mode: 'detach' });
     });
+    ipcMain.on('window-minimize', () => {
+        BrowserWindow.getFocusedWindow()?.minimize();
+    });
+    ipcMain.on('window-maximize', () => {
+        const window = BrowserWindow.getFocusedWindow();
+        if (window?.isMaximized()) {
+            window.unmaximize();
+        } else {
+            window?.maximize();
+        }
+    });
     createWindow();
 });

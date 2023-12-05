@@ -83,7 +83,6 @@ export function App() {
         }
     }
 
-    const closeWindow = () => window.close();
     document.onkeyup = (e) => {
         switch (e.key) {
             case 'h':
@@ -97,9 +96,9 @@ export function App() {
     return <>
         <div className='titleBar'>
             <div className='titleBarText'>{fileName}</div>
-            <button className='titleBarButton' id="minimizeButton" onClick={() => null}>▁</button>
-            <button className='titleBarButton' id="maximizeButton" onClick={() => null}>▢</button>
-            <button className='titleBarButton' id="closeButton" onClick={closeWindow}>╳</button>
+            <button className='titleBarButton' id="minimizeButton" onClick={() => (window as any).electron.windowMinimize()}>▁</button>
+            <button className='titleBarButton' id="maximizeButton" onClick={() => (window as any).electron.windowMaximize()}>▢</button>
+            <button className='titleBarButton' id="closeButton" onClick={() => window.close()}>╳</button>
         </div >
         <div className="content">
             <input type="file" onChange={onOpenFile} name={"日志文件路径"} />
