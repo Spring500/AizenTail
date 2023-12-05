@@ -26,6 +26,7 @@ gulp.task("build", () => {
     const renderCompile = gulp.src('./app/index.tsx')
         .pipe(gulpWebpack({
             mode: 'development',
+            target: 'electron-renderer',
             module: {
                 rules: [{
                     loader: 'ts-loader',
