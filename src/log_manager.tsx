@@ -16,12 +16,9 @@ class LogManager {
 
         document.onkeyup = (e) => {
             switch (e.key) {
-                case 'h':
-                    if (e.ctrlKey) this.toggleFilter();
-                    break;
-                case 'F12':
-                    (window as any).electron.openDevTools();
-                    break;
+                case 'f': this.toggleFilter(); break;
+                case 'r': this.toggleAutoScroll(); break;
+                case 'F12': (window as any).electron.openDevTools(); break;
             }
         }
 
