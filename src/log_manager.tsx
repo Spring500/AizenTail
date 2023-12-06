@@ -36,6 +36,8 @@ class LogManager {
             console.log("initSetting file", settingString);
             if (settingString !== null)
                 setting = JSON.parse(settingString);
+            else
+                console.log("initSetting file is null");
         } catch (e) {
             console.log("initSetting error", e);
         }
@@ -95,17 +97,18 @@ class LogManager {
         this.logs.length = 0;
         await this.updateFile(null, resultText);
 
-        this.onSetFileName?.(file.name);
         this.onSetFileUrl?.(filepath);
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
     }
 
     toggleFilter() {
         this.refreshFilter(!this.isFiltering);
+        this.onSetFiltering?.(this.isFiltering);
     }
 
     toggleAutoScroll() {
         this.autoScroll = !this.autoScroll;
+        this.onSetAutoScroll?.(this.autoScroll);
     }
 
     public updateFile = async (event: Electron.IpcRendererEvent | null, data: string) => {
@@ -151,11 +154,12 @@ class LogManager {
         }
     }
 
-    onSetFileName: ((fileName: string) => void) | null = null;
     onSetFileUrl: ((fileUrl: string) => void) | null = null;
     onSetHint: ((hint: string) => void) | null = null;
     onSetLogCount: ((count: number) => void) | null = null;
     onScrollToItem: ((index: number) => void) | null = null;
+    onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
+    onSetFiltering: ((isFiltering: boolean) => void) | null = null;
 }
 
 export let logManager = new LogManager();
