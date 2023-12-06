@@ -14,6 +14,17 @@ class LogManager {
     async init() {
         (window as any).electron.setOnWatchFile(this.updateFile);
 
+        document.onkeyup = (e) => {
+            switch (e.key) {
+                case 'h':
+                    if (e.ctrlKey) this.toggleFilter();
+                    break;
+                case 'F12':
+                    (window as any).electron.openDevTools();
+                    break;
+            }
+        }
+
         // 解析setting.json
         this.rules = await this.initSetting();
     }
@@ -42,22 +53,14 @@ class LogManager {
         return rules;
     }
 
-    getLogLine(index: number) {
+    public getLogLine(index: number) {
         if (this.isFiltering) {
             const logId = this.filtedLogIds[index];
-            return this.logs[logId] ?? '';
+            return this.logs[logId].text ?? '';
         }
-        return this.logs[index] ?? '';
+        return this.logs[index].text ?? '';
     }
-
-    getLogColor(log: string): { background?: string, color?: string } {
-        for (const rule of this.rules.color) {
-            if (rule.reg.test(log)) return rule;
-        };
-        return {};
-    }
-
-    getLogReplacing(log: string) {
+    public getLogReplacing(log: string) {
         for (const rule of this.rules.replacing) {
             if (rule.reg.test(log))
                 log = log.replace(rule.reg, rule.replace);
@@ -65,13 +68,36 @@ class LogManager {
         return log;
     }
 
-    async openFile(filename: string) {
+    /**获取正则替换后的日志文本 */
+    public getReplacedLogLine(index: number) {
+        return this.getLogReplacing(this.getLogLine(index));
+    }
+
+    public getLogColor(log: string): { background?: string, color?: string } {
+        for (const rule of this.rules.color) {
+            if (rule.reg.test(log)) return rule;
+        };
+        return {};
+    }
+
+    async openFile(file: File) {
+        const filepath = file.path;
+        console.log('打开文件', event);
+        if (!filepath) return;
+
+        this.onSetHint?.(`正在打开文件...`);
+        const start = Date.now();
+
         (window as any).electron.unwatchFile();
-        const resultText = await (window as any).electron.openFile(filename);
+        const resultText = await (window as any).electron.openFile(filepath);
         if (resultText === null) return;
-        (window as any).electron.watchFile(filename);
+        (window as any).electron.watchFile(filepath);
         this.logs.length = 0;
         await this.updateFile(null, resultText);
+
+        this.onSetFileName?.(file.name);
+        this.onSetFileUrl?.(filepath);
+        this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
     }
 
     toggleFilter() {
@@ -82,7 +108,7 @@ class LogManager {
         this.autoScroll = !this.autoScroll;
     }
 
-    updateFile = async (event: Electron.IpcRendererEvent | null, data: string) => {
+    public updateFile = async (event: Electron.IpcRendererEvent | null, data: string) => {
         if (data[data.length - 1] === '\n') data = data.slice(0, data.length - 1);
         const result = data.split('\n');
         for (let i = 0; i < result.length; i++) {
@@ -92,6 +118,7 @@ class LogManager {
     }
 
     protected refreshFilter(isFiltering: boolean) {
+        console.log('刷新过滤', isFiltering);
         if (isFiltering) {
             this.filtedLogIds.length = 0;
             for (let i = 0; i < this.logs.length; i++) {
@@ -109,12 +136,26 @@ class LogManager {
                 }
             }
         }
-
         this.isFiltering = isFiltering;
-        this.onRefreshFilter?.(isFiltering);
+
+        if (isFiltering) {
+            this.onSetHint?.(`开启过滤`);
+            this.onSetLogCount?.(this.filtedLogIds.length);
+            if (logManager.autoScroll)
+                setTimeout(() => this.onScrollToItem?.(logManager.filtedLogIds.length - 1), 0);
+        } else {
+            this.onSetHint?.(`关闭过滤`);
+            this.onSetLogCount?.(logManager.logs.length);
+            if (logManager.autoScroll)
+                setTimeout(() => this.onScrollToItem?.(logManager.logs.length - 1), 0);
+        }
     }
 
-    onRefreshFilter: ((filting: boolean) => void) | null = null;
+    onSetFileName: ((fileName: string) => void) | null = null;
+    onSetFileUrl: ((fileUrl: string) => void) | null = null;
+    onSetHint: ((hint: string) => void) | null = null;
+    onSetLogCount: ((count: number) => void) | null = null;
+    onScrollToItem: ((index: number) => void) | null = null;
 }
 
 export let logManager = new LogManager();
