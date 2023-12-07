@@ -141,6 +141,39 @@ body,
     width: 50px;
 }
 
+.rulePanel{
+    padding: 0px 5px 0px 5px;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.rulePanelButton{
+    -webkit-app-region: no-drag;
+    background: var(--theme-color-button);
+    color: var(--theme-color-info-text);
+    border: none;
+    width: 100%;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    user-select: none;
+}
+
+.rulePanelButton:hover {
+    background: var(--theme-color-button-hover);
+    color: var(--theme-color-info-text-highlight);
+}
+
+.ruleLine{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: var(--theme-color-info-text);
+    font: var(--theme-font-log);
+}
+
 *::-webkit-scrollbar {
     width: 16px; 
  }
@@ -160,25 +193,6 @@ body,
 
 *::-webkit-scrollbar-corner {
   background: var(--theme-color-background);
-}
-
-input[type=file] {
-    border: none;
-    color: #a8a5ca;
-    text-align: center;
-    display: inline-block;
-    /* font: 14px; */
-}
-input[type=file]::-webkit-file-upload-button {
-    color: var(--theme-color-info-text);
-    background-color: var(--theme-color-button);
-    border: none;
-    border-radius: 2px;
-    padding: 5px 10px;
-}
-input[type=file]::-webkit-file-upload-button:hover {
-    background-color: var(--theme-color-button-hover);
-    color: var(--theme-color-info-text-highlight);
 }
 
 #app {
