@@ -3,8 +3,8 @@ export declare global {
         electron: {
             openFile: (filename: string) => Promise<string | null>,
             watchFile: (filename: string) => void,
-            setOnWatchFile: (callback: (event: Electron.IpcRendererEvent, text: string) => void) => void,
-            removeOnWatchFile: (callback: (event: Electron.IpcRendererEvent, text: string) => void) => void,
+            watchLogChange: (callback: (event: Electron.IpcRendererEvent, text: string) => void) => void,
+            removeLogChange: (callback: (event: Electron.IpcRendererEvent, text: string) => void) => void,
             unwatchFile: () => void,
         }
     }

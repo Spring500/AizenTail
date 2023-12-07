@@ -17,7 +17,7 @@ class LogManager {
     }
 
     async init() {
-        (window as any).electron.setOnWatchFile(this.updateFile);
+        (window as any).electron.watchLogChange(this.updateFile);
 
         document.onkeyup = (e) => {
             switch (e.key) {
@@ -59,8 +59,10 @@ class LogManager {
     }
 
     /**获取日志行号 */
-    public indexToLine(index: number) {
-        return this.isFiltering ? this.filtedLogIds[index] : index;
+    public indexToLine(index: number): number {
+        return this.isFiltering
+            ? (this.filtedLogIds[index] ?? -1)
+            : (index <= this.logs.length - 1 ? index : -1);
     }
 
     public lineToIndex(line: number) {
@@ -97,7 +99,7 @@ class LogManager {
         if (resultText === null) return;
         (window as any).electron.watchFile(filepath);
         this.logs.length = 0;
-        await this.updateFile(null, resultText);
+        await this.updateFile(null, 'add', resultText);
 
         this.onSetFileUrl?.(filepath);
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
@@ -126,12 +128,28 @@ class LogManager {
         this.onSetAlwaysOnTop?.(flag);
     }
 
-    public updateFile = async (event: Electron.IpcRendererEvent | null, data: string) => {
-        if (data[data.length - 1] === '\n') data = data.slice(0, data.length - 1);
-        const result = data.split('\n');
-        for (let i = 0; i < result.length; i++) {
-            this.logs.push({ offset: 0, index: i, text: result[i], });
+    public updateFile = async (event: Electron.IpcRendererEvent | null, type: 'add' | 'clear', data: string) => {
+        if (this.logs.length <= 0)
+            this.logs.push({ offset: 0, index: 0, text: '' });
+
+        if (type === 'add') {
+            let count = this.logs.length;
+            let lineEnded = false;
+            if (data[data.length - 1] === '\n') {
+                lineEnded = true;
+                data = data.substring(0, data.length - 1);
+            }
+            const newLogs = data.split('\n');
+            this.logs[this.logs.length - 1].text += newLogs[0];
+            for (let i = 1; i < newLogs.length; i++) {
+                this.logs.push({ offset: 0, index: count++, text: newLogs[i] })
+            }
+
+            if (lineEnded) this.logs.push({ offset: 0, index: count++, text: '' });
+        } else if (type === 'clear') {
+            this.logs.length = 0;
         }
+
         this.refreshFilter(this.isFiltering);
         if (this.autoScroll) setTimeout(() => {
             if (this.highlightLine !== -1) {

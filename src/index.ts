@@ -63,16 +63,28 @@ app.whenReady().then(() => {
         console.log('watching file', filename);
         fileCurrentSize = fs.statSync(filename).size;
         watcher = watch(filename, { recursive: false, delay: 200 }, (evt, name) => {
-            console.log('watching file changed', evt, name);
-            if (evt !== "update") {
-                return;
+            console.log('watching file changed', evt, name,);
+            switch (evt) {
+                case "update": {
+                    const fd = fs.openSync(filename, 'r');
+                    const deltaSize = fs.statSync(filename).size - fileCurrentSize;
+                    if (deltaSize < 0) {
+                        event.reply('log-changed', 'clear', '');
+                    } else if (deltaSize > 0) {
+                        const buffer = Buffer.alloc(fs.statSync(filename).size - fileCurrentSize);
+                        fs.readSync(fd, buffer, 0, buffer.length, fileCurrentSize);
+                        fs.closeSync(fd);
+                        fileCurrentSize = fs.statSync(filename).size;
+                        event.reply('log-changed', 'add', buffer.toString());
+                    }
+                    break;
+                }
+                case "remove":
+                    event.reply('log-changed', 'clear', '');
+                    return;
+                default:
+                    return;
             }
-            const fd = fs.openSync(filename, 'r');
-            const buffer = Buffer.alloc(fs.statSync(filename).size - fileCurrentSize);
-            fs.readSync(fd, buffer, 0, buffer.length, fileCurrentSize);
-            fs.closeSync(fd);
-            fileCurrentSize = fs.statSync(filename).size;
-            event.reply('watch-file-reply', buffer.toString());
         });
     });
     ipcMain.on('unwatch-file', () => {
