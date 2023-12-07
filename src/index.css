@@ -6,6 +6,7 @@
 :root {
     --theme-color-background: #2e2c33;
     --theme-color-content: #3c3a40;
+    --theme-color-info-text-darker: #505050;
     --theme-color-info-text: #707070;
     --theme-color-info-text-highlight: #ffffff;
     --theme-color-log: #ffffff;
@@ -16,6 +17,7 @@
     --theme-color-button: #ffffff00;
     --theme-color-button-hover: #ffffff10;
     --theme-color-button-close-hover: #ef3c54;
+    --theme-color-inputField: #00000050;
     --theme-font-system: 12px/1.0 "Microsoft Yahei";
     --theme-font-log: 13px/1.2 "SimSun";
 }
@@ -47,7 +49,7 @@ body,
     align-items: center;
     -webkit-app-region: drag;
     background: var(--theme-color-background);
-    height: 30px;
+    height: 35px;
 }
 
 .titleBarText{
@@ -80,11 +82,22 @@ body,
     color: var(--theme-color-info-text-highlight);
 }
 
+.menuBar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    -webkit-app-region: drag;
+    background: var(--theme-color-background);
+    height: 30px;
+    padding: 4px 4px 4px 4px;
+}
+
 .menuButton{
     -webkit-app-region: no-drag;
     background: var(--theme-color-button);
     color: var(--theme-color-info-text);
-    width: 100px;
+    width: auto;
+    padding: 0 8px 0 8px;
     height: 100%;
     border: none;
     display: inline-block;
@@ -97,6 +110,25 @@ body,
 .menuButton:hover {
     background: var(--theme-color-button-hover);
     color: var(--theme-color-info-text-highlight);
+}
+
+.menuFilter{
+    -webkit-app-region: no-drag;
+    background: var(--theme-color-inputField);
+    color: var(--theme-color-log);
+    height: 100%;
+    border:none;
+    border-radius: 5px;
+    padding: 0 8px 0 8px;
+    display: inline-block;
+    position: relative;
+    text-align: left;
+    user-select: text;
+    flex: 1 1 auto;
+}
+
+.menuFilter::placeholder{
+    color: var(--theme-color-info-text-darker);
 }
 
 #closeButton:hover {

@@ -128,6 +128,14 @@ class LogManager {
         this.onSetAlwaysOnTop?.(flag);
     }
 
+    inputFilters = new Array<string>();
+    setInputFilter(filter: string) {
+        filter = filter.trim();
+        if (filter === '') this.inputFilters.length = 0;
+        else this.inputFilters = filter.split(/\s+/);
+        this.refreshFilter(this.isFiltering);
+    }
+
     public updateFile = async (event: Electron.IpcRendererEvent | null, type: 'add' | 'clear', data: string) => {
         if (this.logs.length <= 0)
             this.logs.push({ offset: 0, index: 0, text: '' });
@@ -162,8 +170,18 @@ class LogManager {
         }, 0);
     }
 
+    lastRefreshTime = 0;
+    refreshTimer: NodeJS.Timeout | null = null;
     protected refreshFilter(isFiltering: boolean) {
-        console.log('刷新过滤', isFiltering);
+        console.log('刷新过滤', isFiltering, this.inputFilters);
+        // 每100ms最多触发一次, 防止频繁刷新
+        if (Date.now() - this.lastRefreshTime < 100) {
+            this.refreshTimer && clearTimeout(this.refreshTimer);
+            this.refreshTimer = setTimeout(() => this.refreshFilter(isFiltering), 100);
+            return;
+        }
+        this.lastRefreshTime = Date.now();
+
         if (isFiltering) {
             this.filtedLogIds.length = 0;
             this.lineToIndexMap.clear();
@@ -176,6 +194,9 @@ class LogManager {
                         rule.exclude ? exclude = true : include = true;
                         break;
                     }
+                }
+                if (this.inputFilters?.some(filter => log.text.includes(filter))) {
+                    include = true;
                 }
                 if (include && !exclude) {
                     this.lineToIndexMap.set(line, this.filtedLogIds.length);
