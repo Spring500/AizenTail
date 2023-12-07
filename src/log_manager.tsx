@@ -1,8 +1,12 @@
+import { FixedSizeList } from "react-window";
+
 class LogManager {
     readonly logs = new Array<LogMeta>();
     isFiltering = false;
     autoScroll = true;
     filtedLogIds = new Array<number>();
+    /**当开启筛选时，获取显示行数对应的日志行 */
+    lineToIndexMap = new Map<number, number>();
 
     rules: LogConfig = { color: [], replacing: [], filter: [] };
 
@@ -52,24 +56,24 @@ class LogManager {
         return rules;
     }
 
-    public getLogLine(index: number) {
-        if (this.isFiltering) {
-            const logId = this.filtedLogIds[index];
-            return this.logs[logId].text ?? '';
-        }
-        return this.logs[index].text ?? '';
+    /**获取日志行号 */
+    public indexToLine(index: number) {
+        return this.isFiltering ? this.filtedLogIds[index] : index;
     }
-    public getLogReplacing(log: string) {
-        for (const rule of this.rules.replacing) {
-            if (rule.reg.test(log))
-                log = log.replace(rule.reg, rule.replace);
-        };
-        return log;
+
+    public lineToIndex(line: number) {
+        return this.isFiltering ? (this.lineToIndexMap.get(line) ?? -1) : line;
     }
 
     /**获取正则替换后的日志文本 */
-    public getReplacedLogLine(index: number) {
-        return this.getLogReplacing(this.getLogLine(index));
+    public getLogText(index: number) {
+        index = this.isFiltering ? this.filtedLogIds[index] : index;
+        const log = this.logs[index];
+        let text = log.text;
+        for (const rule of this.rules.replacing) {
+            text = text.replace(rule.reg, rule.replace);
+        }
+        return text;
     }
 
     public getLogColor(log: string): { background?: string, color?: string } {
@@ -101,6 +105,13 @@ class LogManager {
     toggleFilter() {
         this.refreshFilter(!this.isFiltering);
         this.onSetFiltering?.(this.isFiltering);
+        setTimeout(() => {
+            if (this.highlightLine !== -1) {
+                const index = this.lineToIndex(this.highlightLine);
+                console.log("highlightLine", index, this.highlightLine);
+                if (index !== -1) this.onScrollToItem?.(index)
+            }
+        }, 0);
     }
 
     toggleAutoScroll() {
@@ -115,14 +126,24 @@ class LogManager {
             this.logs.push({ offset: 0, index: i, text: result[i], });
         }
         this.refreshFilter(this.isFiltering);
+        if (this.autoScroll) setTimeout(() => {
+            if (this.highlightLine !== -1) {
+                const index = this.lineToIndex(this.highlightLine);
+                console.log("highlightLine", index, this.highlightLine);
+                if (index !== -1) this.onScrollToItem?.(index)
+            } else {
+                this.onScrollToItem?.(this.isFiltering ? this.filtedLogIds.length - 1 : this.logs.length - 1);
+            }
+        }, 0);
     }
 
     protected refreshFilter(isFiltering: boolean) {
         console.log('刷新过滤', isFiltering);
         if (isFiltering) {
             this.filtedLogIds.length = 0;
-            for (let i = 0; i < this.logs.length; i++) {
-                const log = this.logs[i];
+            this.lineToIndexMap.clear();
+            for (let line = 0; line < this.logs.length; line++) {
+                const log = this.logs[line];
                 let exclude = false;
                 let include = false;
                 for (const rule of this.rules.filter) {
@@ -132,7 +153,8 @@ class LogManager {
                     }
                 }
                 if (include && !exclude) {
-                    this.filtedLogIds.push(i);
+                    this.lineToIndexMap.set(line, this.filtedLogIds.length);
+                    this.filtedLogIds.push(line);
                 }
             }
         }
@@ -141,22 +163,29 @@ class LogManager {
         if (isFiltering) {
             this.onSetHint?.(`开启过滤`);
             this.onSetLogCount?.(this.filtedLogIds.length);
-            if (logManager.autoScroll)
-                setTimeout(() => this.onScrollToItem?.(logManager.filtedLogIds.length - 1), 0);
         } else {
             this.onSetHint?.(`关闭过滤`);
             this.onSetLogCount?.(logManager.logs.length);
-            if (logManager.autoScroll)
-                setTimeout(() => this.onScrollToItem?.(logManager.logs.length - 1), 0);
         }
     }
 
+    highlightLine = -1;
+    setHighlightLine(line: number) {
+        this.highlightLine = line;
+        this.onSetHighlightLine?.(line);
+    }
+
+    onSetHighlightLine: ((line: number) => void) | null = null;
     onSetFileUrl: ((fileUrl: string) => void) | null = null;
     onSetHint: ((hint: string) => void) | null = null;
     onSetLogCount: ((count: number) => void) | null = null;
     onScrollToItem: ((index: number) => void) | null = null;
     onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
     onSetFiltering: ((isFiltering: boolean) => void) | null = null;
+
+    logListRef: React.RefObject<FixedSizeList> | null = null;
 }
 
 export let logManager = new LogManager();
+
+(window as any).logManager = logManager;
