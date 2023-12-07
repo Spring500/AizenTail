@@ -9,4 +9,5 @@ contextBridge.exposeInMainWorld("electron", {
     openDevTools: () => ipcRenderer.send("open-dev-tools"),
     windowMinimize: () => ipcRenderer.send("window-minimize"),
     windowMaximize: () => ipcRenderer.send("window-maximize"),
+    setAlwaysOnTop: (flag: boolean) => ipcRenderer.send("window-set-always-on-top", flag),
 });

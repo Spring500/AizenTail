@@ -4,6 +4,7 @@ class LogManager {
     readonly logs = new Array<LogMeta>();
     isFiltering = false;
     autoScroll = true;
+    alwaysOnTop = false;
     filtedLogIds = new Array<number>();
     /**当开启筛选时，获取显示行数对应的日志行 */
     lineToIndexMap = new Map<number, number>();
@@ -22,6 +23,7 @@ class LogManager {
             switch (e.key) {
                 case 'f': this.toggleFilter(); break;
                 case 'r': this.toggleAutoScroll(); break;
+                case 't': this.setAlwaysOnTop(!this.alwaysOnTop); break;
                 case 'F12': (window as any).electron.openDevTools(); break;
             }
         }
@@ -85,7 +87,7 @@ class LogManager {
 
     async openFile(file: File) {
         const filepath = file.path;
-        console.log('打开文件', event);
+        console.log('打开文件', filepath);
         if (!filepath) return;
 
         this.onSetHint?.(`正在打开文件...`);
@@ -117,6 +119,12 @@ class LogManager {
     toggleAutoScroll() {
         this.autoScroll = !this.autoScroll;
         this.onSetAutoScroll?.(this.autoScroll);
+    }
+
+    setAlwaysOnTop(flag: boolean) {
+        this.alwaysOnTop = flag;
+        (window as any).electron.setAlwaysOnTop(flag);
+        this.onSetAlwaysOnTop?.(flag);
     }
 
     public updateFile = async (event: Electron.IpcRendererEvent | null, data: string) => {
@@ -182,6 +190,7 @@ class LogManager {
     onScrollToItem: ((index: number) => void) | null = null;
     onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
     onSetFiltering: ((isFiltering: boolean) => void) | null = null;
+    onSetAlwaysOnTop: ((alwaysOnTop: boolean) => void) | null = null;
 
     logListRef: React.RefObject<FixedSizeList> | null = null;
 }

@@ -127,7 +127,7 @@ body,
     word-break: break-all;
     white-space: nowrap;
     font: var(--theme-font-log);
-    min-width: 110% + 5px;
+    min-width: 110%;
 }
 
 .logIndex{

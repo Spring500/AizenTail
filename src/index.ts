@@ -15,7 +15,6 @@ const createWindow = () => {
     const mainWindow = new BrowserWindow({
         width: 800, height: 600,
         minWidth: 700, minHeight: 200,
-        alwaysOnTop: true,
         autoHideMenuBar: true,
         frame: false,
         movable: true,
@@ -94,6 +93,10 @@ app.whenReady().then(() => {
         } else {
             window?.maximize();
         }
+    });
+    ipcMain.on('window-set-always-on-top', (e, flag: boolean) => {
+        const window = BrowserWindow.getFocusedWindow();
+        window?.setAlwaysOnTop(flag, 'main-menu');
     });
     createWindow();
 });
