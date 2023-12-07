@@ -70,8 +70,7 @@ class LogManager {
     /**获取正则替换后的日志文本 */
     public getLogText(index: number) {
         index = this.isFiltering ? this.filtedLogIds[index] : index;
-        const log = this.logs[index];
-        let text = log.text;
+        let text = this.logs[index]?.text ?? "";
         for (const rule of this.rules.replacing) {
             text = text.replace(rule.reg, rule.replace);
         }
@@ -170,10 +169,10 @@ class LogManager {
 
         if (isFiltering) {
             this.onSetHint?.(`开启过滤`);
-            this.onSetLogCount?.(this.filtedLogIds.length);
+            this.onSetLogCount?.(this.filtedLogIds.length + 1);
         } else {
             this.onSetHint?.(`关闭过滤`);
-            this.onSetLogCount?.(logManager.logs.length);
+            this.onSetLogCount?.(logManager.logs.length + 1);
         }
     }
 
