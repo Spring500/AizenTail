@@ -207,19 +207,19 @@ class LogManager {
                     this.filtedLogIds.push(line);
                 }
             }
-            setTimeout(() => {
-                if (this.highlightLine !== -1) {
-                    const index = this.lineToIndex(this.highlightLine);
-                    console.log("highlightLine", index, this.highlightLine);
-                    if (index !== -1) this.onScrollToItem?.(index)
-                }
-            }, 0);
             this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`);
             this.onSetLogCount?.(this.filtedLogIds.length + 1);
         } else {
             this.onSetHint?.(`关闭过滤`);
             this.onSetLogCount?.(logManager.logs.length + 1);
         }
+
+        setTimeout(() => {
+            if (this.highlightLine !== -1) {
+                const index = this.lineToIndex(this.highlightLine);
+                if (index !== -1) this.onScrollToItem?.(index)
+            }
+        }, 0);
     }
 
     highlightLine = -1;
