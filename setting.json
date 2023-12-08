@@ -61,7 +61,7 @@
     ],
     "filter": [
         {
-            "reg": "buff",
+            "reg": "testReg",
             "exclude": false
         }
     ]

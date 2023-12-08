@@ -17,8 +17,9 @@ function Component_LogRow({ index = 0, highlightLine = -1, style }: {
         if (line === highlightLine) logManager.setHighlightLine(-1);
         else logManager.setHighlightLine(line);
     }
-    return <div className="log" style={{ ...style, backgroundColor: background, color }} onClick={onClick}>
-        <div className="logIndex">{line >= 0 ? line : ''}</div> {logText}
+    return <div className="log" style={{ ...style }} onClick={onClick}>
+        <div className="logIndex">{line >= 0 ? line : ''}</div>
+        <div className="logText" style={{ backgroundColor: background, color }}>{logText}</div>
     </div >
 }
 

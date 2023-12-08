@@ -2,7 +2,7 @@ import { FixedSizeList } from "react-window";
 
 class LogManager {
     readonly logs = new Array<LogMeta>();
-    isFiltering = false;
+    _isFilteringSettings = false;
     autoScroll = true;
     alwaysOnTop = false;
     filtedLogIds = new Array<number>();
@@ -21,9 +21,9 @@ class LogManager {
 
         document.onkeyup = (e) => {
             switch (e.key) {
-                case 'f': this.toggleFilter(); break;
-                case 'r': this.toggleAutoScroll(); break;
-                case 't': this.setAlwaysOnTop(!this.alwaysOnTop); break;
+                case 'f': if (e.altKey) this.toggleFilterSetting(); break;
+                case 'r': if (e.altKey) this.toggleAutoScroll(); break;
+                case 't': if (e.altKey) this.setAlwaysOnTop(!this.alwaysOnTop); break;
                 case 'F12': (window as any).electron.openDevTools(); break;
             }
         }
@@ -105,9 +105,10 @@ class LogManager {
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
     }
 
-    toggleFilter() {
-        this.refreshFilter(!this.isFiltering);
-        this.onSetFiltering?.(this.isFiltering);
+    toggleFilterSetting() {
+        this._isFilteringSettings = !this._isFilteringSettings;
+        this.refreshFilter();
+        this.onSetFiltering?.(this._isFilteringSettings);
         setTimeout(() => {
             if (this.highlightLine !== -1) {
                 const index = this.lineToIndex(this.highlightLine);
@@ -126,6 +127,17 @@ class LogManager {
         this.alwaysOnTop = flag;
         (window as any).electron.setAlwaysOnTop(flag);
         this.onSetAlwaysOnTop?.(flag);
+    }
+
+    get isFiltering() {
+        return this._isFilteringSettings || this.inputFilters.length > 0;
+    }
+    inputFilters = new Array<string>();
+    setInputFilter(filter: string) {
+        filter = filter.trim();
+        if (filter === '') this.inputFilters.length = 0;
+        else this.inputFilters = filter.split(/\s+/);
+        this.refreshFilter();
     }
 
     public updateFile = async (event: Electron.IpcRendererEvent | null, type: 'add' | 'clear', data: string) => {
@@ -150,7 +162,7 @@ class LogManager {
             this.logs.length = 0;
         }
 
-        this.refreshFilter(this.isFiltering);
+        this.refreshFilter();
         if (this.autoScroll) setTimeout(() => {
             if (this.highlightLine !== -1) {
                 const index = this.lineToIndex(this.highlightLine);
@@ -162,9 +174,19 @@ class LogManager {
         }, 0);
     }
 
-    protected refreshFilter(isFiltering: boolean) {
-        console.log('刷新过滤', isFiltering);
-        if (isFiltering) {
+    lastRefreshTime = 0;
+    refreshTimer: NodeJS.Timeout | null = null;
+    protected refreshFilter() {
+        console.log('刷新过滤', this._isFilteringSettings, this.inputFilters);
+        // 每100ms最多触发一次, 防止频繁刷新
+        if (Date.now() - this.lastRefreshTime < 100) {
+            this.refreshTimer && clearTimeout(this.refreshTimer);
+            this.refreshTimer = setTimeout(this.refreshFilter.bind(this), 100);
+            return;
+        }
+        this.lastRefreshTime = Date.now();
+
+        if (this.isFiltering) {
             this.filtedLogIds.length = 0;
             this.lineToIndexMap.clear();
             for (let line = 0; line < this.logs.length; line++) {
@@ -177,21 +199,27 @@ class LogManager {
                         break;
                     }
                 }
+                if (this.inputFilters?.some(filter => log.text.includes(filter))) {
+                    include = true;
+                }
                 if (include && !exclude) {
                     this.lineToIndexMap.set(line, this.filtedLogIds.length);
                     this.filtedLogIds.push(line);
                 }
             }
-        }
-        this.isFiltering = isFiltering;
-
-        if (isFiltering) {
-            this.onSetHint?.(`开启过滤`);
+            this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`);
             this.onSetLogCount?.(this.filtedLogIds.length + 1);
         } else {
             this.onSetHint?.(`关闭过滤`);
             this.onSetLogCount?.(logManager.logs.length + 1);
         }
+
+        setTimeout(() => {
+            if (this.highlightLine !== -1) {
+                const index = this.lineToIndex(this.highlightLine);
+                if (index !== -1) this.onScrollToItem?.(index)
+            }
+        }, 0);
     }
 
     highlightLine = -1;

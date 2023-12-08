@@ -1,5 +1,5 @@
 {
-  "name": "aizen-log-watcher",
+  "name": "aizen-tail",
   "version": "1.0.0",
   "description": "实时日志查看工具",
   "main": ".webpack/main",
@@ -10,8 +10,11 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
-  "author": "spring500",
-  "license": "ISC",
+  "author": {
+    "name": "spring500",
+    "email": "406388823@qq.com"
+  },
+  "license": "MIT",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "node-watch": "^0.7.4",

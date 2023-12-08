@@ -6,6 +6,7 @@
 :root {
     --theme-color-background: #2e2c33;
     --theme-color-content: #3c3a40;
+    --theme-color-info-text-darker: #505050;
     --theme-color-info-text: #707070;
     --theme-color-info-text-highlight: #ffffff;
     --theme-color-log: #ffffff;
@@ -16,6 +17,7 @@
     --theme-color-button: #ffffff00;
     --theme-color-button-hover: #ffffff10;
     --theme-color-button-close-hover: #ef3c54;
+    --theme-color-inputField: #00000050;
     --theme-font-system: 12px/1.0 "Microsoft Yahei";
     --theme-font-log: 13px/1.2 "SimSun";
 }
@@ -47,7 +49,8 @@ body,
     align-items: center;
     -webkit-app-region: drag;
     background: var(--theme-color-background);
-    height: 30px;
+    height: 35px;
+    justify-content: flex-end;
 }
 
 .titleBarText{
@@ -59,6 +62,8 @@ body,
     text-align: center;
     user-select: none;
     flex: auto;
+    position: absolute;
+    width: 100%;
 }
 
 .titleBarButton{
@@ -80,13 +85,25 @@ body,
     color: var(--theme-color-info-text-highlight);
 }
 
+.menuBar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    -webkit-app-region: drag;
+    background: var(--theme-color-background);
+    height: 35px;
+    padding: 0 4px 0 4px;
+}
+
 .menuButton{
     -webkit-app-region: no-drag;
     background: var(--theme-color-button);
     color: var(--theme-color-info-text);
-    width: 100px;
-    height: 100%;
+    width: auto;
+    padding: 0 8px 0 8px;
+    height: 80%;
     border: none;
+    border-radius: 8px;
     display: inline-block;
     position: relative;
     text-align: center;
@@ -97,6 +114,36 @@ body,
 .menuButton:hover {
     background: var(--theme-color-button-hover);
     color: var(--theme-color-info-text-highlight);
+}
+
+.menuFilter{
+    -webkit-app-region: no-drag;
+    height:80%;
+    padding: 0 8px 0 8px;
+    margin-left: 8px;
+    display: inline-block;
+    position: relative;
+    text-align: left;
+    user-select: text;
+    flex: 1 1 auto;
+    background: var(--theme-color-inputField);
+    color: var(--theme-color-log);
+    border:none;
+    border-radius: 8px;
+    outline: var(--theme-color-info-text-darker);
+    outline-style:solid;
+    outline-width: 1px;
+}
+
+.menuFilter:focus{
+    outline: var(--theme-color-info-text);
+    outline-style:solid;
+    outline-width: 1px;
+    border: #ef3c54;
+}
+
+.menuFilter::placeholder{
+    color: var(--theme-color-info-text-darker);
 }
 
 #closeButton:hover {
@@ -172,6 +219,14 @@ body,
     width: 100%;
     color: var(--theme-color-info-text);
     font: var(--theme-font-log);
+}
+
+.logText{
+    display: inline-block;
+    user-select: text;
+    max-width: fit-content;
+    min-width: 100%;
+    height: 100%;
 }
 
 *::-webkit-scrollbar {
