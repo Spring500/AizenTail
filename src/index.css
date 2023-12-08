@@ -88,8 +88,8 @@ body,
     align-items: center;
     -webkit-app-region: drag;
     background: var(--theme-color-background);
-    height: 30px;
-    padding: 4px 4px 4px 4px;
+    height: 35px;
+    padding: 0 4px 0 4px;
 }
 
 .menuButton{
@@ -98,8 +98,10 @@ body,
     color: var(--theme-color-info-text);
     width: auto;
     padding: 0 8px 0 8px;
+    margin: 0 4px 0 4px;
     height: 100%;
     border: none;
+    border-radius: 5px;
     display: inline-block;
     position: relative;
     text-align: center;
@@ -116,9 +118,9 @@ body,
     -webkit-app-region: no-drag;
     background: var(--theme-color-inputField);
     color: var(--theme-color-log);
-    height: 100%;
     border:none;
     border-radius: 5px;
+    height:80%;
     padding: 0 8px 0 8px;
     display: inline-block;
     position: relative;
@@ -200,25 +202,6 @@ body,
 
 *::-webkit-scrollbar-corner {
   background: var(--theme-color-background);
-}
-
-input[type=file] {
-    border: none;
-    color: #a8a5ca;
-    text-align: center;
-    display: inline-block;
-    /* font: 14px; */
-}
-input[type=file]::-webkit-file-upload-button {
-    color: var(--theme-color-info-text);
-    background-color: var(--theme-color-button);
-    border: none;
-    border-radius: 2px;
-    padding: 5px 10px;
-}
-input[type=file]::-webkit-file-upload-button:hover {
-    background-color: var(--theme-color-button-hover);
-    color: var(--theme-color-info-text-highlight);
 }
 
 #app {
