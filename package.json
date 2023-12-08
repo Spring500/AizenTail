@@ -10,7 +10,10 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
-  "author": "spring500",
+  "author": {
+    "name": "spring500",
+    "email": "406388823@qq.com"
+  },
   "license": "ISC",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
