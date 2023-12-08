@@ -51,6 +51,7 @@ body,
     background: var(--theme-color-background);
     height: 35px;
     justify-content: flex-end;
+    flex: 0 0 auto;
 }
 
 .titleBarText{
@@ -93,6 +94,7 @@ body,
     background: var(--theme-color-background);
     height: 35px;
     padding: 0 4px 0 4px;
+    flex: 0 0 auto;
 }
 
 .menuButton{
@@ -194,6 +196,7 @@ body,
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    overflow: scroll;
 }
 
 .rulePanelButton{
@@ -219,6 +222,36 @@ body,
     width: 100%;
     color: var(--theme-color-info-text);
     font: var(--theme-font-log);
+}
+
+.ruleInput{
+    -webkit-app-region: no-drag;
+    height:80%;
+    padding: 0 8px 0 8px;
+    margin-left: 8px;
+    display: inline-block;
+    position: relative;
+    text-align: left;
+    user-select: text;
+    flex: 1 1 auto;
+    background: var(--theme-color-inputField);
+    color: var(--theme-color-log);
+    border:none;
+    border-radius: 8px;
+    outline: var(--theme-color-info-text-darker);
+    outline-style:solid;
+    outline-width: 1px;
+}
+
+.ruleInput:focus{
+    outline: var(--theme-color-info-text);
+    outline-style:solid;
+    outline-width: 1px;
+    border: #ef3c54;
+}
+
+.ruleInput::placeholder{
+    color: var(--theme-color-info-text-darker);
 }
 
 .logText{

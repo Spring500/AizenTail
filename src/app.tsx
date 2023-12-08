@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { logManager } from './log_manager';
-import { Component_LogContainer } from './components/log_container';
+import { LogContainer } from './components/log_container';
 import { Component_TitleBar } from './components/title_bar';
 import { Component_MenuBar } from './components/menu_bar';
 import { Component_RulePanel } from './components/rule_panel';
@@ -17,7 +17,7 @@ export function Component_App() {
         <Component_MenuBar />
         <Component_RulePanel />
         <div className="content">
-            <Component_LogContainer />
+            <LogContainer />
             <div id='hintBar' className='systemInfo'>
                 <div>路径: {fileUrl}</div>
                 {hint}
