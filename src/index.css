@@ -50,6 +50,7 @@ body,
     -webkit-app-region: drag;
     background: var(--theme-color-background);
     height: 35px;
+    justify-content: flex-end;
 }
 
 .titleBarText{
@@ -61,6 +62,8 @@ body,
     text-align: center;
     user-select: none;
     flex: auto;
+    position: absolute;
+    width: 100%;
 }
 
 .titleBarButton{
