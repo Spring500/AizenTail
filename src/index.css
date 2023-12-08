@@ -98,10 +98,9 @@ body,
     color: var(--theme-color-info-text);
     width: auto;
     padding: 0 8px 0 8px;
-    margin: 0 4px 0 4px;
-    height: 100%;
+    height: 80%;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     display: inline-block;
     position: relative;
     text-align: center;
@@ -116,17 +115,28 @@ body,
 
 .menuFilter{
     -webkit-app-region: no-drag;
-    background: var(--theme-color-inputField);
-    color: var(--theme-color-log);
-    border:none;
-    border-radius: 5px;
     height:80%;
     padding: 0 8px 0 8px;
+    margin-left: 8px;
     display: inline-block;
     position: relative;
     text-align: left;
     user-select: text;
     flex: 1 1 auto;
+    background: var(--theme-color-inputField);
+    color: var(--theme-color-log);
+    border:none;
+    border-radius: 8px;
+    outline: var(--theme-color-info-text-darker);
+    outline-style:solid;
+    outline-width: 1px;
+}
+
+.menuFilter:focus{
+    outline: var(--theme-color-info-text);
+    outline-style:solid;
+    outline-width: 1px;
+    border: #ef3c54;
 }
 
 .menuFilter::placeholder{
