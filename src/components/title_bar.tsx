@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function Component_TitleBar() {
+export function TitleBar() {
     return <div className='titleBar'>
         <div className='titleBarText'>AizenTail</div>
         <button className='titleBarButton' id="minimizeButton" onClick={() => (window as any).electron.windowMinimize()}>▁</button>

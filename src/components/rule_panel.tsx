@@ -32,21 +32,11 @@ class ColorRuleLine extends React.Component<{ rule: ColorRule }> {
     }
 }
 
-function Component_ColorRulePanel({ rules }: { rules: ColorRule[] }) {
-    const [foldState, setFoldState] = React.useState(false);
-    if (foldState)
-        return <button className='rulePanelButton' onClick={() => setFoldState(false)}>v染色规则</button>
-    else
-        return <>
-            <button className='rulePanelButton' onClick={() => setFoldState(true)}>^染色规则</button>
-            <div className='rulePanel'>
-
-                {rules.map((rule, index) => <ColorRuleLine key={index} rule={rule} />)}
-                <button >+添加规则</button>
-            </div >
-        </>
-}
-
-export function Component_RulePanel() {
-    return <Component_ColorRulePanel rules={[{ reg: '', fontColor: 'red' }, { reg: '', fontColor: 'yellow' }]} />
+export class ColorRulePanel extends React.Component<{ rules: ColorRule[] }> {
+    public render() {
+        return <div className='rulePanel'>
+            {this.props.rules.map((rule, index) => <ColorRuleLine key={index} rule={rule} />)}
+            <button >+添加规则</button>
+        </div>
+    }
 }

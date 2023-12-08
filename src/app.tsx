@@ -2,28 +2,34 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { logManager } from './log_manager';
 import { LogContainer } from './components/log_container';
-import { Component_TitleBar } from './components/title_bar';
-import { Component_MenuBar } from './components/menu_bar';
-import { Component_RulePanel } from './components/rule_panel';
+import { TitleBar } from './components/title_bar';
+import { MenuBar } from './components/menu_bar';
 
-export function Component_App() {
-    const [fileUrl, setFileUrl] = React.useState('file directory' as string);
-    const [hint, setHint] = React.useState('');
-    logManager.onSetHint = setHint;
-    logManager.onSetFileUrl = setFileUrl;
+class App extends React.Component<{}, {
+    fileUrl: string,
+    hint: string,
+}> {
+    constructor(props: {}) {
+        super(props);
+        this.state = { fileUrl: 'file directory', hint: '' };
+        logManager.onSetHint = (hint: string) => this.setState({ hint });
+        logManager.onSetFileUrl = (fileUrl: string) => this.setState({ fileUrl });
+    }
 
-    return <>
-        <Component_TitleBar />
-        <Component_MenuBar />
-        <div className="content">
-            <LogContainer />
-            <div id='hintBar' className='systemInfo'>
-                <div>路径: {fileUrl}</div>
-                {hint}
-            </div>
-        </div></>;
+    public render() {
+        return <>
+            <TitleBar />
+            <MenuBar />
+            <div className="content">
+                <LogContainer />
+                <div id='hintBar' className='systemInfo'>
+                    <div>路径: {this.state.fileUrl}</div>
+                    {this.state.hint}
+                </div>
+            </div></>;
+    }
 }
 
 const root = createRoot(document.getElementById('app')!);
-root.render(<Component_App />);
+root.render(<App />);
 

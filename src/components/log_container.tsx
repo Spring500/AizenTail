@@ -42,10 +42,29 @@ export class LogContainer extends React.Component<{}, {
 }> {
     private logListRef = React.createRef<FixedSizeList>();
     private logContainerRef = React.createRef<HTMLDivElement>();
+    private observer: ResizeObserver | undefined;
 
     constructor(props: {}) {
         super(props);
         this.state = { logCount: 0, highlightLine: -1, componentHeight: 300 };
+    }
+
+    lastResizeTime = 0;
+    ResizeTimer: NodeJS.Timeout | null = null;
+    protected onHeightChange() {
+        const now = Date.now();
+        if (now - this.lastResizeTime < 50) {
+            this.ResizeTimer && clearTimeout(this.ResizeTimer);
+            this.ResizeTimer = setTimeout(() => {
+                const height = this.logContainerRef.current?.getBoundingClientRect().height ?? 300;
+                this.setState({ componentHeight: height });
+                this.lastResizeTime = now;
+            }, 50);
+        } else {
+            const height = this.logContainerRef.current?.getBoundingClientRect().height ?? 300;
+            this.setState({ componentHeight: height });
+            this.lastResizeTime = now;
+        }
     }
 
     public componentDidMount() {
@@ -57,11 +76,12 @@ export class LogContainer extends React.Component<{}, {
         const div = this.logContainerRef.current;
         if (!div) return;
 
-        const resize = new ResizeObserver(() => this.setState({ componentHeight: div.getBoundingClientRect().height }));
-        // 传入监听对象
-        resize.observe(div);
-        // 及时销毁监听函数（重要!!!）
-        this.componentWillUnmount = () => { resize.unobserve(this.logContainerRef?.current!); };
+        this.observer = new ResizeObserver(this.onHeightChange.bind(this));
+        this.observer.observe(div);
+    }
+
+    public componentWillUnmount() {
+        this.observer?.disconnect();
     }
 
     public render() {
