@@ -15,7 +15,6 @@ export function Component_App() {
     return <>
         <Component_TitleBar />
         <Component_MenuBar />
-        <Component_RulePanel />
         <div className="content">
             <LogContainer />
             <div id='hintBar' className='systemInfo'>
