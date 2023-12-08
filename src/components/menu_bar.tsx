@@ -15,7 +15,7 @@ export function Component_MenuBar() {
     }
     const onInputFilter = (event: React.ChangeEvent<HTMLInputElement>) => logManager.setInputFilter(event.target.value);
     const onClickToggleAutoScroll = () => logManager.toggleAutoScroll();
-    const onClickToggleFilter = () => logManager.toggleFilter();
+    const onClickToggleFilter = () => logManager.toggleFilterSetting();
     const onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!alwaysOnTop);
 
     return <><input type="file" id="openLogButton" onChange={onClickOpenFile} style={{ display: "none" }} />
