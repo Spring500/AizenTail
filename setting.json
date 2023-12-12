@@ -16,9 +16,12 @@
             "reg": "^\\s*at\\s*.*\\d\\)\\s*$"
         },
         {
-            "background": "red",
-            "color": "white",
+            "color": "red",
             "reg": "[^\\w]Error[^\\w]"
+        },
+        {
+            "color": "yellow",
+            "reg": "[^\\w]Warning[^\\w]"
         },
         {
             "color": "yellow",
