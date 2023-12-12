@@ -70,8 +70,7 @@ export class LogContainer extends React.Component<{}, {
     public componentDidMount() {
         logManager.onSetLogCount = (logCount) => this.setState({ logCount });
         logManager.onSetHighlightLine = (highlightLine) => this.setState({ highlightLine });
-        logManager.onScrollToItem = (index) => this.logListRef.current?.scrollToItem(index, 'start');
-        logManager.logListRef = this.logListRef;
+        logManager.onScrollToItem = (index) => this.logListRef.current?.scrollToItem(index, "smart");
 
         const div = this.logContainerRef.current;
         if (!div) return;
@@ -86,7 +85,7 @@ export class LogContainer extends React.Component<{}, {
 
     public render() {
         return <div className="logContainer" ref={this.logContainerRef}>
-            <FixedSizeList className="logList"
+            <FixedSizeList
                 ref={this.logListRef} itemData={{ ItemRenderer: LogRow, highlightLine: this.state.highlightLine }}
                 height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={30}>
                 {ItemWrapper}

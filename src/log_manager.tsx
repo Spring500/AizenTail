@@ -236,8 +236,6 @@ class LogManager {
     onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
     onSetFiltering: ((isFiltering: boolean) => void) | null = null;
     onSetAlwaysOnTop: ((alwaysOnTop: boolean) => void) | null = null;
-
-    logListRef: React.RefObject<FixedSizeList> | null = null;
 }
 
 export let logManager = new LogManager();
