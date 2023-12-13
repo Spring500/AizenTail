@@ -1,5 +1,5 @@
 import React from 'react';
-import { logManager } from '../log_manager';
+import { logManager } from '../managers/log_manager';
 
 export class MenuBar extends React.Component<{}, {
     autoScroll: boolean,

@@ -1,26 +1,25 @@
-import React from 'react';
+import React from "react";
 import { FixedSizeList } from "react-window";
-import { logManager } from "../managers/log_manager";
+import { ruleManager } from "../managers/rule_manager";
 
-class LogRow extends React.Component<{
+class RuleItem extends React.Component<{
     index: number, highlightLine: number,
     style: React.CSSProperties
 }> {
     public render() {
         const index = this.props.index;
-        const logText = logManager.getLogText(index);
-        const line = logManager.indexToLine(index);
-        const { background, color } = line >= 0 && line === this.props.highlightLine
+        const rule = ruleManager.getRules()[index];
+        const { background, color } = index >= 0 && index === this.props.highlightLine
             ? { background: "gray", color: "white" }
-            : logManager.getLogColor(logText);
+            : { background: "white", color: "black" };
         const onClick = () => {
-            console.log("click", line);
-            if (line === this.props.highlightLine) logManager.setHighlightLine(-1);
-            else logManager.setHighlightLine(line);
+            console.log("click", index);
+            if (index === this.props.highlightLine) ruleManager.setHighlightLine(-1);
+            else ruleManager.setHighlightLine(index);
         }
         return <div className="log" style={{ ...this.props.style }} onClick={onClick} >
-            <div className="logIndex">{line >= 0 ? line : ''}</div>
-            <div className="logText" style={{ backgroundColor: background, color }}>{logText}</div>
+            <div className="logIndex">{index >= 0 ? index : ''}</div>
+            <div className="logText" style={{ backgroundColor: background, color }}>{rule.reg.source}</div>
         </div >
     }
 }
@@ -35,18 +34,18 @@ class ItemWrapper extends React.Component<{
     }
 }
 
-export class LogContainer extends React.Component<{}, {
-    logCount: number,
+export class RuleContainer extends React.Component<{}, {
+    ruleCount: number,
     highlightLine: number,
     componentHeight: number,
 }> {
-    private logListRef = React.createRef<FixedSizeList>();
-    private logContainerRef = React.createRef<HTMLDivElement>();
+    private ruleListRef = React.createRef<FixedSizeList>();
+    private ruleContainerRef = React.createRef<HTMLDivElement>();
     private observer: ResizeObserver | undefined;
 
     constructor(props: {}) {
         super(props);
-        this.state = { logCount: 0, highlightLine: -1, componentHeight: 300 };
+        this.state = { ruleCount: 0, highlightLine: -1, componentHeight: 300 };
     }
 
     lastResizeTime = 0;
@@ -56,23 +55,23 @@ export class LogContainer extends React.Component<{}, {
         if (now - this.lastResizeTime < 50) {
             this.ResizeTimer && clearTimeout(this.ResizeTimer);
             this.ResizeTimer = setTimeout(() => {
-                const height = this.logContainerRef.current?.getBoundingClientRect().height ?? 300;
+                const height = this.ruleContainerRef.current?.getBoundingClientRect().height ?? 300;
                 this.setState({ componentHeight: height });
                 this.lastResizeTime = now;
             }, 50);
         } else {
-            const height = this.logContainerRef.current?.getBoundingClientRect().height ?? 300;
+            const height = this.ruleContainerRef.current?.getBoundingClientRect().height ?? 300;
             this.setState({ componentHeight: height });
             this.lastResizeTime = now;
         }
     }
 
     public componentDidMount() {
-        logManager.onSetLogCount = (logCount) => this.setState({ logCount });
-        logManager.onSetHighlightLine = (highlightLine) => this.setState({ highlightLine });
-        logManager.onScrollToItem = (index) => this.logListRef.current?.scrollToItem(index, "smart");
+        ruleManager.onSetRuleCount = (ruleCount) => this.setState({ ruleCount });
+        ruleManager.onSetHighlightLine = (highlightLine) => this.setState({ highlightLine });
+        ruleManager.onScrollToItem = (index) => this.ruleListRef.current?.scrollToItem(index, "smart");
 
-        const div = this.logContainerRef.current;
+        const div = this.ruleContainerRef.current;
         if (!div) return;
 
         this.observer = new ResizeObserver(this.onHeightChange.bind(this));
@@ -84,10 +83,15 @@ export class LogContainer extends React.Component<{}, {
     }
 
     public render() {
-        return <div className="logContainer" ref={this.logContainerRef}>
+        return <div className="ruleContainer" ref={this.ruleContainerRef} >
             <FixedSizeList
-                ref={this.logListRef} itemData={{ ItemRenderer: LogRow, highlightLine: this.state.highlightLine }}
-                height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={30}>
+                ref={this.ruleListRef}
+                height={this.state.componentHeight}
+                itemCount={this.state.ruleCount}
+                itemSize={20}
+                width="100%"
+                itemData={{ ItemRenderer: RuleItem, highlightLine: this.state.highlightLine }}
+            >
                 {ItemWrapper}
             </FixedSizeList>
         </div>

@@ -24,6 +24,7 @@
 
 body {
     background:var(--theme-color-background);
+    overflow: hidden;
 }
 
 html,
@@ -152,21 +153,16 @@ body,
     background: var(--theme-color-button-close-hover);
 }
 
-.content{
-    display: flex;
-    flex: auto;
-    flex-direction: column;
-    margin-left: 4px;
-    margin-right: 4px;
-    height: 100%;
-}
-
 .logContainer{
     background:var(--theme-color-content);
     color:var(--theme-color-log);
-    flex: 1 1 0;
-    min-height: 0;
+    margin: 0 4px 4px 4px;
+    flex: 0 0 auto;
+    min-height: 40px;
+    max-height: calc(100% - 120px);
     width: auto;
+    resize: vertical;
+    overflow: hidden;
 }
 
 .log {
@@ -185,6 +181,15 @@ body,
     margin-right: 12px;
     text-align: right;
     width: 50px;
+}
+
+.ruleContainer{
+    background:var(--theme-color-content);
+    color:var(--theme-color-log);
+    flex: 1 1 0;
+    min-height: 0;
+    margin: 0 4px 4px 4px;
+    width: auto;
 }
 
 .rulePanel{
@@ -287,6 +292,7 @@ body,
 
 #hintBar{
     height: 20px;
+    margin: 0 4px 0 4px;
     display: flex;
     justify-content: space-between;
     align-items: center;

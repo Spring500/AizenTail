@@ -1,5 +1,3 @@
-import { FixedSizeList } from "react-window";
-
 class LogManager {
     readonly logs = new Array<LogMeta>();
     _isFilteringSettings = false;
