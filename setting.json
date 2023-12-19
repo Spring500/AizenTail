@@ -1,13 +1,13 @@
 {
     "color": [
         {
-            "reg": "\\[错误\\]",
+            "reg": "^(JS|TS) 堆栈:",
             "color": "white",
             "background": "red",
             "enable": true
         },
         {
-            "reg": "^(JS|TS) 堆栈:",
+            "reg": "\\[错误\\]",
             "color": "white",
             "background": "red",
             "enable": true
@@ -80,7 +80,7 @@
         {
             "reg": "\\[Net\\]",
             "exclude": true,
-            "enable": true
+            "enable": false
         }
     ]
 }
