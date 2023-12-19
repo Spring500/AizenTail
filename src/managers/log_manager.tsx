@@ -81,6 +81,11 @@ class LogManager {
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
     }
 
+    clear() {
+        this.logs.length = 0;
+        this.refreshFilter();
+    }
+
     toggleAutoScroll() {
         this.autoScroll = !this.autoScroll;
         this.onSetAutoScroll?.(this.autoScroll);

@@ -45,6 +45,19 @@ app.whenReady().then(() => {
         });
         return await promise;
     });
+    ipcMain.handle('write-settings', async (event, settings) => {
+        console.log('writing settings');
+        const promise = new Promise<string | null>((resolve, reject) => {
+            fs.writeFile('setting.json', settings, (err) => {
+                if (err) {
+                    console.error('write settings failed', err);
+                    return resolve(null);
+                }
+                return resolve(settings);
+            });
+        });
+        return await promise;
+    });
     ipcMain.handle('open-file', async (event, filename) => {
         console.log('loading', filename);
         const promise = new Promise<string | null>((resolve, reject) => {

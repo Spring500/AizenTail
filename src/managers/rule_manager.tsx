@@ -5,6 +5,8 @@ type Rule = {
     exclude: boolean;
 };
 
+// TODO: 添加脏标记，只有在规则发生变化时才写入规则
+
 class RuleManager {
     private static instance: RuleManager;
 
@@ -81,7 +83,15 @@ class RuleManager {
                 this.filterRules.push({ reg: rule.reg, exclude: rule.exclude, index: i, enable: rule.enable ?? true });
             }
         }
+    }
 
+    public saveConfig(): void {
+        const setting = {
+            color: this.colorRules.map(rule => ({ reg: rule.reg, color: rule.color, background: rule.background, enable: rule.enable })),
+            replacing: this.replaceRules.map(rule => ({ reg: rule.reg, replace: rule.replace, enable: rule.enable })),
+            filter: this.filterRules.map(rule => ({ reg: rule.reg, exclude: rule.exclude, enable: rule.enable })),
+        };
+        (window as any).electron.writeSettings(JSON.stringify(setting, undefined, 4));
     }
 
     public getRules(): Rule[] {
@@ -183,6 +193,7 @@ class RuleManager {
             logManager.refreshFilter();
             this.onRuleChanged?.();
         }, 150);
+        this.saveConfig();
     }
 
     onRuleChanged: null | (() => void) = null;

@@ -25,6 +25,7 @@ export class MenuBar extends React.Component<{}, {
                 <button className='menuButton' title='打开日志文件' onClick={() => document.getElementById('openLogButton')?.click()}>打开文件</button>
                 <button className='menuButton' title='切换是否当日志内容发生变化时自动滚动&#13;&#10;快捷键：Alt+R' onClick={this.onClickToggleAutoScroll}>{`滚动(R): ${this.state.autoScroll ? "开" : "关"}`}</button>
                 <button className='menuButton' title='切换窗口置顶&#13;&#10;快捷键：Alt+T' onClick={this.onClickToggleAlwaysOnTop}>{`置顶(T): ${this.state.alwaysOnTop ? "开" : "关"}`}</button>
+                <button className='menuButton' title='清空当前日志' onClick={() => logManager.clear()}>清空日志</button>
                 <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
             </div></>
     }
