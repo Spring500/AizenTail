@@ -54,13 +54,13 @@ class RuleManager {
         let setting: any = undefined;
         try {
             const settingString = await (window as any).electron.readSettings();
-            console.log("initSetting file", settingString);
+            console.log("initSetting file");
             if (settingString !== null)
                 setting = JSON.parse(settingString);
             else
                 console.log("initSetting file is null");
         } catch (e) {
-            console.log("initSetting error", e);
+            console.error("initSetting error", e);
         }
         setting = setting ?? { color: [], replacing: [], filter: [] };
         if (setting.color !== undefined) {
