@@ -145,6 +145,41 @@ body,
     border: #ef3c54;
 }
 
+.menuDropdown{
+    -webkit-app-region: no-drag;
+    background: var(--theme-color-background);
+    width: 200px;
+    top: 100%;
+    color: var(--theme-color-info-text);
+    padding: 5px;
+    border: 1px solid var(--theme-color-info-text-darker);
+    border-radius: 8px;
+    user-select: none;
+    flex: 0 0 auto;
+    z-index: 1;
+}
+
+.menuDropdownButton{
+    -webkit-app-region: no-drag;
+    background: var(--theme-color-button);
+    color: var(--theme-color-info-text);
+    width: 100%;
+    height: 30px;
+    padding: 0 18px 0 18px;
+    border: none;
+    border-radius: 5px;
+    display: inline-block;
+    position: relative;
+    text-align: left;
+    user-select:none;
+    flex: 0 0 auto;
+}
+
+.menuDropdownButton:hover {
+    background: var(--theme-color-button-hover);
+    color: var(--theme-color-info-text-highlight);
+}
+
 .menuFilter::placeholder{
     color: var(--theme-color-info-text-darker);
 }

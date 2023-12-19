@@ -1,12 +1,15 @@
 import React from 'react';
 import { logManager } from '../managers/log_manager';
+import { Dropdown } from './dropdown';
+
+
 
 export class MenuBar extends React.Component<
     { switchRulePanelVisible: () => void },
-    { autoScroll: boolean, alwaysOnTop: boolean }> {
+    { autoScroll: boolean, alwaysOnTop: boolean, openedMenu: undefined | "file" | "view" }> {
     constructor(props: { switchRulePanelVisible: () => void }) {
         super(props);
-        this.state = { autoScroll: true, alwaysOnTop: false };
+        this.state = { autoScroll: true, alwaysOnTop: false, openedMenu: undefined };
         logManager.onSetAutoScroll = (autoScroll) => this.setState({ autoScroll });
         logManager.onSetAlwaysOnTop = (alwaysOnTop) => this.setState({ alwaysOnTop });
     }
@@ -20,13 +23,27 @@ export class MenuBar extends React.Component<
     private onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!this.state.alwaysOnTop);
 
     public render() {
+        const closeMenu = () => this.setState({ openedMenu: undefined });
+        const switchMenu = (menu: "file" | "view") => this.setState({ openedMenu: this.state.openedMenu === menu ? undefined : menu });
         return <><input type="file" id="openLogButton" onChange={this.onClickOpenFile} style={{ display: "none" }} />
             <div className='menuBar'>
-                <button className='menuButton' title='打开日志文件' onClick={() => document.getElementById('openLogButton')?.click()}>打开文件</button>
-                <button className='menuButton' title='切换是否当日志内容发生变化时自动滚动&#13;&#10;快捷键：Alt+R' onClick={this.onClickToggleAutoScroll}>{`滚动(R): ${this.state.autoScroll ? "开" : "关"}`}</button>
-                <button className='menuButton' title='切换窗口置顶&#13;&#10;快捷键：Alt+T' onClick={this.onClickToggleAlwaysOnTop}>{`置顶(T): ${this.state.alwaysOnTop ? "开" : "关"}`}</button>
-                <button className='menuButton' title='清空当前日志' onClick={() => logManager.clear()}>清空日志</button>
-                <input className='menuButton' title='开关规则面板' type='button' value='规则面板' onClick={() => this.props.switchRulePanelVisible()} />
+                <Dropdown
+                    visible={this.state.openedMenu === "file"}
+                    items={
+                        [{ key: 'file', name: '打开日志...', callback: () => { document.getElementById('openLogButton')?.click(), closeMenu() } },
+                        { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
+                        { key: 'exit', name: '退出', callback: () => window.close() }]
+
+                    } style={{ left: 0 }} />
+                <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => switchMenu("file")}>文件(F)</button>
+                <Dropdown
+                    visible={this.state.openedMenu === "view"}
+                    items={[
+                        { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
+                        { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
+                        { key: 'rulePanel', name: '规则面板', callback: () => { this.props.switchRulePanelVisible(), closeMenu() } }
+                    ]} />
+                <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => switchMenu("view")}>视图(V)</button>
                 <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
             </div></>
     }
