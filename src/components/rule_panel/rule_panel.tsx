@@ -103,8 +103,8 @@ export class RulePanel extends React.Component<{},
         const onAddRule = () => { ruleManager.addRule("filter"); }
         return <><div className="ruleTitleText">过滤规则</div>
             {this.state.filterRules.map(rule =>
-                <RuleLine_Filter key={rule.index} index={rule.index} onRegChange={onRegChange}
-                    enable={rule.enable ?? false} reg={rule.reg} exclude={rule.exclude ?? false}
+                <RuleLine_Filter key={rule.index} index={rule.index} onRegChange={onRegChange} exclude={rule.exclude ?? false}
+                    enable={rule.enable ?? false} reg={rule.reg} regHasError={!checkRegExp(rule.reg)}
                 />
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
