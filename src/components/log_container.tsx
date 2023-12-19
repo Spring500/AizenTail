@@ -2,10 +2,7 @@ import React from 'react';
 import { FixedSizeList } from "react-window";
 import { logManager } from "../managers/log_manager";
 
-class LogRow extends React.Component<{
-    index: number, highlightLine: number,
-    style: React.CSSProperties
-}> {
+class LogRow extends React.Component<{ index: number, highlightLine: number, style: React.CSSProperties }> {
     public render() {
         const index = this.props.index;
         const logText = logManager.getLogText(index);
@@ -35,11 +32,10 @@ class ItemWrapper extends React.Component<{
     }
 }
 
-export class LogContainer extends React.Component<{}, {
-    logCount: number,
-    highlightLine: number,
-    componentHeight: number,
-}> {
+export class LogContainer extends React.Component<
+    { style?: React.CSSProperties },
+    { logCount: number, highlightLine: number, componentHeight: number }
+> {
     private logListRef = React.createRef<FixedSizeList>();
     private logContainerRef = React.createRef<HTMLDivElement>();
     private observer: ResizeObserver | undefined;
@@ -84,7 +80,7 @@ export class LogContainer extends React.Component<{}, {
     }
 
     public render() {
-        return <div className="logContainer" ref={this.logContainerRef}>
+        return <div className="logContainer" ref={this.logContainerRef} style={{ ...this.props.style }}>
             <FixedSizeList
                 ref={this.logListRef} itemData={{ ItemRenderer: LogRow, highlightLine: this.state.highlightLine }}
                 height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={30}>

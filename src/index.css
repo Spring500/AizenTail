@@ -159,9 +159,7 @@ body,
     margin: 0 4px 4px 4px;
     flex: 0 0 auto;
     min-height: 40px;
-    max-height: calc(100% - 120px);
     width: auto;
-    resize: vertical;
     overflow: hidden;
 }
 
