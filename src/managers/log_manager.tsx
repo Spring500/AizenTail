@@ -1,3 +1,5 @@
+import { ruleManager } from "./rule_manager";
+
 class LogManager {
     readonly logs = new Array<LogMeta>();
     _isFilteringSettings = false;
@@ -7,7 +9,7 @@ class LogManager {
     /**当开启筛选时，获取显示行数对应的日志行 */
     lineToIndexMap = new Map<number, number>();
 
-    rules: LogConfig = { color: [], replacing: [], filter: [] };
+    rules: LogConfig = { colorRules: [], replaceRules: [], filterRules: [] };
 
     constructor() {
         console.log("LogManager constructor");
@@ -27,33 +29,7 @@ class LogManager {
         }
 
         // 解析setting.json
-        this.rules = await this.initSetting();
-    }
-
-    async initSetting() {
-        let setting: any = undefined;
-        try {
-            const settingString = await (window as any).electron.readSettings();
-            console.log("initSetting file", settingString);
-            if (settingString !== null)
-                setting = JSON.parse(settingString);
-            else
-                console.log("initSetting file is null");
-        } catch (e) {
-            console.log("initSetting error", e);
-        }
-        setting = setting ?? { color: [], replacing: [], filter: [] };
-        const rules: LogConfig = { color: [], replacing: [], filter: [] };
-        for (const rule of setting.color ?? [])
-            rules.color.push({ reg: new RegExp(rule.reg), background: rule.background, color: rule.color });
-
-        for (const rule of setting.replacing ?? [])
-            rules.replacing.push({ reg: new RegExp(rule.reg), replace: rule.replace });
-
-        for (const rule of setting.filter ?? [])
-            rules.filter.push({ reg: new RegExp(rule.reg), exclude: rule.exclude });
-        console.log("initSetting", rules);
-        return rules;
+        this.rules = ruleManager;
     }
 
     /**获取日志行号 */
@@ -71,15 +47,19 @@ class LogManager {
     public getLogText(index: number) {
         index = this.isFiltering ? this.filtedLogIds[index] : index;
         let text = this.logs[index]?.text ?? "";
-        for (const rule of this.rules.replacing) {
-            text = text.replace(rule.reg, rule.replace);
+        for (const rule of this.rules.replaceRules) {
+            if (!rule.enable) continue;
+            const reg = ruleManager.getReplaceRegExp(rule.index);
+            if (reg) text = text.replace(reg, rule.replace);
         }
         return text;
     }
 
     public getLogColor(log: string): { background?: string, color?: string } {
-        for (const rule of this.rules.color) {
-            if (rule.reg.test(log)) return rule;
+        for (const rule of this.rules.colorRules) {
+            if (!rule.enable) continue;
+            const reg = ruleManager.getColorRegExp(rule.index);
+            if (reg?.test(log)) return rule;
         };
         return {};
     }
@@ -128,7 +108,14 @@ class LogManager {
     }
 
     get isFiltering() {
-        return this._isFilteringSettings || this.inputFilters.length > 0;
+        let anyFilterEnabled = false;
+        for (const rule of this.rules.filterRules) {
+            if (rule.enable) {
+                anyFilterEnabled = true;
+                break;
+            }
+        }
+        return this.inputFilters.length > 0 || anyFilterEnabled;
     }
     inputFilters = new Array<string>();
     setInputFilter(filter: string) {
@@ -174,8 +161,7 @@ class LogManager {
 
     lastRefreshTime = 0;
     refreshTimer: NodeJS.Timeout | null = null;
-    protected refreshFilter() {
-        console.log('刷新过滤', this._isFilteringSettings, this.inputFilters);
+    public refreshFilter() {
         // 每100ms最多触发一次, 防止频繁刷新
         if (Date.now() - this.lastRefreshTime < 100) {
             this.refreshTimer && clearTimeout(this.refreshTimer);
@@ -184,15 +170,25 @@ class LogManager {
         }
         this.lastRefreshTime = Date.now();
 
+        console.log("refreshFilter", this.isFiltering, this.inputFilters.length > 0);
         if (this.isFiltering) {
             this.filtedLogIds.length = 0;
             this.lineToIndexMap.clear();
+            let anyPositiveFilter = false;
+            for (const rule of this.rules.filterRules) {
+                if (rule.enable && !rule.exclude) {
+                    anyPositiveFilter = true;
+                    break;
+                }
+            }
             for (let line = 0; line < this.logs.length; line++) {
                 const log = this.logs[line];
                 let exclude = false;
                 let include = false;
-                for (const rule of this.rules.filter) {
-                    if (rule.reg.test(log.text)) {
+                for (const rule of this.rules.filterRules) {
+                    if (!rule.enable) continue;
+                    const reg = ruleManager.getFilterRegExp(rule.index);
+                    if (reg?.test(log.text)) {
                         rule.exclude ? exclude = true : include = true;
                         break;
                     }
@@ -200,7 +196,7 @@ class LogManager {
                 if (this.inputFilters?.some(filter => log.text.includes(filter))) {
                     include = true;
                 }
-                if (include && !exclude) {
+                if ((include || anyPositiveFilter) && !exclude) {
                     this.lineToIndexMap.set(line, this.filtedLogIds.length);
                     this.filtedLogIds.push(line);
                 }

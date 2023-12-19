@@ -1,69 +1,84 @@
 {
     "color": [
         {
+            "enable": true,
             "background": "red",
             "color": "white",
             "reg": "\\[错误\\]"
         },
         {
+            "enable": true,
             "background": "red",
             "color": "white",
             "reg": "^(JS|TS) 堆栈:"
         },
         {
+            "enable": true,
             "background": "red",
             "color": "white",
             "reg": "^\\s*at\\s*.*\\d\\)\\s*$"
         },
         {
+            "enable": true,
             "color": "red",
             "reg": "[^\\w]Error[^\\w]"
         },
         {
+            "enable": true,
             "color": "yellow",
             "reg": "[^\\w]Warning[^\\w]"
         },
         {
+            "enable": true,
             "color": "yellow",
             "reg": "\\[警告\\]"
         },
         {
+            "enable": true,
             "color": "gray",
             "reg": "\\[协议\\]"
         }
     ],
     "replacing": [
         {
+            "enable": true,
             "reg": "^\\[(\\d+.\\d+.\\d+-(\\d+)\\.(\\d+)\\.(\\d+):(\\d+))\\]\\[\\s*(\\d+)\\]",
             "replace": "[$2:$3:$4.$5($6帧)]"
         },
         {
+            "enable": true,
             "reg": "\\[GameThread\\].*\\[(信息|警告|错误)\\]",
             "replace": "[$1]"
         },
         {
+            "enable": true,
             "reg": "\\[(信息|警告|错误)\\]\\[(\\w+)\\](\\[[^\\[\\]]+\\])*",
             "replace": "[$1][$2]"
         },
         {
+            "enable": true,
             "reg": "D:\\\\aki\\\\Source\\\\Client",
             "replace": " ..项目路径"
         },
         {
+            "enable": true,
             "reg": "Puerts: \\(0x[0-9a-fA-F]+\\)?",
             "replace": ""
         },
         {
+            "enable": true,
             "reg": "\\[调试\\]\\[Net\\]\\[ZQ\\].* Net\\.\\w+\\.(\\w+)",
             "replace": "[协议]$1"
         },
         {
+            "enable": true,
             "reg": "\\[GameThread\\]",
             "replace": ""
         }
     ],
     "filter": [
         {
+            "enable": true,
             "reg": "testReg",
             "exclude": false
         }

@@ -8,23 +8,29 @@ type LogMeta = {
 }
 
 type ColorConfig = {
+    index: number,
     color?: string,
     background?: string,
-    reg: RegExp,
+    reg: string,
+    enable?: boolean,
 }
 
 type ReplaceConfig = {
-    reg: RegExp,
+    index: number,
+    reg: string,
     replace: string,
+    enable?: boolean,
 }
 
 type FilterConfig = {
-    reg: RegExp,
-    exclude: false
+    index: number,
+    reg: string,
+    exclude: boolean,
+    enable?: boolean,
 }
 
 type LogConfig = {
-    color: ColorConfig[],
-    replacing: ReplaceConfig[],
-    filter: FilterConfig[],
+    colorRules: ColorConfig[],
+    replaceRules: ReplaceConfig[],
+    filterRules: FilterConfig[],
 }
