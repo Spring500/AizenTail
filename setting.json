@@ -1,86 +1,86 @@
 {
     "color": [
         {
-            "enable": true,
-            "background": "red",
+            "reg": "\\[错误\\]",
             "color": "white",
-            "reg": "\\[错误\\]"
+            "background": "red",
+            "enable": true
         },
         {
-            "enable": true,
-            "background": "red",
+            "reg": "^(JS|TS) 堆栈:",
             "color": "white",
-            "reg": "^(JS|TS) 堆栈:"
+            "background": "red",
+            "enable": true
         },
         {
-            "enable": true,
-            "background": "red",
+            "reg": "^\\s*at\\s*.*\\d\\)\\s*$",
             "color": "white",
-            "reg": "^\\s*at\\s*.*\\d\\)\\s*$"
+            "background": "red",
+            "enable": true
         },
         {
-            "enable": true,
+            "reg": "[^\\w]Error[^\\w]",
             "color": "red",
-            "reg": "[^\\w]Error[^\\w]"
+            "enable": true
         },
         {
-            "enable": true,
+            "reg": "[^\\w]Warning[^\\w]",
             "color": "yellow",
-            "reg": "[^\\w]Warning[^\\w]"
+            "enable": true
         },
         {
-            "enable": true,
+            "reg": "\\[警告\\]",
             "color": "yellow",
-            "reg": "\\[警告\\]"
+            "enable": true
         },
         {
-            "enable": true,
+            "reg": "\\[协议\\]",
             "color": "gray",
-            "reg": "\\[协议\\]"
+            "enable": true
         }
     ],
     "replacing": [
         {
-            "enable": true,
             "reg": "^\\[(\\d+.\\d+.\\d+-(\\d+)\\.(\\d+)\\.(\\d+):(\\d+))\\]\\[\\s*(\\d+)\\]",
-            "replace": "[$2:$3:$4.$5($6帧)]"
+            "replace": "[$2:$3:$4.$5($6帧)]",
+            "enable": true
         },
         {
-            "enable": true,
             "reg": "\\[GameThread\\].*\\[(信息|警告|错误)\\]",
-            "replace": "[$1]"
+            "replace": "[$1]",
+            "enable": true
         },
         {
-            "enable": true,
             "reg": "\\[(信息|警告|错误)\\]\\[(\\w+)\\](\\[[^\\[\\]]+\\])*",
-            "replace": "[$1][$2]"
+            "replace": "[$1][$2]",
+            "enable": true
         },
         {
-            "enable": true,
             "reg": "D:\\\\aki\\\\Source\\\\Client",
-            "replace": " ..项目路径"
+            "replace": " ..项目路径",
+            "enable": true
         },
         {
-            "enable": true,
             "reg": "Puerts: \\(0x[0-9a-fA-F]+\\)?",
-            "replace": ""
+            "replace": "",
+            "enable": true
         },
         {
-            "enable": true,
             "reg": "\\[调试\\]\\[Net\\]\\[ZQ\\].* Net\\.\\w+\\.(\\w+)",
-            "replace": "[协议]$1"
+            "replace": "[协议]$1",
+            "enable": true
         },
         {
-            "enable": true,
             "reg": "\\[GameThread\\]",
-            "replace": ""
+            "replace": "",
+            "enable": true
         }
     ],
     "filter": [
         {
-            "enable": true,
-            "reg": "testReg",
-            "exclude": false
+            "reg": "\\[Net\\]",
+            "exclude": true,
+            "enable": true
         }
     ]
 }
