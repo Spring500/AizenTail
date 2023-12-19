@@ -220,6 +220,11 @@ body,
     color: var(--theme-color-info-text-highlight);
 }
 
+.ruleButton:disabled{
+    background: var(--theme-color-button);
+    color: var(--theme-color-info-text-darker);
+}
+
 .ruleLine{
     display: flex;
     align-items: center;

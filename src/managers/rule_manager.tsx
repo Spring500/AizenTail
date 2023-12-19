@@ -131,6 +131,7 @@ class RuleManager {
 
     public switchRules(type: "color" | "filter" | "replace", index1: number, index2: number): void {
         const ruleArray = type === "color" ? this.colorRules : type === "filter" ? this.filterRules : this.replaceRules;
+        if (index1 < 0 || index1 >= ruleArray.length || index2 < 0 || index2 >= ruleArray.length) return;
         const temp = ruleArray[index1];
         ruleArray[index1] = ruleArray[index2];
         ruleArray[index2] = temp;

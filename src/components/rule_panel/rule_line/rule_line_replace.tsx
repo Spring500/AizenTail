@@ -32,8 +32,10 @@ export class RuleLine_Replace extends React.Component<{
             {this.renderReg()}
             {this.renderReplace()}
             <div className="fixedRuleBlock">
-                <button className="ruleButton" onClick={() => ruleManager.switchRules("replace", index, index - 1)}>上移</button>
-                <button className="ruleButton" onClick={() => ruleManager.switchRules("replace", index, index + 1)}>下移</button>
+                <button className="ruleButton" onClick={() => ruleManager.switchRules("replace", index, index - 1)}
+                    disabled={this.props.index <= 0}>上移</button>
+                <button className="ruleButton" onClick={() => ruleManager.switchRules("replace", index, index + 1)}
+                    disabled={this.props.index >= ruleManager.replaceRules.length - 1}>下移</button>
                 <button className="ruleButton" onClick={() => ruleManager.removeRule("replace", index)}>删除</button>
             </div>
         </div>

@@ -27,8 +27,10 @@ export class RuleLine_Filter extends React.Component<{
                 }} />
             </div>
             <div className="fixedRuleBlock">
-                <button className="ruleButton" onClick={() => ruleManager.switchRules("filter", index, index - 1)}>上移</button>
-                <button className="ruleButton" onClick={() => ruleManager.switchRules("filter", index, index + 1)}>下移</button>
+                <button className="ruleButton" onClick={() => ruleManager.switchRules("filter", index, index - 1)}
+                    disabled={this.props.index <= 0}>上移</button>
+                <button className="ruleButton" onClick={() => ruleManager.switchRules("filter", index, index + 1)}
+                    disabled={this.props.index >= ruleManager.filterRules.length - 1}>下移</button>
                 <button className="ruleButton" onClick={() => ruleManager.removeRule("filter", index)}>删除</button>
             </div>
         </div>
