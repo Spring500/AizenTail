@@ -155,7 +155,7 @@ class LogManager {
         }
         this.lastRefreshTime = Date.now();
 
-        console.log("refreshFilter", this.isFiltering, this.inputFilters.length > 0);
+
         if (this.isFiltering) {
             this.filtedLogIds.length = 0;
             this.lineToIndexMap.clear();
@@ -181,7 +181,7 @@ class LogManager {
                 if (this.inputFilters?.some(filter => log.text.includes(filter))) {
                     include = true;
                 }
-                if ((include || anyPositiveFilter) && !exclude) {
+                if ((include || !anyPositiveFilter) && !exclude) {
                     this.lineToIndexMap.set(line, this.filtedLogIds.length);
                     this.filtedLogIds.push(line);
                 }
