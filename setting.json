@@ -34,7 +34,7 @@
             "enable": true
         },
         {
-            "reg": "\\[协议\\]",
+            "reg": "\\[Net\\]\\[ZQ\\]",
             "color": "gray",
             "enable": true
         }
@@ -68,19 +68,29 @@
         {
             "reg": "\\[调试\\]\\[Net\\]\\[ZQ\\].* Net\\.\\w+\\.(\\w+)",
             "replace": "[协议]$1",
-            "enable": true
+            "enable": false
         },
         {
             "reg": "\\[GameThread\\]",
             "replace": "",
             "enable": true
+        },
+        {
+            "reg": "\"CombatCommon\":{\"PreMessageId\":.*,\"MessageId\":(.*),\"Originator\":.*,\"TimeStamp\":.*,\"EntityId\":.*,\"IsServerRequest\":(true|false)}",
+            "replace": "",
+            "enable": true
+        },
+        {
+            "reg": "Net.(Notify|Response).(\\w+)",
+            "replace": "$2",
+            "enable": true
         }
     ],
     "filter": [
         {
-            "reg": "\\[Net\\]",
-            "exclude": true,
-            "enable": false
+            "reg": "\\[Net\\]\\[ZQ\\]",
+            "exclude": false,
+            "enable": true
         }
     ]
 }
