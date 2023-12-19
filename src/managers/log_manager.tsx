@@ -2,7 +2,6 @@ import { ruleManager } from "./rule_manager";
 
 class LogManager {
     readonly logs = new Array<LogMeta>();
-    _isFilteringSettings = false;
     autoScroll = true;
     alwaysOnTop = false;
     filtedLogIds = new Array<number>();
@@ -21,7 +20,6 @@ class LogManager {
 
         document.onkeyup = (e) => {
             switch (e.key) {
-                case 'f': if (e.altKey) this.toggleFilterSetting(); break;
                 case 'r': if (e.altKey) this.toggleAutoScroll(); break;
                 case 't': if (e.altKey) this.setAlwaysOnTop(!this.alwaysOnTop); break;
                 case 'F12': (window as any).electron.openDevTools(); break;
@@ -81,19 +79,6 @@ class LogManager {
 
         this.onSetFileUrl?.(filepath);
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
-    }
-
-    toggleFilterSetting() {
-        this._isFilteringSettings = !this._isFilteringSettings;
-        this.refreshFilter();
-        this.onSetFiltering?.(this._isFilteringSettings);
-        setTimeout(() => {
-            if (this.highlightLine !== -1) {
-                const index = this.lineToIndex(this.highlightLine);
-                console.log("highlightLine", index, this.highlightLine);
-                if (index !== -1) this.onScrollToItem?.(index)
-            }
-        }, 0);
     }
 
     toggleAutoScroll() {
@@ -228,7 +213,6 @@ class LogManager {
     onSetLogCount: ((count: number) => void) | null = null;
     onScrollToItem: ((index: number) => void) | null = null;
     onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
-    onSetFiltering: ((isFiltering: boolean) => void) | null = null;
     onSetAlwaysOnTop: ((alwaysOnTop: boolean) => void) | null = null;
 }
 
