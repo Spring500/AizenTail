@@ -70,10 +70,13 @@ export class RulePanel extends React.Component<{},
                 <option value="red" />
                 <option value="yellow" />
                 <option value="gray" />
-                <option value="black" />
-                <option value="#FF00FF" />
-                <option value="#FFFF00" />
-                <option value="#FFFFFF" />
+                <option value="pink" />
+                <option value="green" />
+                <option value="blue" />
+                <option value="purple" />
+                <option value="orange" />
+                <option value="brown" />
+                <option value="#ffaaff" />
             </datalist></>
     }
 
