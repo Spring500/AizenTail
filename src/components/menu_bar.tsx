@@ -32,6 +32,9 @@ export class MenuBar extends React.Component<
                     items={
                         [{ key: 'file', name: '打开日志...', callback: () => { document.getElementById('openLogButton')?.click(), closeMenu() } },
                         { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
+                        { key: 'save', name: '加载规则文件...', callback: () => { closeMenu() } },
+                        { key: 'save', name: '规则文件另存为...', callback: () => { closeMenu() } },
+                        { key: 'rulePanel', name: '规则面板', callback: () => { this.props.switchRulePanelVisible(), closeMenu() } },
                         { key: 'exit', name: '退出', callback: () => window.close() }]
 
                     } style={{ left: 0 }} />
@@ -41,7 +44,6 @@ export class MenuBar extends React.Component<
                     items={[
                         { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
-                        { key: 'rulePanel', name: '规则面板', callback: () => { this.props.switchRulePanelVisible(), closeMenu() } }
                     ]} />
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => switchMenu("view")}>视图(V)</button>
                 <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
