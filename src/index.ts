@@ -70,33 +70,6 @@ app.whenReady().then(() => {
         if (!path) return null;
         return path;
     });
-
-    ipcMain.handle('read-settings', async () => {
-        console.log('reading settings');
-        const promise = new Promise<string | null>((resolve, reject) => {
-            fs.readFile('setting.json', (err, data) => {
-                if (err) {
-                    console.error('read settings failed', err);
-                    return resolve(null);
-                }
-                return resolve(data.toString());
-            });
-        });
-        return await promise;
-    });
-    ipcMain.handle('write-settings', async (event, settings) => {
-        console.log('writing settings');
-        const promise = new Promise<string | null>((resolve, reject) => {
-            fs.writeFile('setting.json', settings, (err) => {
-                if (err) {
-                    console.error('write settings failed', err);
-                    return resolve(null);
-                }
-                return resolve(settings);
-            });
-        });
-        return await promise;
-    });
     ipcMain.handle('open-file', async (event, filename: string) => {
         console.log('open-file', filename);
         const promise = new Promise<string | null>((resolve, reject) => {

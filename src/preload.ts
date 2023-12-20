@@ -5,9 +5,6 @@ contextBridge.exposeInMainWorld("electron", {
 
     openSaveDialog: (title: string, defaultPath?: string, filters?: Electron.FileFilter[]) =>
         ipcRenderer.invoke("open-save-dialog", title, defaultPath, filters),
-
-    readSettings: () => ipcRenderer.invoke("read-settings"),
-    writeSettings: (settings: string) => ipcRenderer.invoke("write-settings", settings),
     openFile: (filename: string) => ipcRenderer.invoke("open-file", filename),
     writeFile: (filename: string, content: string) => ipcRenderer.invoke("write-file", filename, content),
     watchFile: (filename: string) => ipcRenderer.send("watch-file", filename),
