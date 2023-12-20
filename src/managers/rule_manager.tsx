@@ -40,16 +40,30 @@ class RuleManager {
     }
 
     public constructor() {
-        this.initSetting();
+        this.openFile('setting.json');
     }
 
-    async initSetting() {
+    async openFile(filepath: string) {
+        console.log('打开文件', filepath);
+        if (!filepath) return;
+
+        const resultText = await (window as any).electron.openFile(filepath);
+        if (resultText === null) return;
+        await this.initSetting(resultText);
+    }
+
+    async saveFile(filepath: string) {
+        console.log('保存文件', filepath);
+        if (!filepath) return;
+        await (window as any).electron.writeFile(filepath, this.stringify());
+    }
+
+    async initSetting(settingString: string) {
         this.colorRegExps.length = 0;
         this.replaceRegExps.length = 0;
         this.filterRegExps.length = 0;
         let setting: any = undefined;
         try {
-            const settingString = await (window as any).electron.readSettings();
             console.log("initSetting file");
             if (settingString !== null)
                 setting = JSON.parse(settingString);
@@ -79,15 +93,20 @@ class RuleManager {
                 this.filterRules.push({ reg: rule.reg, exclude: rule.exclude, index: i, enable: rule.enable ?? true });
             }
         }
+        this.refreshRules();
     }
 
-    public saveConfig(): void {
+    public stringify(): string {
         const setting = {
             color: this.colorRules.map(rule => ({ reg: rule.reg, color: rule.color, background: rule.background, enable: rule.enable })),
             replacing: this.replaceRules.map(rule => ({ reg: rule.reg, replace: rule.replace, enable: rule.enable })),
             filter: this.filterRules.map(rule => ({ reg: rule.reg, exclude: rule.exclude, enable: rule.enable })),
         };
-        (window as any).electron.writeSettings(JSON.stringify(setting, undefined, 4));
+        return JSON.stringify(setting, undefined, 4);
+    }
+
+    public saveConfig(): void {
+        (window as any).electron.writeSettings(this.stringify());
     }
 
     public addRule(type: "color" | "filter" | "replace"): void {
@@ -182,7 +201,7 @@ class RuleManager {
             logManager.refreshFilter();
             this.onRuleChanged?.();
         }, 150);
-        this.saveConfig();
+        this.saveConfig(); // TODO:初始化的第一次刷新不需要保存
     }
 
     onRuleChanged: null | (() => void) = null;

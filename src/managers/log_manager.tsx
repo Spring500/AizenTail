@@ -62,8 +62,7 @@ class LogManager {
         return {};
     }
 
-    async openFile(file: File) {
-        const filepath = file.path;
+    async openFile(filepath: string) {
         console.log('打开文件', filepath);
         if (!filepath) return;
 

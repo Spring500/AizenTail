@@ -1,8 +1,42 @@
 import React from 'react';
 import { logManager } from '../managers/log_manager';
 import { Dropdown } from './common/dropdown';
+import { ruleManager } from '../managers/rule_manager';
 
 
+const openLogFile = async () => {
+    const filepath: string = await (window as any).electron.openFileDialog("打开日志文件",
+        undefined,
+        [
+            { name: "All Files", extensions: ["*"] },
+            { name: "Log Files", extensions: ["log"] },
+            { name: "Text Files", extensions: ["txt"] },
+        ],
+    );
+    await logManager.openFile(filepath);
+}
+
+const openRuleFile = async () => {
+    const filepath: string = await (window as any).electron.openFileDialog("加载规则文件",
+        undefined,
+        [
+            { name: "All Files", extensions: ["*"] },
+            { name: "JSON Files", extensions: ["json"] },
+        ],
+    );
+    await ruleManager.openFile(filepath);
+}
+
+const saveRuleFile = async () => {
+    const filepath: string = await (window as any).electron.openSaveDialog("规则文件另存为",
+        'AizenTailSetting.json',
+        [
+            { name: "All Files", extensions: ["*"] },
+            { name: "JSON Files", extensions: ["json"] },
+        ],
+    );
+    await ruleManager.saveFile(filepath);
+}
 
 export class MenuBar extends React.Component<
     { switchRulePanelVisible: () => void },
@@ -13,11 +47,6 @@ export class MenuBar extends React.Component<
         logManager.onSetAutoScroll = (autoScroll) => this.setState({ autoScroll });
         logManager.onSetAlwaysOnTop = (alwaysOnTop) => this.setState({ alwaysOnTop });
     }
-
-    private onClickOpenFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        file && await logManager.openFile(file)
-    }
     private onInputFilter = (event: React.ChangeEvent<HTMLInputElement>) => logManager.setInputFilter(event.target.value);
     private onClickToggleAutoScroll = () => logManager.toggleAutoScroll();
     private onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!this.state.alwaysOnTop);
@@ -25,15 +54,15 @@ export class MenuBar extends React.Component<
     public render() {
         const closeMenu = () => this.setState({ openedMenu: undefined });
         const switchMenu = (menu: "file" | "view") => this.setState({ openedMenu: this.state.openedMenu === menu ? undefined : menu });
-        return <><input type="file" id="openLogButton" onChange={this.onClickOpenFile} style={{ display: "none" }} />
+        return <>
             <div className='menuBar'>
                 <Dropdown
                     visible={this.state.openedMenu === "file"}
                     items={
-                        [{ key: 'file', name: '打开日志...', callback: () => { document.getElementById('openLogButton')?.click(), closeMenu() } },
+                        [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
                         { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
-                        { key: 'loadRule', name: '加载规则文件...', callback: () => { closeMenu() } },
-                        { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { closeMenu() } },
+                        { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
+                        { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
                         { key: 'rulePanel', name: '规则面板', callback: () => { this.props.switchRulePanelVisible(), closeMenu() } },
                         { key: 'exit', name: '退出', callback: () => window.close() }]
 
