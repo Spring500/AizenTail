@@ -106,7 +106,7 @@ class RuleManager {
     }
 
     public saveConfig(): void {
-        (window as any).electron.writeSettings(this.stringify());
+        this.saveFile('setting.json');
     }
 
     public addRule(type: "color" | "filter" | "replace"): void {
