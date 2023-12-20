@@ -1,5 +1,6 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
+import { TextField } from "../../common/text_field";
 
 export class RuleLine_Filter extends React.Component<{
     index: number, enable: boolean, reg: string | undefined, regHasError: boolean, exclude: boolean,
@@ -7,10 +8,10 @@ export class RuleLine_Filter extends React.Component<{
 }> {
     public renderReg() {
         return <div className="ruleBlock"> {this.props.exclude ? "排除" : "包含"}匹配串
-            <input className="ruleInput" type="text" value={this.props.reg}
-                style={{ border: this.props.regHasError ? "1px solid red" : undefined }}
-                onChange={(e) => this.props.onRegChange(this.props.index, e.target.value)}
-                onBlur={(e) => ruleManager.setReg("filter", this.props.index, e.target.value)} />
+            <TextField className="ruleInput" value={this.props.reg}
+                style={{ border: this.props.regHasError ? "1px solid red" : "1px solid #ffffff00" }}
+                onChange={(value) => this.props.onRegChange(this.props.index, value)}
+                onEnter={(value) => ruleManager.setReg("filter", this.props.index, value)} />
         </div>
     }
     public render() {

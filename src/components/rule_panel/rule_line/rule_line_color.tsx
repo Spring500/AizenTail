@@ -1,5 +1,6 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
+import { TextField } from "../../common/text_field";
 
 export class RuleLine_Color extends React.Component<{
     index: number, enable: boolean, reg: string, regHasError: boolean,
@@ -15,13 +16,13 @@ export class RuleLine_Color extends React.Component<{
 
     private renderReg() {
         return <div className="ruleBlock"> 匹配串
-            <input className="ruleInput" type="text" value={this.props.reg} placeholder="输入匹配串"
+            <TextField className="ruleInput" value={this.props.reg} placeholder="输入匹配串"
                 style={{
                     color: this.props.color, backgroundColor: this.props.background,
-                    border: this.props.regHasError ? "1px solid red" : undefined
+                    border: this.props.regHasError ? "1px solid red" : "1px solid #ffffff00"
                 }}
-                onChange={(e) => this.props.onRegChange(this.props.index, e.currentTarget.value)}
-                onBlur={(e) => ruleManager.setReg("color", this.props.index, e.currentTarget.value)} />
+                onChange={(text) => this.props.onRegChange(this.props.index, text)}
+                onEnter={(text) => ruleManager.setReg("color", this.props.index, text)} />
         </div>
     }
 

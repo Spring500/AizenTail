@@ -1,6 +1,6 @@
 import React from 'react';
 import { logManager } from '../managers/log_manager';
-import { Dropdown } from './dropdown';
+import { Dropdown } from './common/dropdown';
 
 
 

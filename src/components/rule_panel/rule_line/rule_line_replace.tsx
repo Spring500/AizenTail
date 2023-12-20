@@ -1,5 +1,6 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
+import { TextField } from "../../common/text_field";
 
 export class RuleLine_Replace extends React.Component<{
     index: number, enable: boolean, reg: string, regHasError: boolean, replace: string,
@@ -8,18 +9,18 @@ export class RuleLine_Replace extends React.Component<{
 }> {
     private renderReg() {
         return <div className="ruleBlock"> 匹配串
-            <input className="ruleInput" type="text" value={this.props.reg}
-                style={{ border: this.props.regHasError ? "1px solid red" : undefined }}
-                onChange={(e) => this.props.onRegChange(this.props.index, e.target.value)}
-                onBlur={(e) => ruleManager.setReg("replace", this.props.index, e.target.value)} />
+            <TextField className="ruleInput" value={this.props.reg}
+                style={{ border: this.props.regHasError ? "1px solid red" : "1px solid #ffffff00" }}
+                onChange={(value) => this.props.onRegChange(this.props.index, value)}
+                onEnter={(value) => ruleManager.setReg("replace", this.props.index, value)} />
         </div>
     }
 
     private renderReplace() {
         return <div className="ruleBlock"> 替换串
-            <input className="ruleInput" type="text" value={this.props.replace}
-                onChange={(e) => this.props.onReplaceChange(this.props.index, e.target.value)}
-                onBlur={(e) => ruleManager.setRuleReplace(this.props.index, e.target.value)} />
+            <TextField className="ruleInput" value={this.props.replace}
+                onChange={(value) => this.props.onReplaceChange(this.props.index, value)}
+                onEnter={(value) => ruleManager.setRuleReplace(this.props.index, value)} />
         </div>
     }
 
