@@ -170,25 +170,25 @@ class LogManager {
                     break;
                 }
             }
+            let anyInputFilter = false;
+            if (this.inputFilters.length > 0) anyInputFilter = true;
             for (let line = 0; line < this.logs.length; line++) {
-                const log = this.logs[line];
                 let exclude = false;
                 let include = false;
+                let inputInclude = false;
+                const text = this.logs[line].text;
                 for (const rule of this.rules.filterRules) {
-                    if (!rule.enable) continue;
-                    const reg = ruleManager.getFilterRegExp(rule.index);
-                    if (reg?.test(log.text)) {
-                        rule.exclude ? exclude = true : include = true;
-                        break;
-                    }
+                    if (!rule.enable || !ruleManager.getFilterRegExp(rule.index)?.test(text)) continue;
+                    rule.exclude ? exclude = true : include = true;
+                    break;
                 }
-                if (this.inputFilters?.some(filter => log.text.includes(filter))) {
-                    include = true;
+                if ((anyPositiveFilter && !include) || exclude) continue;
+                if (this.inputFilters?.some(filter => text.includes(filter))) {
+                    inputInclude = true;
                 }
-                if ((include || !anyPositiveFilter) && !exclude) {
-                    this.lineToIndexMap.set(line, this.filtedLogIds.length);
-                    this.filtedLogIds.push(line);
-                }
+                if (anyInputFilter && !inputInclude) continue;
+                this.lineToIndexMap.set(line, this.filtedLogIds.length);
+                this.filtedLogIds.push(line);
             }
             this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`);
             this.onSetLogCount?.(this.filtedLogIds.length + 1);
