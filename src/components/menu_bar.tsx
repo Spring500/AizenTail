@@ -32,8 +32,8 @@ export class MenuBar extends React.Component<
                     items={
                         [{ key: 'file', name: '打开日志...', callback: () => { document.getElementById('openLogButton')?.click(), closeMenu() } },
                         { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
-                        { key: 'save', name: '加载规则文件...', callback: () => { closeMenu() } },
-                        { key: 'save', name: '规则文件另存为...', callback: () => { closeMenu() } },
+                        { key: 'loadRule', name: '加载规则文件...', callback: () => { closeMenu() } },
+                        { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { closeMenu() } },
                         { key: 'rulePanel', name: '规则面板', callback: () => { this.props.switchRulePanelVisible(), closeMenu() } },
                         { key: 'exit', name: '退出', callback: () => window.close() }]
 
