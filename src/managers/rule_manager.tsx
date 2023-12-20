@@ -8,10 +8,6 @@ type Rule = {
 // TODO: 添加脏标记，只有在规则发生变化时才写入规则
 
 class RuleManager {
-    private static instance: RuleManager;
-
-    private rules: Rule[] = [];
-
     public colorRules: ColorConfig[] = [];
     private readonly colorRegExps: (RegExp | undefined)[] = [];
     public getColorRegExp(index: number): RegExp | undefined {
@@ -92,14 +88,6 @@ class RuleManager {
             filter: this.filterRules.map(rule => ({ reg: rule.reg, exclude: rule.exclude, enable: rule.enable })),
         };
         (window as any).electron.writeSettings(JSON.stringify(setting, undefined, 4));
-    }
-
-    public getRules(): Rule[] {
-        return this.rules;
-    }
-
-    public getRuleCount(): number {
-        return this.rules.length;
     }
 
     public addRule(type: "color" | "filter" | "replace"): void {

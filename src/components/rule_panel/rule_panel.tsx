@@ -5,13 +5,13 @@ import { RuleLine_Color, RuleLine_Replace, RuleLine_Filter } from "./rule_line";
 
 
 export class RulePanel extends React.Component<{},
-    { ruleCount: number, colorRules: ColorConfig[], replaceRules: ReplaceConfig[], filterRules: FilterConfig[] }
+    { colorRules: ColorConfig[], replaceRules: ReplaceConfig[], filterRules: FilterConfig[] }
 > {
     private ruleContainerRef = React.createRef<HTMLDivElement>();
 
     constructor(props: {}) {
         super(props);
-        this.state = { ruleCount: 0, colorRules: [], replaceRules: [], filterRules: [] };
+        this.state = { colorRules: [], replaceRules: [], filterRules: [] };
     }
 
 
@@ -36,11 +36,8 @@ export class RulePanel extends React.Component<{},
 
     public componentDidMount() {
         ruleManager.onRuleChanged = () => {
-            this.setState({ ruleCount: ruleManager.getRuleCount() });
             this.loadSetting();
         }
-
-        this.setState({ ruleCount: ruleManager.getRuleCount() });
         this.loadSetting();
         const div = this.ruleContainerRef.current;
         if (!div) return;
