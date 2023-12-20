@@ -15,7 +15,7 @@ export class RuleLine_Color extends React.Component<{
     }
 
     private renderReg() {
-        return <div className="ruleBlock"> 匹配串
+        return <div className="ruleBlock"> <p style={{ color: this.props.regHasError ? "red" : undefined }}>匹配串</p>
             <TextField className="ruleInput" value={this.props.reg} placeholder="输入匹配串"
                 style={{
                     color: this.props.color, backgroundColor: this.props.background,

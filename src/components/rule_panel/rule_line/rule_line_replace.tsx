@@ -8,7 +8,7 @@ export class RuleLine_Replace extends React.Component<{
     /**替换串发生输入变更时的回调函数 */ onReplaceChange: (index: number, replace: string) => void,
 }> {
     private renderReg() {
-        return <div className="ruleBlock"> 匹配串
+        return <div className="ruleBlock"> <p style={{ color: this.props.regHasError ? "red" : undefined }}>匹配串</p>
             <TextField className="ruleInput" value={this.props.reg}
                 style={{ border: this.props.regHasError ? "1px solid red" : "1px solid #ffffff00" }}
                 onChange={(value) => this.props.onRegChange(this.props.index, value)}
