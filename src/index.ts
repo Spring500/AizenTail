@@ -106,10 +106,15 @@ app.whenReady().then(() => {
             switch (evt) {
                 case "update": {
                     const fd = fs.openSync(filename, 'r');
-                    const deltaSize = fs.statSync(filename).size - fileCurrentSize;
+                    let deltaSize = fs.statSync(filename).size - fileCurrentSize;
+
                     if (deltaSize < 0) {
                         event.reply('log-changed', 'clear', '');
-                    } else if (deltaSize > 0) {
+                        fileCurrentSize = 0;
+                        deltaSize = fs.statSync(filename).size;
+                    }
+
+                    if (deltaSize > 0) {
                         const buffer = Buffer.alloc(fs.statSync(filename).size - fileCurrentSize);
                         fs.readSync(fd, buffer, 0, buffer.length, fileCurrentSize);
                         fs.closeSync(fd);
