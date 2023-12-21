@@ -51,11 +51,24 @@ export class MenuBar extends React.Component<
     private onClickToggleAutoScroll = () => logManager.toggleAutoScroll();
     private onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!this.state.alwaysOnTop);
 
+    protected switchMenu(menu: "file" | "view") {
+        this.setState({ openedMenu: this.state.openedMenu === menu ? undefined : menu });
+    }
+
+    override componentDidMount() {
+        logManager.registerHotKey('f', true, false, false, () => this.switchMenu('file'));
+        logManager.registerHotKey('v', true, false, false, () => this.switchMenu('view'));
+    }
+
+    override componentWillUnmount() {
+        logManager.unregisterHotKey('f', true, false, false);
+        logManager.unregisterHotKey('v', true, false, false);
+    }
+
     public render() {
         const closeMenu = () => this.setState({ openedMenu: undefined });
-        const switchMenu = (menu: "file" | "view") => this.setState({ openedMenu: this.state.openedMenu === menu ? undefined : menu });
         return <>
-            <div className='menuBar'>
+            <div className='menuBar' style={{ listStyleType: "none" }}>
                 <Dropdown
                     visible={this.state.openedMenu === "file"}
                     items={
@@ -67,14 +80,14 @@ export class MenuBar extends React.Component<
                         { key: 'exit', name: '退出', callback: () => window.close() }]
 
                     } style={{ left: 0 }} />
-                <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => switchMenu("file")}>文件(F)</button>
+                <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => this.switchMenu("file")}>文件(F)</button>
                 <Dropdown
                     visible={this.state.openedMenu === "view"}
                     items={[
                         { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
                     ]} />
-                <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => switchMenu("view")}>视图(V)</button>
+                <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => this.switchMenu("view")}>视图(V)</button>
                 <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
             </div></>
     }

@@ -20,14 +20,42 @@ class LogManager {
 
         document.onkeyup = (e) => {
             switch (e.key) {
-                case 'r': if (e.altKey) this.toggleAutoScroll(); break;
-                case 't': if (e.altKey) this.setAlwaysOnTop(!this.alwaysOnTop); break;
+                case 'r': if (e.altKey) this.toggleAutoScroll(); return;
+                case 't': if (e.altKey) this.setAlwaysOnTop(!this.alwaysOnTop); return;
                 case 'F12': (window as any).electron.openDevTools(); break;
             }
+            this.handleHotKey(e.key, e.altKey, e.ctrlKey, e.shiftKey);
         }
 
         // 解析setting.json
         this.rules = ruleManager;
+    }
+
+    private hotKeyMap = new Map<string, () => unknown>();
+
+    /**注册热键 */
+    public registerHotKey(
+        key: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean, callback: () => unknown
+    ) {
+        this.hotKeyMap.set(
+            `${key}_${altKey ? 'alt' : ''}_${ctrlKey ? 'ctrl' : ''}_${shiftKey ? 'shift' : ''}`
+            , callback);
+    }
+
+    /**处理热键 */
+    public handleHotKey(key: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean) {
+        const callback = this.hotKeyMap.get(
+            `${key}_${altKey ? 'alt' : ''}_${ctrlKey ? 'ctrl' : ''}_${shiftKey ? 'shift' : ''}`
+        );
+        console.log('handleHotKey', key, altKey, ctrlKey, shiftKey, callback);
+        if (callback) callback();
+    }
+
+    /**移除热键 */
+    public unregisterHotKey(key: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean) {
+        this.hotKeyMap.delete(
+            `${key}_${altKey ? 'alt' : ''}_${ctrlKey ? 'ctrl' : ''}_${shiftKey ? 'shift' : ''}`
+        );
     }
 
     /**获取日志行号 */
