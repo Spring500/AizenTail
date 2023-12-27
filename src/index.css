@@ -20,6 +20,7 @@
     --theme-color-inputField: #00000050;
     --theme-font-system: 12px/1.0 "Microsoft Yahei";
     --theme-font-log: 13px/1.2 "SimSun";
+    --theme-font-title: 13px/1.2 "Microsoft Yahei";
 }
 
 body {
@@ -50,16 +51,14 @@ body,
     align-items: center;
     -webkit-app-region: drag;
     background: var(--theme-color-background);
-    height: 35px;
+    height: 28px;
     justify-content: flex-end;
     flex: 0 0 auto;
 }
 
 .titleBarText{
     color: var(--theme-color-info-text);
-    font-size: 16px;
-    font-weight: bold;
-    -webkit-app-region: drag;
+    font: var(--theme-font-title);
     vertical-align: middle;
     text-align: center;
     user-select: none;
@@ -202,7 +201,7 @@ body,
     word-break: break-all;
     white-space: nowrap;
     font: var(--theme-font-log);
-    min-width: 110%;
+    min-width: 100%;
 }
 
 .logIndex{
@@ -214,6 +213,14 @@ body,
     margin-right: 12px;
     text-align: right;
     width: 50px;
+}
+
+.logText{
+    display: inline-block;
+    user-select: text;
+    max-width: fit-content;
+    min-width: calc(100% - 50px - 12px);
+    height: 100%;
 }
 
 .ruleContainer{
@@ -317,14 +324,6 @@ body,
 
 .ruleInput::placeholder{
     color: var(--theme-color-info-text-darker);
-}
-
-.logText{
-    display: inline-block;
-    user-select: text;
-    max-width: fit-content;
-    min-width: 100%;
-    height: 100%;
 }
 
 *::-webkit-scrollbar {

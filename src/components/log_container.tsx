@@ -83,6 +83,7 @@ export class LogContainer extends React.Component<
         return <div className="logContainer" ref={this.logContainerRef} style={{ ...this.props.style }}>
             <FixedSizeList
                 ref={this.logListRef} itemData={{ ItemRenderer: LogRow, highlightLine: this.state.highlightLine }}
+                style={{ overflow: "scroll" }}
                 height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={30}>
                 {ItemWrapper}
             </FixedSizeList>
