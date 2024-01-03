@@ -17,7 +17,7 @@ class LogRow extends React.Component<{ index: number, highlightLine: number, sty
         }
         return <div className="log" style={{ ...this.props.style }} onClick={onClick} >
             <div className="logIndex">{line >= 0 ? line : ''}</div>
-            <div className="logText" style={{ backgroundColor: background, color }}>{logText}<br /></div>
+            <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{logText}<br /></div>
         </div >
     }
 }
