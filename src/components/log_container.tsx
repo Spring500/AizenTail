@@ -15,7 +15,11 @@ class LogRow extends React.Component<{ index: number, highlightLine: number, sty
             if (line === this.props.highlightLine) logManager.setHighlightLine(-1);
             else logManager.setHighlightLine(line);
         }
-        return <div className="log" style={{ ...this.props.style }} onClick={onClick} >
+        const isExculed = logManager.isDisableFilter() && !logManager.lineToIndexMap.has(index);
+        return <div className="log" style={{
+            ...this.props.style,
+            opacity: isExculed ? 0.3 : 1,
+        }} onClick={onClick} >
             <div className="logIndex">{line >= 0 ? line : ''}</div>
             <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{logText}<br /></div>
         </div >

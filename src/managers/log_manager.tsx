@@ -5,8 +5,7 @@ class LogManager {
     autoScroll = true;
     alwaysOnTop = false;
     filtedLogIds = new Array<number>();
-    /**当开启筛选时，获取显示行数对应的日志行 */
-    lineToIndexMap = new Map<number, number>();
+    /**当开启筛选时，获取显示行数对应的日志行 */ lineToIndexMap = new Map<number, number>();
 
     rules: LogConfig = { colorRules: [], replaceRules: [], filterRules: [] };
 
@@ -21,6 +20,7 @@ class LogManager {
         document.onkeyup = (e) => {
             switch (e.key) {
                 case 'r': if (e.altKey) this.toggleAutoScroll(); return;
+                case 'h': if (e.ctrlKey) this.setFilterDisabled(!this.disableFilter); return;
                 case 't': if (e.altKey) this.setAlwaysOnTop(!this.alwaysOnTop); return;
                 case 'F12': (window as any).electron.openDevTools(); break;
             }
@@ -60,18 +60,18 @@ class LogManager {
 
     /**获取日志行号 */
     public indexToLine(index: number): number {
-        return this.isFiltering
+        return this.isFiltering()
             ? (this.filtedLogIds[index] ?? -1)
             : (index <= this.logs.length - 1 ? index : -1);
     }
 
     public lineToIndex(line: number) {
-        return this.isFiltering ? (this.lineToIndexMap.get(line) ?? -1) : line;
+        return this.isFiltering() ? (this.lineToIndexMap.get(line) ?? -1) : line;
     }
 
     /**获取正则替换后的日志文本 */
     public getLogText(index: number) {
-        index = this.isFiltering ? this.filtedLogIds[index] : index;
+        index = this.isFiltering() ? this.filtedLogIds[index] : index;
         let text = this.logs[index]?.text ?? "";
         for (const rule of this.rules.replaceRules) {
             if (!rule.enable) continue;
@@ -124,16 +124,24 @@ class LogManager {
         this.onSetAlwaysOnTop?.(flag);
     }
 
-    get isFiltering() {
-        let anyFilterEnabled = false;
-        for (const rule of this.rules.filterRules) {
-            if (rule.enable) {
-                anyFilterEnabled = true;
-                break;
-            }
-        }
-        return this.inputFilters.length > 0 || anyFilterEnabled;
+    hasFilter() {
+        return this.inputFilters.length > 0 || this.rules.filterRules.some(rule => rule.enable);
     }
+
+    private disableFilter: boolean = false;
+    setFilterDisabled(flag: boolean) {
+        this.disableFilter = flag;
+        this.refreshFilter();
+    }
+
+    isDisableFilter() {
+        return this.disableFilter;
+    }
+
+    isFiltering() {
+        return this.hasFilter() && !this.disableFilter;
+    }
+
     inputFilters = new Array<string>();
     setInputFilter(filter: string) {
         filter = filter.trim();
@@ -171,7 +179,9 @@ class LogManager {
                 console.log("highlightLine", index, this.highlightLine);
                 if (index !== -1) this.onScrollToItem?.(index)
             } else {
-                this.onScrollToItem?.(this.isFiltering ? this.filtedLogIds.length - 1 : this.logs.length - 1);
+                this.onScrollToItem?.(this.isFiltering()
+                    ? this.filtedLogIds.length - 1
+                    : this.logs.length - 1);
             }
         }, 0);
     }
@@ -187,43 +197,17 @@ class LogManager {
         }
         this.lastRefreshTime = Date.now();
 
-
-        if (this.isFiltering) {
-            this.filtedLogIds.length = 0;
-            this.lineToIndexMap.clear();
-            let anyPositiveFilter = false;
-            for (const rule of this.rules.filterRules) {
-                if (rule.enable && !rule.exclude) {
-                    anyPositiveFilter = true;
-                    break;
-                }
-            }
-            let anyInputFilter = false;
-            if (this.inputFilters.length > 0) anyInputFilter = true;
+        this.filtedLogIds.length = 0;
+        this.lineToIndexMap.clear();
+        if (this.hasFilter()) {
             for (let line = 0; line < this.logs.length; line++) {
-                let exclude = false;
-                let include = false;
-                let inputInclude = false;
-                const text = this.logs[line].text;
-                for (const rule of this.rules.filterRules) {
-                    if (!rule.enable || !ruleManager.getFilterRegExp(rule.index)?.test(text)) continue;
-                    rule.exclude ? exclude = true : include = true;
-                    break;
-                }
-                if ((anyPositiveFilter && !include) || exclude) continue;
-                if (this.inputFilters?.some(filter => text.includes(filter))) {
-                    inputInclude = true;
-                }
-                if (anyInputFilter && !inputInclude) continue;
-                this.lineToIndexMap.set(line, this.filtedLogIds.length);
+                if (this.calculateExcluded(line)) continue;
                 this.filtedLogIds.push(line);
+                this.lineToIndexMap.set(line, this.filtedLogIds.length);
             }
             this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`);
-            this.onSetLogCount?.(this.filtedLogIds.length + 1);
-        } else {
-            this.onSetHint?.(`关闭过滤`);
-            this.onSetLogCount?.(logManager.logs.length + 1);
         }
+        this.onSetLogCount?.(this.isFiltering() ? this.filtedLogIds.length + 1 : logManager.logs.length + 1);
 
         setTimeout(() => {
             if (this.highlightLine !== -1) {
@@ -231,6 +215,22 @@ class LogManager {
                 if (index !== -1) this.onScrollToItem?.(index)
             }
         }, 0);
+    }
+
+    private calculateExcluded(line: number): boolean {
+        const text = this.logs[line].text;
+        let include = false;
+        let hasIncludeFilter = false;
+        for (const rule of this.rules.filterRules) {
+            if (!rule.enable) continue;
+            if (!rule.exclude) hasIncludeFilter = true;
+            if (!ruleManager.getFilterRegExp(rule.index)?.test(text)) continue;
+            if (rule.exclude) return true;
+            include = true;
+        }
+        if (!include && hasIncludeFilter) return true;
+        if (this.inputFilters.length <= 0) return false;
+        return this.inputFilters?.some(filter => text.includes(filter));
     }
 
     highlightLine = -1;
