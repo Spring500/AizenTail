@@ -51,12 +51,21 @@ export class RulePanel extends React.Component<{},
         const onRegChange = (index: number, reg: string) => {
             this.setState({ colorRules: this.state.colorRules.map(rule => rule.index === index ? { ...rule, reg } : rule) });
         }
+        const onBackColorChange = (index: number, color: string) => {
+            this.setState({ colorRules: this.state.colorRules.map(rule => rule.index === index ? { ...rule, background: color } : rule) });
+        }
+        const onFontColorChange = (index: number, color: string) => {
+            this.setState({ colorRules: this.state.colorRules.map(rule => rule.index === index ? { ...rule, color } : rule) });
+        }
         const onAddRule = () => { ruleManager.addRule("color"); }
         const rules = this.state.colorRules;
         return <><div className="ruleTitleText">颜色规则</div>
             {rules.map(rule => {
                 const index = rule.index;
-                return <RuleLine_Color key={index} index={index} onRegChange={onRegChange}
+                return <RuleLine_Color key={index} index={index}
+                    onRegChange={onRegChange}
+                    onBackColorChange={onBackColorChange}
+                    onFontColorChange={onFontColorChange}
                     enable={rule.enable ?? false} reg={rule.reg ?? ""} regHasError={!checkRegExp(rule.reg)}
                     background={rule.background} color={rule.color}
                 />

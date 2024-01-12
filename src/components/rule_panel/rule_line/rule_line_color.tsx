@@ -5,20 +5,23 @@ import { TextField } from "../../common/text_field";
 export class RuleLine_Color extends React.Component<{
     index: number, enable: boolean, reg: string, regHasError: boolean,
     background: string | undefined, color: string | undefined,
+    onFontColorChange: (index: number, color: string) => void,
+    onBackColorChange: (index: number, color: string) => void,
     /**匹配串发生输入变更时的回调函数 */ onRegChange: (index: number, reg: string) => void,
 }> {
-    private onChangeBackColor = (e: React.ChangeEvent<HTMLInputElement>) => {
-        ruleManager.setRuleBackgroundColor(this.props.index, e.target.value);
+    private onEnterBackColor = (color: string) => {
+        ruleManager.setRuleBackgroundColor(this.props.index, color);
     }
-    private onChangeFontColor = (e: React.ChangeEvent<HTMLInputElement>) => {
-        ruleManager.setRuleFontColor(this.props.index, e.target.value);
+    private onEnterFontColor = (color: string) => {
+        ruleManager.setRuleFontColor(this.props.index, color);
     }
 
     private renderReg() {
         return <div className="ruleBlock"> <p style={{ color: this.props.regHasError ? "red" : undefined }}>匹配串</p>
             <TextField className="ruleInput" value={this.props.reg} placeholder="输入匹配串"
                 style={{
-                    color: this.props.color, backgroundColor: this.props.background,
+                    color: ruleManager.colorRules[this.props.index]?.color,
+                    backgroundColor: ruleManager.colorRules[this.props.index]?.background,
                     border: this.props.regHasError ? "1px solid red" : "1px solid #ffffff00"
                 }}
                 onChange={(text) => this.props.onRegChange(this.props.index, text)}
@@ -29,16 +32,18 @@ export class RuleLine_Color extends React.Component<{
     private renderBackColor() {
         const color = this.props.background;
         return <div className="ruleBlock"> 背景色
-            <input className="ruleInput" type='text' list="colorList"
-                onChange={this.onChangeBackColor} placeholder="选择背景颜色" value={color} />
+            <TextField className="ruleInput" list="colorList"
+                onChange={(text) => this.props.onBackColorChange(this.props.index, text)}
+                onEnter={this.onEnterBackColor} placeholder="选择背景颜色" value={color} />
         </div>
     }
 
     private renderFontColor() {
         const color = this.props.color;
         return <div className="ruleBlock"> 字体色
-            <input className="ruleInput" type='text' list="colorList"
-                onChange={this.onChangeFontColor} placeholder="选择字体颜色" value={color} />
+            <TextField className="ruleInput" list="colorList"
+                onChange={(text) => this.props.onFontColorChange(this.props.index, text)}
+                onEnter={this.onEnterFontColor} placeholder="选择字体颜色" value={color} />
         </div>
     }
 
