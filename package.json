@@ -1,6 +1,6 @@
 {
   "name": "aizen-tail",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "实时日志查看工具",
   "main": ".webpack/main",
   "scripts": {
