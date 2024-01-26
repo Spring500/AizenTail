@@ -7,7 +7,8 @@ class LogRow extends React.Component<{ index: number, highlightLine: number, sty
         const index = this.props.index;
         const logText = logManager.getLogText(index);
         const line = logManager.indexToLine(index);
-        const { background, color } = line >= 0 && line === this.props.highlightLine
+        const isHighlight = line >= 0 && line === this.props.highlightLine;
+        const { background, color } = isHighlight
             ? { background: "gray", color: "white" }
             : logManager.getLogColor(logText);
         const onClick = () => {
@@ -20,7 +21,7 @@ class LogRow extends React.Component<{ index: number, highlightLine: number, sty
             ...this.props.style,
             opacity: isExculed ? 0.3 : 1,
         }} onClick={onClick} >
-            <div className="logIndex">{line >= 0 ? line : ''}</div>
+            <div className="logIndex" style={{ color: isHighlight ? "var(--theme-color-log)" : undefined }}>{line >= 0 ? line : ''}</div>
             <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{logText}<br /></div>
         </div >
     }
@@ -88,7 +89,7 @@ export class LogContainer extends React.Component<
             <FixedSizeList
                 ref={this.logListRef} itemData={{ ItemRenderer: LogRow, highlightLine: this.state.highlightLine }}
                 style={{ overflow: "scroll" }}
-                height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={30}>
+                height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={3}>
                 {ItemWrapper}
             </FixedSizeList>
         </div>
