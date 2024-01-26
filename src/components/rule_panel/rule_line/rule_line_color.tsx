@@ -17,8 +17,10 @@ export class RuleLine_Color extends React.Component<{
     }
 
     private renderReg() {
-        return <div className="ruleBlock"> <p style={{ color: this.props.regHasError ? "red" : undefined }}>匹配串</p>
+        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
+            <p style={{ color: this.props.regHasError ? "red" : undefined }}>匹配串</p>
             <TextField className="ruleInput" value={this.props.reg} placeholder="输入匹配串"
+
                 style={{
                     color: ruleManager.colorRules[this.props.index]?.color,
                     backgroundColor: ruleManager.colorRules[this.props.index]?.background,
@@ -31,7 +33,7 @@ export class RuleLine_Color extends React.Component<{
 
     private renderBackColor() {
         const color = this.props.background;
-        return <div className="ruleBlock"> 背景色
+        return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串"> 背景色
             <TextField className="ruleInput" list="colorList"
                 onChange={(text) => this.props.onBackColorChange(this.props.index, text)}
                 onEnter={this.onEnterBackColor} placeholder="选择背景颜色" value={color} />
@@ -40,7 +42,7 @@ export class RuleLine_Color extends React.Component<{
 
     private renderFontColor() {
         const color = this.props.color;
-        return <div className="ruleBlock"> 字体色
+        return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串"> 字体色
             <TextField className="ruleInput" list="colorList"
                 onChange={(text) => this.props.onFontColorChange(this.props.index, text)}
                 onEnter={this.onEnterFontColor} placeholder="选择字体颜色" value={color} />
@@ -50,7 +52,7 @@ export class RuleLine_Color extends React.Component<{
     public render() {
         const index = this.props.index;
         return <div key={index} className="ruleLine">
-            <div className="fixedRuleBlock"> 启用
+            <div className="fixedRuleBlock" title="是否启用该规则"> 启用
                 <input type="checkbox" checked={this.props.enable} onChange={(e) => ruleManager.setEnable("color", index, e.target.checked)} />
             </div>
             {this.renderReg()}
@@ -58,10 +60,11 @@ export class RuleLine_Color extends React.Component<{
             {this.renderFontColor()}
             <div className="fixedRuleBlock">
                 <button className="ruleButton" onClick={() => ruleManager.switchRules("color", index, index - 1)}
-                    disabled={this.props.index <= 0}>上移</button>
+                    title="将该条规则上移一行" disabled={this.props.index <= 0}>上移</button>
                 <button className="ruleButton" onClick={() => ruleManager.switchRules("color", index, index + 1)}
-                    disabled={this.props.index >= ruleManager.colorRules.length - 1}>下移</button>
-                <button className="ruleButton" onClick={() => ruleManager.removeRule("color", index)}>删除</button>
+                    title="将该条规则下移一行" disabled={this.props.index >= ruleManager.colorRules.length - 1}>下移</button>
+                <button className="ruleButton" onClick={() => ruleManager.removeRule("color", index)}
+                    title="删除该条规则">删除</button>
             </div>
         </div>
     }

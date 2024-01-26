@@ -85,7 +85,10 @@ export class MenuBar extends React.Component<
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
                     ]} />
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => this.switchMenu("view")}>视图(V)</button>
-                <button className='menuButton' onClick={this.props.switchRulePanelVisible}>规则面板</button>
+                <button className='menuButton'
+                    onClick={this.props.switchRulePanelVisible}
+                    title='开启筛选及高亮规则配置面板'>规则面板
+                </button>
                 <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
             </div></>
     }
