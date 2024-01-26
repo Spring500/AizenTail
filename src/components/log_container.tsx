@@ -17,12 +17,22 @@ class LogRow extends React.Component<{ index: number, highlightLine: number, sty
             else logManager.setHighlightLine(line);
         }
         const isExculed = logManager.isDisableFilter() && !logManager.lineToIndexMap.has(index);
+        let splitedText = logText;
+        for (const keyword of logManager.inputFilters) {
+            splitedText = splitedText.replace(new RegExp(`(${keyword})`, "gi"), "\x01\x02$1\x01");
+        }
+        const splitedLog = splitedText.split("\x01").map((text, index) => {
+            if (text[0] === "\x02")
+                return <span key={index} style={{ color: 'black', background: 'yellow' }}>{text.substring(1)}</span>
+            else
+                return <>{text}</>
+        })
         return <div className="log" style={{
             ...this.props.style,
             opacity: isExculed ? 0.3 : 1,
         }} onClick={onClick} >
             <div className="logIndex" style={{ color: isHighlight ? "var(--theme-color-log)" : undefined }}>{line >= 0 ? line : ''}</div>
-            <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{logText}<br /></div>
+            <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{splitedLog}<br /></div>
         </div >
     }
 }

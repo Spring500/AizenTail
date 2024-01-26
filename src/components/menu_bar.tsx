@@ -69,25 +69,23 @@ export class MenuBar extends React.Component<
         const closeMenu = () => this.setState({ openedMenu: undefined });
         return <>
             <div className='menuBar' style={{ listStyleType: "none" }}>
-                <Dropdown
-                    visible={this.state.openedMenu === "file"}
+                <Dropdown visible={this.state.openedMenu === "file"}
                     items={
                         [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
                         { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
                         { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
                         { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
-                        { key: 'rulePanel', name: '规则面板', callback: () => { this.props.switchRulePanelVisible(), closeMenu() } },
                         { key: 'exit', name: '退出', callback: () => window.close() }]
 
                     } style={{ left: 0 }} />
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => this.switchMenu("file")}>文件(F)</button>
-                <Dropdown
-                    visible={this.state.openedMenu === "view"}
+                <Dropdown visible={this.state.openedMenu === "view"}
                     items={[
                         { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
                     ]} />
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => this.switchMenu("view")}>视图(V)</button>
+                <button className='menuButton' onClick={this.props.switchRulePanelVisible}>规则面板</button>
                 <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
             </div></>
     }

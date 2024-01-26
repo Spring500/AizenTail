@@ -230,7 +230,7 @@ class LogManager {
         }
         if (!include && hasIncludeFilter) return true;
         if (this.inputFilters.length <= 0) return false;
-        return this.inputFilters?.some(filter => text.includes(filter));
+        return !this.inputFilters?.some(filter => text.includes(filter));
     }
 
     highlightLine = -1;
