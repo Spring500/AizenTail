@@ -10,6 +10,8 @@
     --theme-color-info-text: #707070;
     --theme-color-info-text-highlight: #ffffff;
     --theme-color-log: #ffffff;
+    --theme-color-log-search-hit-background: yellow;
+    --theme-color-log-search-hit-text: black;
     --theme-color-log-index: #ffffff44;
     --theme-color-scrollbar-track: #303134;
     --theme-color-scrollbar-thumb: #514e55;
@@ -221,6 +223,12 @@ body,
     max-width: fit-content;
     min-width: calc(100% - 50px - 12px);
     height: 100%;
+}
+
+.logSearchHit{
+    background: var(--theme-color-log-search-hit-background);
+    color: var(--theme-color-log-search-hit-text);
+    border-radius: 2px;
 }
 
 .ruleContainer{

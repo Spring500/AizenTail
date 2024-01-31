@@ -230,7 +230,7 @@ class LogManager {
         }
         if (!include && hasIncludeFilter) return true;
         if (this.inputFilters.length <= 0) return false;
-        return !this.inputFilters?.some(filter => text.includes(filter));
+        return !this.inputFilters?.some(filter => text.match(new RegExp(`(${filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi")));
     }
 
     highlightLine = -1;
@@ -247,7 +247,7 @@ class LogManager {
     onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
     onSetAlwaysOnTop: ((alwaysOnTop: boolean) => void) | null = null;
 }
-
+export type ILogManager = LogManager;
 export let logManager = new LogManager();
 
 (window as any).logManager = logManager;

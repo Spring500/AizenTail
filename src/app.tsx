@@ -24,8 +24,8 @@ class App extends React.Component<
             <MenuBar switchRulePanelVisible={this.onSwitchRulePanelVisible} />
             {
                 this.state.rulePanelVisible
-                    ? <><LogContainer style={{ resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }} /><RulePanel /></>
-                    : <><LogContainer style={{ resize: 'none', height: 'auto', flex: '1 1 auto' }} /></>
+                    ? <><LogContainer manager={logManager} style={{ resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }} /><RulePanel /></>
+                    : <><LogContainer manager={logManager} style={{ resize: 'none', height: 'auto', flex: '1 1 auto' }} /></>
             }
             <div id='hintBar' className='systemInfo'><div>路径: {this.state.fileUrl}</div>{this.state.hint}</div></>;
     }
