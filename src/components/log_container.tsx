@@ -2,106 +2,70 @@ import React from 'react';
 import { FixedSizeList } from "react-window";
 import { logManager } from "../managers/log_manager";
 
-class LogRow extends React.Component<{ index: number, highlightLine: number, style: React.CSSProperties }> {
-    public render() {
-        const index = this.props.index;
-        const logText = logManager.getLogText(index);
-        const line = logManager.indexToLine(index);
-        const isHighlight = line >= 0 && line === this.props.highlightLine;
-        const { background, color } = isHighlight
-            ? { background: "gray", color: "white" }
-            : logManager.getLogColor(logText);
-        const onClick = () => {
-            console.log("click", line);
-            if (line === this.props.highlightLine) logManager.setHighlightLine(-1);
-            else logManager.setHighlightLine(line);
-        }
-        const isExculed = logManager.isDisableFilter() && !logManager.lineToIndexMap.has(index);
-        let splitedText = logText;
-        for (const keyword of logManager.inputFilters) {
-            splitedText = splitedText.replace(new RegExp(`(${keyword})`, "gi"), "\x01\x02$1\x01");
-        }
-        const splitedLog = splitedText.split("\x01").map((text, index) => {
-            if (text[0] === "\x02")
-                return <span key={index} style={{ color: 'black', background: 'yellow' }}>{text.substring(1)}</span>
-            else
-                return <>{text}</>
-        })
-        return <div className="log" style={{
-            ...this.props.style,
-            opacity: isExculed ? 0.3 : 1,
-        }} onClick={onClick} >
-            <div className="logIndex" style={{ color: isHighlight ? "var(--theme-color-log)" : undefined }}>{line >= 0 ? line : ''}</div>
-            <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{splitedLog}<br /></div>
-        </div >
+const HIGHLIGHT_STYLE = { background: "gray", color: "var(--theme-color-info-text-highlight)" };
+const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
+const EXCLUDED_OPACITY = 0.3;
+
+const splitLog = function (text: string, keywords: string[]) {
+    let splitedText = text;
+    for (const keyword of keywords) {
+        splitedText = splitedText.replace(new RegExp(`(${keyword})`, "gi"), "\x01\x02$1\x01");
     }
+    return splitedText.split("\x01").map((text) => {
+        if (text[0] !== "\x02") return <>{text}</>
+        return <span style={{ color: 'black', background: 'yellow' }}>{text.substring(1)}</span>
+    });
 }
 
-class ItemWrapper extends React.Component<{
+const LogRow = function ({ index, style, highlightLine }: { index: number, style: React.CSSProperties, highlightLine: number }) {
+    const logText = logManager.getLogText(index);
+    const line = logManager.indexToLine(index);
+    const isHighlight = line >= 0 && line === highlightLine;
+    const { background, color } = isHighlight ? HIGHLIGHT_STYLE : logManager.getLogColor(logText);
+    const isExculed = logManager.isDisableFilter() && !logManager.lineToIndexMap.has(index);
+    const onClick = () => logManager.setHighlightLine(line !== highlightLine ? line : -1);
+    return <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
+        <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
+        <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{
+            splitLog(logText, logManager.inputFilters)}<br /></div>
+    </div >
+}
+
+export const ItemWrapper = function ({ data, index, style }: {
     data: { ItemRenderer: React.ComponentType<{ index: number, style: React.CSSProperties, highlightLine: number }>, highlightLine: number },
-    index: number,
-    style: React.CSSProperties,
-}> {
-    public render() {
-        return <this.props.data.ItemRenderer index={this.props.index} style={this.props.style} highlightLine={this.props.data.highlightLine} />;
-    }
+    index: number, style: React.CSSProperties
+}) {
+    return <data.ItemRenderer index={index} style={style} highlightLine={data.highlightLine} />;
 }
 
-export class LogContainer extends React.Component<
-    { style?: React.CSSProperties },
-    { logCount: number, highlightLine: number, componentHeight: number }
-> {
-    private logListRef = React.createRef<FixedSizeList>();
-    private logContainerRef = React.createRef<HTMLDivElement>();
-    private observer: ResizeObserver | undefined;
-
-    constructor(props: {}) {
-        super(props);
-        this.state = { logCount: 0, highlightLine: -1, componentHeight: 300 };
+export const LogContainer = function ({ style }: { style?: React.CSSProperties }) {
+    const mainRef = React.createRef<HTMLDivElement>();
+    const listRef = React.createRef<FixedSizeList>();
+    const [logCount, setLogCount] = React.useState(0);
+    const [highlightLine, setHighlightLine] = React.useState(-1);
+    const [componentHeight, setComponentHeight] = React.useState(300);
+    const onHeightChange = () => {
+        const height = mainRef.current?.getBoundingClientRect().height ?? 300;
+        setComponentHeight(height);
     }
+    React.useEffect(() => {
+        logManager.onSetLogCount = setLogCount;
+        logManager.onSetHighlightLine = setHighlightLine;
+        logManager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "smart");
 
-    lastResizeTime = 0;
-    ResizeTimer: NodeJS.Timeout | null = null;
-    protected onHeightChange() {
-        const now = Date.now();
-        if (now - this.lastResizeTime < 50) {
-            this.ResizeTimer && clearTimeout(this.ResizeTimer);
-            this.ResizeTimer = setTimeout(() => {
-                const height = this.logContainerRef.current?.getBoundingClientRect().height ?? 300;
-                this.setState({ componentHeight: height });
-                this.lastResizeTime = now;
-            }, 50);
-        } else {
-            const height = this.logContainerRef.current?.getBoundingClientRect().height ?? 300;
-            this.setState({ componentHeight: height });
-            this.lastResizeTime = now;
+        if (mainRef.current) {
+            const observer = new ResizeObserver(onHeightChange);
+            observer.observe(mainRef.current);
+            return () => observer.disconnect();
         }
-    }
+    }, [mainRef]);
 
-    public componentDidMount() {
-        logManager.onSetLogCount = (logCount) => this.setState({ logCount });
-        logManager.onSetHighlightLine = (highlightLine) => this.setState({ highlightLine });
-        logManager.onScrollToItem = (index) => this.logListRef.current?.scrollToItem(index, "smart");
-
-        const div = this.logContainerRef.current;
-        if (!div) return;
-
-        this.observer = new ResizeObserver(this.onHeightChange.bind(this));
-        this.observer.observe(div);
-    }
-
-    public componentWillUnmount() {
-        this.observer?.disconnect();
-    }
-
-    public render() {
-        return <div className="logContainer" ref={this.logContainerRef} style={{ ...this.props.style }}>
-            <FixedSizeList
-                ref={this.logListRef} itemData={{ ItemRenderer: LogRow, highlightLine: this.state.highlightLine }}
-                style={{ overflow: "scroll" }}
-                height={this.state.componentHeight} itemCount={this.state.logCount} itemSize={17} width={"auto"} overscanCount={3}>
-                {ItemWrapper}
-            </FixedSizeList>
-        </div>
-    }
+    return <div className="logContainer" ref={mainRef} style={style}>
+        <FixedSizeList
+            ref={listRef} itemData={{ ItemRenderer: LogRow, highlightLine }}
+            style={{ overflow: "scroll" }}
+            height={componentHeight} itemCount={logCount} itemSize={17} width={"auto"} overscanCount={3}>
+            {ItemWrapper}
+        </FixedSizeList>
+    </div>
 }
