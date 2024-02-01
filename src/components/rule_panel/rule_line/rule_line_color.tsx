@@ -1,71 +1,75 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
 import { TextField } from "../../common/text_field";
+import { ContextItem } from "../../common/contextItem";
 
-export class RuleLine_Color extends React.Component<{
+
+
+export const RuleLine_Color = function ({ index, enable, reg, regHasError, background, color, onFontColorChange, onBackColorChange, onRegChange }: {
     index: number, enable: boolean, reg: string, regHasError: boolean,
     background: string | undefined, color: string | undefined,
     onFontColorChange: (index: number, color: string) => void,
     onBackColorChange: (index: number, color: string) => void,
     /**匹配串发生输入变更时的回调函数 */ onRegChange: (index: number, reg: string) => void,
-}> {
-    private onEnterBackColor = (color: string) => {
-        ruleManager.setRuleBackgroundColor(this.props.index, color);
-    }
-    private onEnterFontColor = (color: string) => {
-        ruleManager.setRuleFontColor(this.props.index, color);
-    }
+}) {
 
-    private renderReg() {
+
+    const renderReg = () => {
+        const rule = ruleManager.colorRules[index];
         return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
-            <p style={{ color: this.props.regHasError ? "red" : undefined }}>匹配串</p>
-            <TextField className="ruleInput" value={this.props.reg} placeholder="输入匹配串"
-
+            <p style={{ color: regHasError ? "red" : undefined }}>匹配串</p>
+            <TextField className="ruleInput" value={reg} placeholder="输入匹配串"
                 style={{
-                    color: ruleManager.colorRules[this.props.index]?.color,
-                    backgroundColor: ruleManager.colorRules[this.props.index]?.background,
-                    border: this.props.regHasError ? "1px solid red" : "1px solid #ffffff00"
+                    color: rule?.color, backgroundColor: rule?.background,
+                    border: regHasError ? "1px solid red" : "1px solid #ffffff00"
                 }}
-                onChange={(text) => this.props.onRegChange(this.props.index, text)}
-                onEnter={(text) => ruleManager.setReg("color", this.props.index, text)} />
+                onChange={(text) => onRegChange(index, text)}
+                onEnter={(text) => ruleManager.setReg("color", index, text)} />
         </div>
     }
 
-    private renderBackColor() {
-        const color = this.props.background;
+    const renderBackColor = () => {
         return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串"> 背景色
             <TextField className="ruleInput" list="colorList"
-                onChange={(text) => this.props.onBackColorChange(this.props.index, text)}
-                onEnter={this.onEnterBackColor} placeholder="选择背景颜色" value={color} />
+                onChange={(text) => onBackColorChange(index, text)}
+                onEnter={(text) => ruleManager.setRuleBackgroundColor(index, text)}
+                placeholder="选择背景颜色" value={background} />
         </div>
     }
 
-    private renderFontColor() {
-        const color = this.props.color;
+    const renderFontColor = () => {
         return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串"> 字体色
             <TextField className="ruleInput" list="colorList"
-                onChange={(text) => this.props.onFontColorChange(this.props.index, text)}
-                onEnter={this.onEnterFontColor} placeholder="选择字体颜色" value={color} />
+                onChange={(text) => onFontColorChange(index, text)}
+                onEnter={(text) => ruleManager.setRuleFontColor(index, text)}
+                placeholder="选择字体颜色" value={color} />
         </div>
     }
 
-    public render() {
-        const index = this.props.index;
-        return <div key={index} className="ruleLine">
+    const ruleUp = () => ruleManager.switchRules("color", index, index - 1);
+    const ruleDown = () => ruleManager.switchRules("color", index, index + 1);
+    const enableRule = () => ruleManager.setEnable("color", index, !enable);
+    const deleteRule = () => ruleManager.removeRule("color", index);
+
+    return <ContextItem key={index} menuItems={[
+        { key: "up", name: "上移规则", disabled: index <= 0, callback: ruleUp },
+        { key: "down", name: "下移规则", disabled: index >= ruleManager.colorRules.length - 1, callback: ruleDown },
+        { key: "enable", name: () => enable ? "禁用规则" : "启用规则", callback: enableRule },
+        { key: "del", name: "删除规则", callback: deleteRule },
+
+    ]}>
+        <div key={index} className="ruleLine">
             <div className="fixedRuleBlock" title="是否启用该规则"> 启用
-                <input type="checkbox" checked={this.props.enable} onChange={(e) => ruleManager.setEnable("color", index, e.target.checked)} />
+                <input type="checkbox" checked={enable} onChange={enableRule} />
             </div>
-            {this.renderReg()}
-            {this.renderBackColor()}
-            {this.renderFontColor()}
+            {renderReg()} {renderBackColor()} {renderFontColor()}
             <div className="fixedRuleBlock">
-                <button className="ruleButton" onClick={() => ruleManager.switchRules("color", index, index - 1)}
-                    title="将该条规则上移一行" disabled={this.props.index <= 0}>上移</button>
-                <button className="ruleButton" onClick={() => ruleManager.switchRules("color", index, index + 1)}
-                    title="将该条规则下移一行" disabled={this.props.index >= ruleManager.colorRules.length - 1}>下移</button>
-                <button className="ruleButton" onClick={() => ruleManager.removeRule("color", index)}
-                    title="删除该条规则">删除</button>
+                <button className="ruleButton" onClick={ruleUp} title="将该条规则上移一行"
+                    disabled={index <= 0}>上移</button>
+                <button className="ruleButton" onClick={ruleDown} title="将该条规则下移一行"
+                    disabled={index >= ruleManager.colorRules.length - 1}>下移</button>
+                <button className="ruleButton" onClick={deleteRule} title="删除该条规则">删除</button>
             </div>
         </div>
-    }
+    </ContextItem>
 }

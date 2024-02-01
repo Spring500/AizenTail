@@ -181,6 +181,10 @@ body,
     color: var(--theme-color-info-text-highlight);
 }
 
+.menuDropdownButton:disabled {
+    color: var(--theme-color-info-text-darker);
+}
+
 .menuFilter::placeholder{
     color: var(--theme-color-info-text-darker);
 }
