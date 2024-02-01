@@ -39,7 +39,7 @@ const saveRuleFile = async () => {
 }
 
 export class MenuBar extends React.Component<
-    { switchRulePanelVisible: () => void },
+    { switchRulePanelVisible: () => void, rulePanelVisible: boolean },
     { autoScroll: boolean, alwaysOnTop: boolean, openedMenu: undefined | "file" | "view" }> {
     constructor(props: { switchRulePanelVisible: () => void }) {
         super(props);
@@ -87,11 +87,11 @@ export class MenuBar extends React.Component<
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
                     ]} />
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => this.switchMenu("view")}>视图(V)</button>
-                <button className='menuButton'
+                <button className={this.props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
                     onClick={this.props.switchRulePanelVisible}
                     title='开关筛选及高亮规则配置面板'>规则面板
                 </button>
-                <button className='menuButton'
+                <button className={!logManager.isDisableFilter() ? 'menuButton activatedButton' : 'menuButton'}
                     onClick={() => { logManager.setFilterDisabled(!logManager.isDisableFilter()) }}
                     title='暂时开关日志筛选功能 (ctrl+H)'>{logManager.isDisableFilter() ? '日志筛选: 关' : '日志筛选: 开'}
                 </button>

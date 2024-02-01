@@ -17,8 +17,12 @@
     --theme-color-scrollbar-thumb: #514e55;
     --theme-color-scrollbar-thumb-hover: #7d7a7f;
     --theme-color-button: #ffffff00;
+    --theme-color-button-activated: #8e8a9a43;
+    --theme-color-button-text-activated: #ffffffc6;
     --theme-color-button-hover: #ffffff10;
     --theme-color-button-close-hover: #ef3c54;
+    --theme-color-button-activated-hover: #8e8a9a93;
+    --theme-color-button-text-activated-hover: var(--theme-color-info-text-highlight);
     --theme-color-inputField: #00000050;
     --theme-font-system: 12px/1.0 "Microsoft Yahei";
     --theme-font-log: 13px/1.2 "SimSun";
@@ -242,7 +246,8 @@ body,
     min-height: 0;
     margin: 0 4px 4px 4px;
     width: auto;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .ruleTitleText{
@@ -260,6 +265,7 @@ body,
     background: var(--theme-color-button);
     color: var(--theme-color-info-text);
     width: fit-content;
+    min-width: fit-content;
     height: 100%;
     padding: 0 8px 0 8px;
     border: none;
@@ -267,11 +273,22 @@ body,
     display: inline-block;
     position: relative;
     text-align: center;
+    flex: 0 0 auto;
+}
+
+.activatedButton{
+    background: var(--theme-color-button-activated);
+    color: var(--theme-color-button-text-activated);
 }
 
 .ruleButton:hover {
     background: var(--theme-color-button-hover);
     color: var(--theme-color-info-text-highlight);
+}
+
+.activatedButton:hover{
+    background: var(--theme-color-button-activated-hover);
+    color: var(--theme-color-button-text-activated-hover);
 }
 
 .ruleButton:disabled{

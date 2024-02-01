@@ -25,7 +25,7 @@ function adjustMenuPosition(list: HTMLUListElement | null, position: { x: number
 
 
 export const ContextItem = function (props: {
-    children: React.ReactNode, key: React.Key | null | undefined,
+    children: React.ReactNode, key: React.Key | null | undefined, className?: string,
     menuItems: ItemType[]
 }) {
     const selfRef = React.useRef<HTMLDivElement>(null);
@@ -56,20 +56,17 @@ export const ContextItem = function (props: {
         if (menuVisible) adjustMenuPosition(menuRef.current, clickPos);
     }, [menuRef, menuVisible, clickPos]);
 
-    return <>
-        <div key={props.key} className="ruleLine" ref={selfRef}>
-            {props.children}
-            <Dropdown ref={menuRef} visible={menuVisible}
-                onClickOutside={() => setMenuVisible(false)}
-                items={props.menuItems.map(item => {
-                    return {
-                        ...item, callback: () => {
-                            item.callback();
-                            setMenuVisible(false);
-                        }
-                    };
-                })}
-                style={{ position: "absolute", right: 0, top: 0 }} />
-        </div>
-    </>
+    return <div key={props.key} ref={selfRef} className={props.className}> {props.children}
+        <Dropdown ref={menuRef} visible={menuVisible}
+            onClickOutside={() => setMenuVisible(false)}
+            items={props.menuItems.map(item => {
+                return {
+                    ...item, callback: () => {
+                        item.callback();
+                        setMenuVisible(false);
+                    }
+                };
+            })}
+            style={{ position: "absolute", right: 0, top: 0 }} />
+    </div>
 };

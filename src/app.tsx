@@ -21,7 +21,7 @@ class App extends React.Component<
     public render() {
         return <>
             <TitleBar />
-            <MenuBar switchRulePanelVisible={this.onSwitchRulePanelVisible} />
+            <MenuBar switchRulePanelVisible={this.onSwitchRulePanelVisible} rulePanelVisible={this.state.rulePanelVisible} />
             {
                 this.state.rulePanelVisible
                     ? <><LogContainer manager={logManager} style={{ resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }} /><RulePanel /></>
