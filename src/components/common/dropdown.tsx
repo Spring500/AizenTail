@@ -20,9 +20,12 @@ export const Dropdown = function ({ visible, items, style, onClickOutside }: {
             if (!menu || checkIsInRect(menu.getBoundingClientRect(), event.clientX, event.clientY)) return;
             onClickOutside?.(event);
         }
-        document.addEventListener('click', onClick);
-        document.addEventListener('contextmenu', onClick);
+        const timeout = setTimeout(() => {
+            document.addEventListener('click', onClick);
+            document.addEventListener('contextmenu', onClick);
+        }, 0);
         return () => {
+            clearTimeout(timeout);
             document.removeEventListener('click', onClick);
             document.removeEventListener('contextmenu', onClick);
         }
