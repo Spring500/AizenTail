@@ -70,6 +70,7 @@ export class MenuBar extends React.Component<
         return <>
             <div className='menuBar' style={{ listStyleType: "none" }}>
                 <Dropdown visible={this.state.openedMenu === "file"}
+                    onClickOutside={closeMenu}
                     items={
                         [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
                         { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
@@ -80,6 +81,7 @@ export class MenuBar extends React.Component<
                     } style={{ left: 0 }} />
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => this.switchMenu("file")}>文件(F)</button>
                 <Dropdown visible={this.state.openedMenu === "view"}
+                    onClickOutside={closeMenu}
                     items={[
                         { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
