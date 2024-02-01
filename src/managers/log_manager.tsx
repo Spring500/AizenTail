@@ -81,11 +81,14 @@ class LogManager {
         return text;
     }
 
-    public getLogColor(log: string): { background?: string, color?: string } {
+    public getLogColor(log: string): { backgroundColor?: string, color?: string } {
         for (const rule of this.rules.colorRules) {
             if (!rule.enable) continue;
             const reg = ruleManager.getColorRegExp(rule.index);
-            if (reg?.test(log)) return rule;
+            if (reg?.test(log)) return {
+                backgroundColor: rule.background,
+                color: rule.color,
+            };
         };
         return {};
     }

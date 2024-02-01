@@ -2,7 +2,7 @@ import React from 'react';
 import { FixedSizeList } from "react-window";
 import { ILogManager } from "../managers/log_manager";
 
-const HIGHLIGHT_STYLE = { background: "gray", color: "var(--theme-color-info-text-highlight)" };
+const HIGHLIGHT_STYLE = { backgroundColor: "gray", color: "var(--theme-color-info-text-highlight)" };
 const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
 const EXCLUDED_OPACITY = 0.3;
 
@@ -12,9 +12,9 @@ const splitLog = function (text: string, keywords: string[]) {
         const plainedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         splitedText = splitedText.replace(new RegExp(`(${plainedKeyword})`, "gi"), "\x01\x02$1\x01");
     }
-    return splitedText.split("\x01").map((text) => {
-        if (text[0] !== "\x02") return <>{text}</>
-        return <span className='logSearchHit'>{text.substring(1)}</span>
+    return splitedText.split("\x01").map((text, index) => {
+        if (text[0] !== "\x02") return <span key={index}>{text}</span >
+        return <span className='logSearchHit' key={index}>{text.substring(1)}</span>
     });
 }
 
@@ -25,13 +25,12 @@ const LogRow = function ({ index, style, highlightLine, manager }: {
     const line = manager.indexToLine(index);
     const isExculed = manager.isDisableFilter() && !manager.lineToIndexMap.has(index);
     const isHighlight = line >= 0 && line === highlightLine;
-    const { background, color } = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
+    const lineStyle = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
     const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
 
     return <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
         <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
-        <div className="logText" style={{ backgroundColor: background, color, whiteSpace: "pre" }}>{
-            splitLog(logText, manager.inputFilters)}<br /></div>
+        <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
     </div >
 }
 
