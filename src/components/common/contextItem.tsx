@@ -6,21 +6,31 @@ function isInRect(rect: DOMRect | undefined, x: number, y: number) {
     return x >= rect.left && x <= rect.left + rect.width && y >= rect.top && y <= rect.top + rect.height;
 }
 
-function adjustMenuPosition(list: HTMLUListElement | null, position: { x: number, y: number }) {
-    if (!list) return;
-    const style = list.style;
-    const rect = list.getBoundingClientRect();
+function adjustMenuPosition(menu: HTMLUListElement | null, position: { x: number, y: number }) {
+    if (!menu) return;
+    const style = menu.style;
+    const rect = menu.getBoundingClientRect();
 
-    style.left = `${position.x}px`;
-    style.top = `${position.y}px`;
-    style.position = "fixed";
-
-    const right = rect.left + rect.width;
-    const bottom = rect.top + rect.height;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    if (right > windowWidth) style.left = `${windowWidth - rect.width}px`;
-    if (bottom > windowHeight) style.top = `${windowHeight - rect.height}px`;
+    // 检查菜单是否超出屏幕，如果未超出则生成在鼠标右下
+    // 如果超出底边但未超出右边界，则生成在鼠标右上
+    // 如果超出右边界但未超出底边，则生成在鼠标左下
+    // 如果超出右边界且超出底边，则生成在鼠标左上
+    const winWidth = window.innerWidth;
+    const winHeight = window.innerHeight;
+    const menuWidth = rect.width;
+    const menuHeight = rect.height;
+    const x = position.x;
+    const y = position.y;
+    if (x + menuWidth <= winWidth) {
+        style.left = x + "px";
+    } else {
+        style.left = (x - menuWidth) + "px";
+    }
+    if (y + menuHeight <= winHeight) {
+        style.top = y + "px";
+    } else {
+        style.top = (y - menuHeight) + "px";
+    }
 }
 
 
@@ -58,13 +68,13 @@ export const ContextItem = function (props: {
     }, [selfRef]);
 
     React.useEffect(() => {
-        if (menuVisible) adjustMenuPosition(menuRef.current, clickPos);
+        if (menuVisible) adjustMenuPosition(menuRef.current, { x: clickPos.x + 5, y: clickPos.y + 5 });
     }, [menuRef, menuVisible, clickPos]);
 
-    return <div ref={selfRef} className={props.className}> {props.children}
-        <Dropdown ref={menuRef} visible={menuVisible}
-            onClickOutside={() => setMenuVisible(false)}
-            items={props.menuItems.map(item => {
+    return <div ref={selfRef} className={props.className}>
+        {props.children}
+        <Dropdown ref={menuRef} onClickOutside={() => setMenuVisible(false)}
+            visible={menuVisible} items={props.menuItems.map(item => {
                 return {
                     ...item, callback: () => {
                         item.callback();
@@ -72,6 +82,6 @@ export const ContextItem = function (props: {
                     }
                 };
             })}
-            style={{ position: "absolute", right: 0, top: 0 }} />
+            style={{ position: "fixed", left: 0, top: 0 }} />
     </div>
 };

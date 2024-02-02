@@ -154,7 +154,6 @@ body,
     -webkit-app-region: no-drag;
     background: var(--theme-color-background);
     width: 200px;
-    top: 100%;
     color: var(--theme-color-info-text);
     padding: 5px;
     border: 1px solid var(--theme-color-info-text-darker);

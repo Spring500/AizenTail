@@ -15,9 +15,10 @@ export const Dropdown = React.forwardRef(function ({ visible, items, style, onCl
     React.useEffect(() => {
         if (!visible || !dropdownRef.current) return;
         const onClick = (event: MouseEvent) => {
-            const menu = dropdownRef.current;
+            const menuRect = dropdownRef.current?.getBoundingClientRect();
             // 先检查点击位置是否在菜单内，如果在则不隐藏菜单
-            if (!menu || isInRect(menu.getBoundingClientRect(), event.clientX, event.clientY)) return;
+            if (!menuRect || isInRect(menuRect, event.clientX, event.clientY))
+                return;
             onClickOutside?.(event);
         }
         const timeout = setTimeout(() => {
@@ -31,20 +32,18 @@ export const Dropdown = React.forwardRef(function ({ visible, items, style, onCl
         }
     }, [dropdownRef, visible]);
     React.useImperativeHandle(ref, () => dropdownRef.current!);
-    const renderItem = (item: ItemType) => {
-        if (item.disabled !== undefined && item.disabled)
-            return <button className='menuDropdownButton' disabled={true}>
-                {typeof item.name === 'string' ? item.name : item.name()} </button>
-        else
-            return <button className='menuDropdownButton' onClick={item.callback}>
-                {typeof item.name === 'string' ? item.name : item.name()} </button>
+    const renderItem = (item: ItemType, index: number) => {
+        const disabled = !!item.disabled;
+        return <button className='menuDropdownButton' key={index}
+            disabled={disabled} onClick={item.callback}>
+            {typeof item.name === 'string' ? item.name : item.name()}
+        </button>
     }
 
-    return <div style={{ position: "relative", width: "auto", height: "100%" }}>
-        <ul className='menuDropdown'
-            ref={dropdownRef}
-            style={{ ...style, display: visible ? 'block' : 'none', position: "absolute", listStyleType: "none" }}>
-            {items.map(item => <li key={item.key}>{renderItem(item)}</li>)}
-        </ul>
-    </div>
+    return <ul className='menuDropdown'
+        ref={dropdownRef}
+        style={{ ...style, display: visible ? style?.display : 'none', listStyleType: "none" }}>
+        {items.map((item, index) => renderItem(item, index))}
+    </ul>
+
 });

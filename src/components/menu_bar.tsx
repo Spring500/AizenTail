@@ -41,7 +41,7 @@ const saveRuleFile = async () => {
 export class MenuBar extends React.Component<
     { switchRulePanelVisible: () => void, rulePanelVisible: boolean },
     { autoScroll: boolean, alwaysOnTop: boolean, openedMenu: undefined | "file" | "view" }> {
-    constructor(props: { switchRulePanelVisible: () => void }) {
+    constructor(props: { switchRulePanelVisible: () => void, rulePanelVisible: boolean }) {
         super(props);
         this.state = { autoScroll: true, alwaysOnTop: false, openedMenu: undefined };
         logManager.onSetAutoScroll = (autoScroll) => this.setState({ autoScroll });
@@ -69,23 +69,29 @@ export class MenuBar extends React.Component<
         const closeMenu = () => this.setState({ openedMenu: undefined });
         return <>
             <div className='menuBar' style={{ listStyleType: "none" }}>
-                <Dropdown visible={this.state.openedMenu === "file"}
-                    onClickOutside={closeMenu}
-                    items={
-                        [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
-                        { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
-                        { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
-                        { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
-                        { key: 'exit', name: '退出', callback: () => window.close() }]
+                <div style={{ position: "relative", height: "100%" }}>
+                    <Dropdown visible={this.state.openedMenu === "file"}
+                        onClickOutside={closeMenu}
+                        items={
+                            [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
+                            { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
+                            { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
+                            { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
+                            { key: 'exit', name: '退出', callback: () => window.close() }]
 
-                    } style={{ left: 0 }} />
+                        } style={{ position: "absolute", top: "100%", display: "block" }} />
+                </div>
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => this.switchMenu("file")}>文件(F)</button>
-                <Dropdown visible={this.state.openedMenu === "view"}
-                    onClickOutside={closeMenu}
-                    items={[
-                        { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
-                        { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
-                    ]} />
+                <div style={{ position: "relative", height: "100%" }}>
+                    <Dropdown visible={this.state.openedMenu === "view"}
+                        onClickOutside={closeMenu}
+                        items={[
+                            { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
+                            { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
+                        ]}
+                        style={{ position: "absolute", top: "100%", display: "block" }}
+                    />
+                </div>
                 <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => this.switchMenu("view")}>视图(V)</button>
                 <button className={this.props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
                     onClick={this.props.switchRulePanelVisible}
