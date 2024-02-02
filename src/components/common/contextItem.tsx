@@ -25,7 +25,7 @@ function adjustMenuPosition(list: HTMLUListElement | null, position: { x: number
 
 
 export const ContextItem = function (props: {
-    children: React.ReactNode, key: React.Key | null | undefined, className?: string,
+    children: React.ReactNode, className?: string,
     menuItems: ItemType[]
 }) {
     const selfRef = React.useRef<HTMLDivElement>(null);
@@ -37,11 +37,16 @@ export const ContextItem = function (props: {
         if (!selfRef.current) return;
         // 当右键点击该行时，显示右键菜单
         const onContextmenu = (event: MouseEvent) => {
+            const holder = selfRef.current;
+            if (!holder || !(event.target instanceof HTMLElement)) return;
+            // 检查事件点击对象是否是该行的子对象
+            if (!(event.target instanceof HTMLElement) ||
+                !(holder.contains(event.target as Node)))
+                return;
             // 检查事件点击对象是否在该行内
             const x = event.clientX;
             const y = event.clientY;
-            if (!isInRect(selfRef.current?.getBoundingClientRect(), x, y))
-                return;
+            if (!isInRect(holder.getBoundingClientRect(), x, y)) return;
             setClickPos({ x, y });
             setMenuVisible(true);
         }
@@ -56,7 +61,7 @@ export const ContextItem = function (props: {
         if (menuVisible) adjustMenuPosition(menuRef.current, clickPos);
     }, [menuRef, menuVisible, clickPos]);
 
-    return <div key={props.key} ref={selfRef} className={props.className}> {props.children}
+    return <div ref={selfRef} className={props.className}> {props.children}
         <Dropdown ref={menuRef} visible={menuVisible}
             onClickOutside={() => setMenuVisible(false)}
             items={props.menuItems.map(item => {
