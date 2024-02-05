@@ -4,7 +4,6 @@ import { ILogManager } from "../managers/log_manager";
 
 const HIGHLIGHT_STYLE = { backgroundColor: "gray", color: "var(--theme-color-info-text-highlight)" };
 const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
-const EXCLUDED_OPACITY = 0.3;
 
 const splitLog = function (text: string, keywords: string[]) {
     let splitedText = text;
@@ -28,7 +27,7 @@ const LogRow = function ({ index, style, highlightLine, manager }: {
     const lineStyle = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
     const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
 
-    return <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
+    return <div className="log" style={style} onClick={onClick} >
         <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
         <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
     </div >

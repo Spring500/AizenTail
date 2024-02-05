@@ -1,33 +1,31 @@
 import * as React from 'react';
 
-export class TextField extends React.Component<{
+export const TextField = React.forwardRef(function ({ className, value, placeholder, style, title, list, onChange, onEnter }: {
     className?: string, value: string | undefined,
     placeholder?: string, style?: React.CSSProperties,
     title?: string, list?: string | undefined,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
-}> {
-    private onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        this.props.onChange(e.currentTarget.value);
+}, ref: React.Ref<HTMLInputElement> | undefined) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    React.useImperativeHandle(ref, () => inputRef.current!);
+    const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(e.currentTarget.value);
     }
-
-    private onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const onKeyUpHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
         e.key === "Enter" && e.currentTarget.blur();
     }
-
-    private onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        this.props.onEnter && this.props.onEnter(e.currentTarget.value);
+    const onBlurHandler = (e: React.FocusEvent<HTMLInputElement>) => {
+        onEnter && onEnter(e.currentTarget.value);
     }
-
-    public render() {
-        return <input className={this.props.className} type='text'
-            title={this.props.title}
-            value={this.props.value}
-            placeholder={this.props.placeholder}
-            style={this.props.style}
-            list={this.props.list}
-            onChange={this.onChange}
-            onKeyUp={this.onKeyUp}
-            onBlur={this.onBlur}
-        />;
-    }
-}
+    return <input className={className} type='text'
+        title={title}
+        value={value}
+        placeholder={placeholder}
+        style={style}
+        list={list}
+        onChange={onChangeHandler}
+        onKeyUp={onKeyUpHandler}
+        onBlur={onBlurHandler}
+        ref={inputRef}
+    />;
+});

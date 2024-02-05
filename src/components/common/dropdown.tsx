@@ -40,9 +40,15 @@ export const Dropdown = React.forwardRef(function ({ visible, items, style, onCl
         </button>
     }
 
+    if (!visible) return null;
     return <ul className='menuDropdown'
         ref={dropdownRef}
-        style={{ ...style, display: visible ? style?.display : 'none', listStyleType: "none" }}>
+        style={{
+            ...style,
+            display: visible ? 'flex' : 'none',
+            flexDirection: "column",
+            listStyleType: "none",
+        }}>
         {items.map((item, index) => renderItem(item, index))}
     </ul>
 

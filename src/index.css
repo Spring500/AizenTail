@@ -323,10 +323,16 @@ body,
     text-wrap: nowrap;
 }
 
+.ruleInputWarpper{
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0px;
+}
+
 .ruleInput{
     -webkit-app-region: no-drag;
     height: 18px;
-    min-width: 1px;
+    min-width: 0px;
     flex: 1 1 auto;
     padding: 0 8px 0 8px;
     margin-left: 4px;

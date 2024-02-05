@@ -34,7 +34,7 @@ function adjustMenuPosition(menu: HTMLUListElement | null, position: { x: number
 }
 
 
-export const ContextItem = function (props: {
+export const ContextWarpper = function (props: {
     children: React.ReactNode, className?: string,
     menuItems: ItemType[]
 }) {
@@ -43,45 +43,49 @@ export const ContextItem = function (props: {
     const [clickPos, setClickPos] = React.useState({ x: 0, y: 0 });
     const [menuVisible, setMenuVisible] = React.useState(false);
 
-    React.useEffect(() => {
-        if (!selfRef.current) return;
-        // 当右键点击该行时，显示右键菜单
-        const onContextmenu = (event: MouseEvent) => {
-            const holder = selfRef.current;
-            if (!holder || !(event.target instanceof HTMLElement)) return;
-            // 检查事件点击对象是否是该行的子对象
-            if (!(event.target instanceof HTMLElement) ||
-                !(holder.contains(event.target as Node)))
-                return;
-            // 检查事件点击对象是否在该行内
-            const x = event.clientX;
-            const y = event.clientY;
-            if (!isInRect(holder.getBoundingClientRect(), x, y)) return;
-            setClickPos({ x, y });
-            setMenuVisible(true);
-        }
-        const timeout = setTimeout(() => document.addEventListener('contextmenu', onContextmenu), 0);
-        return () => {
-            clearTimeout(timeout);
-            document.removeEventListener('contextmenu', onContextmenu);
-        }
-    }, [selfRef]);
+    // 当右键点击该行时，显示右键菜单
+    const onContextmenu: React.MouseEventHandler<HTMLDivElement> = (event) => {
+        const holder = selfRef.current;
+        if (!holder || !(event.target instanceof HTMLElement)) return;
+        // 检查事件点击对象是否是该行的子对象
+        if (!(event.target instanceof HTMLElement) ||
+            !(holder.contains(event.target as Node)))
+            return;
+        // 检查事件点击对象是否在该行内
+        const x = event.clientX;
+        const y = event.clientY;
+
+        setClickPos({ x, y });
+        event.stopPropagation();
+        setMenuVisible(true);
+        document.dispatchEvent(new Event('menuOpened'));
+    }
 
     React.useEffect(() => {
-        if (menuVisible) adjustMenuPosition(menuRef.current, { x: clickPos.x + 5, y: clickPos.y + 5 });
+        if (!menuVisible) return;
+        const onOtherMenuOpened = () => {
+            setMenuVisible(false);
+        }
+        document.addEventListener('menuOpened', onOtherMenuOpened, { once: true });
+        adjustMenuPosition(menuRef.current, { x: clickPos.x + 5, y: clickPos.y + 5 });
+
+        return () => document.removeEventListener('menuOpened', onOtherMenuOpened);
     }, [menuRef, menuVisible, clickPos]);
 
-    return <div ref={selfRef} className={props.className}>
-        {props.children}
-        <Dropdown ref={menuRef} onClickOutside={() => setMenuVisible(false)}
-            visible={menuVisible} items={props.menuItems.map(item => {
+    const renderDropdown = () => {
+        if (!menuVisible) return;
+        return <Dropdown ref={menuRef} visible={true} onClickOutside={() => setMenuVisible(false)}
+            items={props.menuItems.map(item => {
                 return {
-                    ...item, callback: () => {
-                        item.callback();
-                        setMenuVisible(false);
-                    }
+                    ...item,
+                    callback: () => { item.callback(); setMenuVisible(false); }
                 };
             })}
             style={{ position: "fixed", left: 0, top: 0 }} />
-    </div>
+    }
+
+    return <span ref={selfRef} className={props.className} onContextMenu={onContextmenu}>
+        {props.children}
+        {renderDropdown()}
+    </span>
 };

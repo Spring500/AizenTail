@@ -1,9 +1,7 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
-import { TextField } from "../../common/text_field";
-import { ContextItem } from "../../common/contextItem";
-
-const EXCLUDED_OPACITY = 0.3;
+import { ContextWarpper } from "../../common/context_wapper";
+import { RuleTextField } from "./rule_text_wapper";
 
 export const RuleLine_Filter = function ({ index, enable, reg, regHasError, exclude, onRegChange }: {
     index: number, enable: boolean, reg: string,
@@ -11,10 +9,9 @@ export const RuleLine_Filter = function ({ index, enable, reg, regHasError, excl
     onRegChange: (index: number, reg: string) => void,
 }) {
     const renderReg = () => {
-        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目"
-            style={{ opacity: enable ? undefined : EXCLUDED_OPACITY }}>
+        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
             <span style={{ color: regHasError ? "red" : undefined }}>{exclude ? "排除" : "包含"}匹配串</span>
-            <TextField className="ruleInput" value={reg} placeholder="输入匹配串"
+            <RuleTextField value={reg} placeholder="输入匹配串"
                 style={{ border: regHasError ? "1px solid red" : "1px solid #ffffff00" }}
                 onChange={(value) => onRegChange(index, value)}
                 onEnter={(value) => ruleManager.setReg("filter", index, value)} />
@@ -32,7 +29,7 @@ export const RuleLine_Filter = function ({ index, enable, reg, regHasError, excl
         console.log(ruleManager.filterRules[index], ruleManager.filterRules[index].exclude, exclude);
     }
 
-    return <ContextItem key={index} menuItems={[
+    return <ContextWarpper key={index} menuItems={[
         { key: "up", name: "上移规则", disabled: index <= 0, callback: ruleUp },
         { key: "down", name: "下移规则", disabled: index >= ruleManager.colorRules.length - 1, callback: ruleDown },
         { key: "enable", name: () => enable ? "禁用规则" : "启用规则", callback: enableRule },
@@ -55,5 +52,5 @@ export const RuleLine_Filter = function ({ index, enable, reg, regHasError, excl
                 <button className="ruleButton" onClick={deleteRule} title="删除该条规则">删除</button>
             </div>
         </div>
-    </ContextItem >
+    </ContextWarpper >
 }
