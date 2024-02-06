@@ -3,22 +3,6 @@ import { ruleManager } from "../../managers/rule_manager";
 import { checkRegExp } from "../../utils";
 import { RuleLine_Color, RuleLine_Replace, RuleLine_Filter } from "./rule_line";
 
-const ColorList = function () {
-    return <datalist id="colorList">
-        <option value="white" />
-        <option value="red" />
-        <option value="yellow" />
-        <option value="gray" />
-        <option value="pink" />
-        <option value="green" />
-        <option value="blue" />
-        <option value="purple" />
-        <option value="orange" />
-        <option value="brown" />
-        <option value="#ffaaff" />
-    </datalist>
-}
-
 export const RulePanel = function () {
     const ruleContainerRef = React.createRef<HTMLDivElement>();
     const [colorRules, setColorRules] = React.useState(ruleManager.colorRules);
@@ -74,7 +58,7 @@ export const RulePanel = function () {
             }
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
-            <ColorList /></>
+        </>
     }
 
     const renderReplaceRuleList = () => {

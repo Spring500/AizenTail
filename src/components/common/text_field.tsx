@@ -18,14 +18,9 @@ export const TextField = React.forwardRef(function ({ className, value, placehol
         onEnter && onEnter(e.currentTarget.value);
     }
     return <input className={className} type='text'
-        title={title}
-        value={value}
-        placeholder={placeholder}
-        style={style}
-        list={list}
-        onChange={onChangeHandler}
-        onKeyUp={onKeyUpHandler}
+        title={title} value={value} placeholder={placeholder}
+        style={style} list={list} ref={inputRef}
+        onChange={onChangeHandler} onKeyUp={onKeyUpHandler}
         onBlur={onBlurHandler}
-        ref={inputRef}
     />;
 });

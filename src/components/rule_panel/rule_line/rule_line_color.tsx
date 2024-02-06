@@ -1,7 +1,7 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
 import { ContextWarpper } from "../../common/context_wapper";
-import { RuleTextField } from "./rule_text_wapper";
+import { ColorRuleTextField, RuleTextField } from "./rule_text_wapper";
 
 export const RuleLine_Color = function ({ index, enable, reg, regHasError, background, color, onFontColorChange, onBackColorChange, onRegChange }: {
     index: number, enable: boolean, reg: string, regHasError: boolean,
@@ -27,7 +27,7 @@ export const RuleLine_Color = function ({ index, enable, reg, regHasError, backg
 
     const renderBackColor = () => {
         return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串"> 背景色
-            <RuleTextField list="colorList"
+            <ColorRuleTextField
                 onChange={(text) => onBackColorChange(index, text)}
                 onEnter={(text) => ruleManager.setRuleBackgroundColor(index, text)}
                 placeholder="选择背景颜色" value={background} />
@@ -36,7 +36,7 @@ export const RuleLine_Color = function ({ index, enable, reg, regHasError, backg
 
     const renderFontColor = () => {
         return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串"> 字体色
-            <RuleTextField list="colorList"
+            <ColorRuleTextField
                 onChange={(text) => onFontColorChange(index, text)}
                 onEnter={(text) => ruleManager.setRuleFontColor(index, text)}
                 placeholder="选择字体颜色" value={color} />

@@ -10,46 +10,60 @@ export const Dropdown = React.forwardRef(function ({ visible, items, style, onCl
     visible: boolean, items: ItemType[], style?: React.CSSProperties,
     onClickOutside?: (event: MouseEvent) => void,
 }, ref: React.Ref<HTMLUListElement> | undefined) {
+    return <DropdownWarpper visible={visible} style={style} onClickOutside={onClickOutside} ref={ref}>
+        {items.map((item, index) => {
+            const disabled = !!item.disabled;
+            return <button className='menuDropdownButton' key={index}
+                disabled={disabled} onClick={item.callback}>
+                {typeof item.name === 'string' ? item.name : item.name()}
+            </button>
+        })}
+    </DropdownWarpper>;
+});
+
+export const DropdownWarpper = React.forwardRef(function (props: {
+    visible: boolean, style?: React.CSSProperties,
+    children: React.ReactNode, className?: string,
+    onClickOutside?: (event: MouseEvent) => void,
+    onOtherDropdownOpen?: () => void,
+}, ref: React.Ref<HTMLUListElement> | undefined) {
     const dropdownRef = React.useRef<HTMLUListElement>(null);
     // 当点击其它位置时，隐藏菜单
     React.useEffect(() => {
-        if (!visible || !dropdownRef.current) return;
+        if (!props.visible || !dropdownRef.current) return;
+        document.dispatchEvent(new Event('openDropdown'));
         const onClick = (event: MouseEvent) => {
             const menuRect = dropdownRef.current?.getBoundingClientRect();
             // 先检查点击位置是否在菜单内，如果在则不隐藏菜单
             if (!menuRect || isInRect(menuRect, event.clientX, event.clientY))
                 return;
-            onClickOutside?.(event);
+            props.onClickOutside?.(event);
+        }
+        const onOtherDropdownOpen = () => {
+            props.onOtherDropdownOpen?.();
         }
         const timeout = setTimeout(() => {
             document.addEventListener('click', onClick);
             document.addEventListener('contextmenu', onClick);
+            document.addEventListener('openDropdown', onOtherDropdownOpen);
         }, 0);
         return () => {
             clearTimeout(timeout);
             document.removeEventListener('click', onClick);
             document.removeEventListener('contextmenu', onClick);
+            document.removeEventListener('openDropdown', onOtherDropdownOpen);
         }
-    }, [dropdownRef, visible]);
+    }, [dropdownRef, props.visible]);
     React.useImperativeHandle(ref, () => dropdownRef.current!);
-    const renderItem = (item: ItemType, index: number) => {
-        const disabled = !!item.disabled;
-        return <button className='menuDropdownButton' key={index}
-            disabled={disabled} onClick={item.callback}>
-            {typeof item.name === 'string' ? item.name : item.name()}
-        </button>
-    }
 
-    if (!visible) return null;
-    return <ul className='menuDropdown'
+    return <>{props.visible && <ul className='menuDropdown'
         ref={dropdownRef}
         style={{
-            ...style,
-            display: visible ? 'flex' : 'none',
+            ...props.style,
+            display: 'flex',
             flexDirection: "column",
             listStyleType: "none",
         }}>
-        {items.map((item, index) => renderItem(item, index))}
-    </ul>
-
+        {props.children}
+    </ul>}</>
 });
