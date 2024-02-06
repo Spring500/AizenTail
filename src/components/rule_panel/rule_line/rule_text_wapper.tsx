@@ -26,8 +26,9 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
     value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
 }, ref: React.Ref<HTMLInputElement> | undefined) {
-    const [isColorListVisible, setIsColorListVisible] = React.useState(false);
+    const [isColorMenuVisible, setIsColorMenuVisible] = React.useState(false);
 
+    const colorMenuRef = React.useRef<HTMLUListElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
 
@@ -39,28 +40,26 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
     }
 
     const closeColorList = () => {
-        setIsColorListVisible(false);
+        setIsColorMenuVisible(false);
     }
 
     const renderColorList = () => {
-        return <div style={{ position: 'relative' }}>
-            <DropdownWarpper visible={isColorListVisible}
-                style={{ position: 'absolute', top: '100%', height: "120px" }}
-                onClickOutside={closeColorList}
-                onOtherDropdownOpen={closeColorList}>
-                <div style={{ padding: '0px 4px', overflowY: 'scroll', }}>
-                    {colorList.map((color, index) => {
-                        if (color === "null") color = '';
-                        return <button key={index}
-                            className='menuDropdownButton colorButton'
-                            onClick={() => onSelectColor(color)}>
-                            <div className="colorBox" style={{ backgroundColor: color === "" ? undefined : color }} />
-                            {color === "" ? "默认" : color}
-                        </button>
-                    })}
-                </div>
-            </DropdownWarpper>;
-        </div>
+        return <DropdownWarpper visible={isColorMenuVisible}
+            ref={colorMenuRef}
+            style={{ position: 'fixed', left: 0, top: 0 }}
+            onClickOutside={closeColorList}
+            onOtherDropdownOpen={closeColorList}>
+            <div style={{ padding: '0px 4px', overflowY: 'auto', }}>
+                {colorList.map((color, index) => {
+                    if (color === "null") color = '';
+                    return <button key={index} onClick={() => onSelectColor(color)}
+                        className='menuDropdownButton colorButton'>
+                        <div className="colorBox" style={{ backgroundColor: color === "" ? undefined : color }} />
+                        {color === "" ? "默认" : color}
+                    </button>
+                })}
+            </div>
+        </DropdownWarpper>;
     }
 
     React.useEffect(() => {
@@ -68,13 +67,30 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
         const input = inputRef.current;
         const onContextMenu = (event: MouseEvent) => {
             event.preventDefault();
-            setIsColorListVisible(!isColorListVisible);
+            setIsColorMenuVisible(!isColorMenuVisible);
             console.log("点击")
         }
         input.addEventListener('click', onContextMenu);
     }, [inputRef]);
 
-    return <ContextWarpper className='ruleInputWarpper' menuItems={[
+    React.useEffect(() => {
+        // 调整菜单位置
+        if (!isColorMenuVisible) return;
+        const input = inputRef.current;
+        const menu = colorMenuRef.current;
+        if (!input || !menu) return;
+        const rect = input.getBoundingClientRect();
+        menu.style.left = rect.left + 'px';
+        menu.style.bottom = (window.innerHeight - rect.top) + 'px';
+        menu.style.top = 'auto';
+        const menuRect = menu.getBoundingClientRect();
+        // 如果高度超过屏幕高度，bottom不变，调整top以压低菜单
+        if (menuRect.top < 0) {
+            menu.style.top = '0px';
+        }
+    }, [colorMenuRef, isColorMenuVisible]);
+
+    return <ContextWarpper className='ruleInputWarpper colorRuleInputWarpper' menuItems={[
         { key: "selectAll", name: "全选", callback: () => document.execCommand("selectAll") },
         { key: "copy", name: "复制", callback: () => document.execCommand("copy") },
         { key: "cut", name: "剪切", callback: () => document.execCommand("cut") },

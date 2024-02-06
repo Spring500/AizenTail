@@ -62,7 +62,6 @@ body,
     height: 28px;
     justify-content: flex-end;
     flex: 0 0 auto;
-    z-index: 1000;
 }
 
 .titleBarText{
@@ -332,6 +331,10 @@ body,
     margin-right: 6px;
     min-width: 1px;
     text-wrap: nowrap;
+}
+
+.colorRuleBlock{
+    max-width: 150px;
 }
 
 .ruleInputWarpper{

@@ -26,20 +26,24 @@ export const RuleLine_Color = function ({ index, enable, reg, regHasError, backg
     }
 
     const renderBackColor = () => {
-        return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串"> 背景色
+        return <div className="ruleBlock colorRuleBlock"
+            title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串">
+            背景色
             <ColorRuleTextField
                 onChange={(text) => onBackColorChange(index, text)}
                 onEnter={(text) => ruleManager.setRuleBackgroundColor(index, text)}
-                placeholder="选择背景颜色" value={background} />
+                placeholder="选择背景色" value={background} />
         </div>
     }
 
     const renderFontColor = () => {
-        return <div className="ruleBlock" title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串"> 字体色
+        return <div className="ruleBlock colorRuleBlock"
+            title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串">
+            字体色
             <ColorRuleTextField
                 onChange={(text) => onFontColorChange(index, text)}
                 onEnter={(text) => ruleManager.setRuleFontColor(index, text)}
-                placeholder="选择字体颜色" value={color} />
+                placeholder="选择字体色" value={color} />
         </div>
     }
 
