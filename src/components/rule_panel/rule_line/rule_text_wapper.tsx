@@ -8,6 +8,7 @@ export const RuleTextField = React.forwardRef(function ({ value, placeholder, st
     onChange: (value: string) => void, onEnter?: (value: string) => void,
 }, ref: React.Ref<HTMLInputElement> | undefined) {
     return <ContextWarpper className='ruleInputWarpper' menuItems={[
+        { key: "selectAll", name: "全选", callback: () => document.execCommand("selectAll") },
         { key: "copy", name: "复制", callback: () => document.execCommand("copy") },
         { key: "cut", name: "剪切", callback: () => document.execCommand("cut") },
         { key: "paste", name: "粘贴", callback: () => document.execCommand("paste") },

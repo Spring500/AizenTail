@@ -5,6 +5,8 @@
 
 :root {
     --theme-color-background: #2e2c33;
+    --theme-color-mask: #2e2c33aa;
+    --theme-color-mask-text: #ffffff;
     --theme-color-content: #3c3a40;
     --theme-color-info-text-darker: #505050;
     --theme-color-info-text: #707070;
@@ -60,6 +62,7 @@ body,
     height: 28px;
     justify-content: flex-end;
     flex: 0 0 auto;
+    z-index: 1000;
 }
 
 .titleBarText{
@@ -204,6 +207,14 @@ body,
     min-height: 40px;
     width: auto;
     overflow: hidden;
+}
+
+.logContainerMask{
+    background: var(--theme-color-mask);
+    color: var(--theme-color-mask-text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .log {
