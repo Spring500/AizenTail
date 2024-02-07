@@ -1,18 +1,17 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
 import { ContextWarpper } from "../../common/context_wapper";
-import { RuleTextField } from "./rule_text_wapper";
+import { EditorableTextField } from "../../common/text_field";
+import { RegexTextField } from "./rule_text_wapper";
 
-export const RuleLine_Filter = function ({ index, enable, reg, regHasError, exclude, onRegChange }: {
-    index: number, enable: boolean, reg: string,
-    regHasError: boolean, exclude: boolean,
+export const RuleLine_Filter = function ({ index, enable, reg, exclude, onRegChange }: {
+    index: number, enable: boolean, reg: string, exclude: boolean,
     onRegChange: (index: number, reg: string) => void,
 }) {
     const renderReg = () => {
         return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
-            <span style={{ color: regHasError ? "red" : undefined }}>{exclude ? "排除" : "包含"}匹配串</span>
-            <RuleTextField value={reg} placeholder="输入匹配串"
-                style={{ border: regHasError ? "1px solid red" : "1px solid #ffffff00" }}
+            <RegexTextField fieldName={`${exclude ? "排除" : "包含"}匹配串`}
+                value={reg} placeholder="输入匹配串"
                 onChange={(value) => onRegChange(index, value)}
                 onEnter={(value) => ruleManager.setReg("filter", index, value)} />
         </div>

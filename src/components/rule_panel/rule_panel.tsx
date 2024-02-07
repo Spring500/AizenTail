@@ -1,6 +1,5 @@
 import React from "react";
 import { ruleManager } from "../../managers/rule_manager";
-import { checkRegExp } from "../../utils";
 import { RuleLine_Color, RuleLine_Replace, RuleLine_Filter } from "./rule_line";
 
 export const RulePanel = function () {
@@ -52,7 +51,7 @@ export const RulePanel = function () {
                     onRegChange={onRegChange}
                     onBackColorChange={onBackColorChange}
                     onFontColorChange={onFontColorChange}
-                    enable={rule.enable ?? false} reg={rule.reg ?? ""} regHasError={!checkRegExp(rule.reg)}
+                    enable={rule.enable ?? false} reg={rule.reg ?? ""}
                     background={rule.background} color={rule.color}
                 />
             }
@@ -71,8 +70,9 @@ export const RulePanel = function () {
         const onAddRule = () => { ruleManager.addRule("replace"); }
         return <><div className="ruleTitleText">替换规则</div>
             {replaceRules.map(rule =>
-                <RuleLine_Replace key={rule.index} index={rule.index} onRegChange={onRegChange} onReplaceChange={onReplaceChange}
-                    enable={rule.enable ?? false} reg={rule.reg} regHasError={!checkRegExp(rule.reg)} replace={rule.replace}
+                <RuleLine_Replace key={rule.index} index={rule.index}
+                    onRegChange={onRegChange} onReplaceChange={onReplaceChange}
+                    enable={rule.enable ?? false} reg={rule.reg} replace={rule.replace}
                 />
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
@@ -86,8 +86,9 @@ export const RulePanel = function () {
         const onAddRule = () => { ruleManager.addRule("filter"); }
         return <><div className="ruleTitleText">过滤规则</div>
             {filterRules.map(rule =>
-                <RuleLine_Filter key={rule.index} index={rule.index} onRegChange={onRegChange} exclude={rule.exclude ?? false}
-                    enable={rule.enable ?? false} reg={rule.reg} regHasError={!checkRegExp(rule.reg)}
+                <RuleLine_Filter key={rule.index} index={rule.index}
+                    onRegChange={onRegChange} exclude={rule.exclude ?? false}
+                    enable={rule.enable ?? false} reg={rule.reg}
                 />
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>

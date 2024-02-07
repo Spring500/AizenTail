@@ -325,11 +325,21 @@ body,
     margin-left: 6px;
     margin-right: 6px;
     min-width: 1px;
+    height: 100%;
     text-wrap: nowrap;
 }
 
 .colorRuleBlock{
     max-width: 130px;
+}
+
+.fieldHint{
+    background: var(--theme-color-background);
+    padding: 4px;
+    margin: 3px;
+    border: 1px solid var(--theme-color-info-text-darker);
+    border-radius: 4px;
+    font: var(--theme-font-system);
 }
 
 .ruleInputWarpper{

@@ -1,24 +1,6 @@
 import * as React from 'react';
-import { TextField } from '../../common/text_field';
-import { ContextWarpper } from '../../common/context_wapper';
+import { EditorableTextField } from '../../common/text_field';
 import { DropdownWarpper } from '../../common/dropdown';
-
-export const RuleTextField = React.forwardRef(function ({ value, placeholder, style, title, list, onChange, onEnter }: {
-    value: string | undefined, placeholder?: string, style?: React.CSSProperties,
-    title?: string, list?: string | undefined,
-    onChange: (value: string) => void, onEnter?: (value: string) => void,
-}, ref: React.Ref<HTMLInputElement> | undefined) {
-    return <ContextWarpper className='ruleInputWarpper' menuItems={[
-        { key: "selectAll", name: "全选", callback: () => document.execCommand("selectAll") },
-        { key: "copy", name: "复制", callback: () => document.execCommand("copy") },
-        { key: "cut", name: "剪切", callback: () => document.execCommand("cut") },
-        { key: "paste", name: "粘贴", callback: () => document.execCommand("paste") },
-    ]}>
-        <TextField className="ruleInput" value={value}
-            placeholder={placeholder} style={style} title={title}
-            list={list} onChange={onChange} onEnter={onEnter} ref={ref} />
-    </ContextWarpper>
-});
 
 const colorList = ["null", "red", "green", "blue", "yellow", "black", "white", "gray", "purple", "pink", "orange", "brown", "cyan", "magenta"];
 
@@ -68,7 +50,6 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
         const onContextMenu = (event: MouseEvent) => {
             event.preventDefault();
             setIsColorMenuVisible(!isColorMenuVisible);
-            console.log("点击")
         }
         input.addEventListener('click', onContextMenu);
     }, [inputRef]);
@@ -90,15 +71,63 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
         }
     }, [colorMenuRef, isColorMenuVisible]);
 
-    return <ContextWarpper className='ruleInputWarpper colorRuleInputWarpper' menuItems={[
-        { key: "selectAll", name: "全选", callback: () => document.execCommand("selectAll") },
-        { key: "copy", name: "复制", callback: () => document.execCommand("copy") },
-        { key: "cut", name: "剪切", callback: () => document.execCommand("cut") },
-        { key: "paste", name: "粘贴", callback: () => document.execCommand("paste") },
-    ]}>
-        {renderColorList()}
-        <TextField className="ruleInput" value={value}
-            placeholder={placeholder} style={style} title={title}
+    return <>{renderColorList()}
+        <EditorableTextField value={value} placeholder={placeholder} style={style} title={title}
             onChange={onChange} onEnter={onEnter} ref={inputRef} />
-    </ContextWarpper>
+    </>
+});
+
+export const RegexTextField = React.forwardRef(function ({ fieldName, value, placeholder, style, title, onChange, onEnter }: {
+    fieldName: string, value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
+    onChange: (value: string) => void, onEnter?: (value: string) => void,
+}, ref: React.Ref<HTMLInputElement> | undefined) {
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    React.useImperativeHandle(ref, () => inputRef.current!);
+
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [errorMsg, setErrorMsg] = React.useState("");
+    React.useEffect(() => {
+        if (!inputRef.current) return;
+        const input = inputRef.current;
+        const onFocus = () => setIsEditing(true);
+        const onBlur = () => setIsEditing(false);
+        input.addEventListener('focus', onFocus);
+        input.addEventListener('blur', onBlur);
+        return () => {
+            input.removeEventListener('focus', onFocus);
+            input.removeEventListener('blur', onBlur);
+        }
+    }, [inputRef]);
+
+    React.useEffect(() => {
+        try {
+            value && new RegExp(value);
+            setErrorMsg("");
+        } catch (e) {
+            let message = '正则表达式错误';
+            if (e instanceof Error) {
+                message = value
+                    ? e.message.replace(`/${value}/:`, '')
+                    : e.message;
+            }
+            setErrorMsg(message);
+        }
+    }, [value]);
+
+
+    const renderHint = () => {
+        if (!errorMsg || !isEditing) return;
+        return <div style={{ position: 'relative', height: "100%" }}>
+            <div className='fieldHint'
+                style={{ position: 'absolute', bottom: "100%", left: 0, color: 'red' }}>{errorMsg}</div>
+        </div >;
+    }
+
+    return <>
+        <span style={{ color: !!errorMsg ? "red" : undefined, }}>{fieldName}</span>
+        {renderHint()}
+        <EditorableTextField value={value} placeholder={placeholder} title={title}
+            onChange={onChange} onEnter={onEnter} ref={inputRef}
+            style={{ ...style, border: !!errorMsg ? "1px solid red" : "1px solid #ffffff00" }} />
+    </>
 });
