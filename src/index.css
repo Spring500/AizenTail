@@ -98,7 +98,7 @@ body,
     display: flex;
     flex-direction: row;
     align-items: center;
-    -webkit-app-region: drag;
+    -webkit-app-region: no-drag;
     background: var(--theme-color-background);
     height: 35px;
     padding: 0 4px 0 4px;
@@ -106,7 +106,6 @@ body,
 }
 
 .menuButton{
-    -webkit-app-region: no-drag;
     background: var(--theme-color-button);
     color: var(--theme-color-info-text);
     width: auto;
@@ -127,7 +126,6 @@ body,
 }
 
 .menuFilter{
-    -webkit-app-region: no-drag;
     height:80%;
     padding: 0 8px 0 8px;
     margin-left: 8px;
@@ -153,7 +151,6 @@ body,
 }
 
 .menuDropdown{
-    -webkit-app-region: no-drag;
     background: var(--theme-color-background);
     width: 200px;
     color: var(--theme-color-info-text);
@@ -166,7 +163,6 @@ body,
 }
 
 .menuDropdownButton{
-    -webkit-app-region: no-drag;
     background: var(--theme-color-button);
     color: var(--theme-color-info-text);
     width: 100%;
@@ -270,7 +266,6 @@ body,
 }
 
 .ruleButton{
-    -webkit-app-region: no-drag;
     background: var(--theme-color-button);
     color: var(--theme-color-info-text);
     width: fit-content;
@@ -334,7 +329,7 @@ body,
 }
 
 .colorRuleBlock{
-    max-width: 150px;
+    max-width: 130px;
 }
 
 .ruleInputWarpper{
@@ -344,7 +339,6 @@ body,
 }
 
 .ruleInput{
-    -webkit-app-region: no-drag;
     height: 18px;
     min-width: 0px;
     flex: 1 1 auto;
