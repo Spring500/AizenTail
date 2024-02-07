@@ -59,7 +59,6 @@ export const ListView = React.forwardRef((props: {
         const start = Math.floor(scrollProgress * props.count);
         const visibleCount = Math.ceil(containerHeight / props.itemHeight) + 3;
         const end = Math.min(start + visibleCount, props.count);
-        console.log(`刷新List 进度${scrollProgress} 总数${props.count}`, start, end);
         const items = [];
         for (let i = start; i < end; i++) {
             items.push(<div key={i} style={{ position: "absolute", top: i * props.itemHeight, width: "100%" }}>
