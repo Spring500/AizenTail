@@ -75,8 +75,12 @@ class LogManager {
         let text = this.logs[index]?.text ?? "";
         for (const rule of this.rules.replaceRules) {
             if (!rule.enable) continue;
-            const reg = ruleManager.getReplaceRegExp(rule.index);
-            if (reg) text = text.replace(reg, rule.replace);
+            if (rule.regexEnable) {
+                const reg = ruleManager.getFilterRegExp(rule.index);
+                if (reg) text = text.replace(reg, rule.replace);
+            } else {
+                if (text.includes(rule.reg)) text = text.replace(rule.reg, rule.replace);
+            }
         }
         return text;
     }
@@ -84,8 +88,12 @@ class LogManager {
     public getLogColor(log: string): { backgroundColor?: string, color?: string } {
         for (const rule of this.rules.colorRules) {
             if (!rule.enable) continue;
-            const reg = ruleManager.getColorRegExp(rule.index);
-            if (reg?.test(log)) return {
+            if (rule.regexEnable) {
+                if (!ruleManager.getFilterRegExp(rule.index)?.test(log)) continue;
+            } else {
+                if (!log.includes(rule.reg)) continue;
+            }
+            return {
                 backgroundColor: rule.background,
                 color: rule.color,
             };
@@ -227,7 +235,11 @@ class LogManager {
         for (const rule of this.rules.filterRules) {
             if (!rule.enable) continue;
             if (!rule.exclude) hasIncludeFilter = true;
-            if (!ruleManager.getFilterRegExp(rule.index)?.test(text)) continue;
+            if (rule.regexEnable) {
+                if (!ruleManager.getFilterRegExp(rule.index)?.test(text)) continue;
+            } else {
+                if (!text.includes(rule.reg)) continue;
+            }
             if (rule.exclude) return true;
             include = true;
         }

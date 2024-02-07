@@ -4,44 +4,45 @@ import { DropdownWarpper } from '../../common/dropdown';
 import { IRuleManager } from '../../../managers/rule_manager';
 import { ContextWarpper } from '../../common/context_wapper';
 
-const colorList = ["null", "red", "green", "blue", "yellow", "black", "white", "gray", "purple", "pink", "orange", "brown", "cyan", "magenta"];
+const COROR_LIST = [
+    "null", "red", "green", "blue", "yellow", "black", "white",
+    "gray", "purple", "pink", "orange", "brown", "cyan", "magenta"];
 
 export const ColorRuleTextField = React.forwardRef(function ({ value, placeholder, style, title, onChange, onEnter }: {
     value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
 }, ref: React.Ref<HTMLInputElement> | undefined) {
-    const [isColorMenuVisible, setIsColorMenuVisible] = React.useState(false);
+    const [menuVisible, setMenuVisible] = React.useState(false);
 
     const colorMenuRef = React.useRef<HTMLUListElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
 
-    const onSelectColor = (color: string) => {
+    const clickColor = (color: string) => {
         onChange(color);
-        onEnter && onEnter(color);
-        console.log("选择颜色", color);
+        onEnter?.(color);
         closeColorList();
     }
 
     const closeColorList = () => {
-        setIsColorMenuVisible(false);
+        setMenuVisible(false);
+    }
+
+    const renderColorButton = (color: string, index: number) => {
+        if (color === "null") color = '';
+        const backgroundColor = color === "" ? undefined : color;
+        return <button key={index} onClick={() => clickColor(color)}
+            className="menuDropdownButton colorButton">
+            <div className="colorBox" style={{ backgroundColor }} /> {color || "默认"}
+        </button>
     }
 
     const renderColorList = () => {
-        return <DropdownWarpper visible={isColorMenuVisible}
-            ref={colorMenuRef}
+        return <DropdownWarpper visible={menuVisible} ref={colorMenuRef}
             style={{ position: 'fixed', left: 0, top: 0 }}
-            onClickOutside={closeColorList}
-            onOtherDropdownOpen={closeColorList}>
+            onClickOutside={closeColorList} onOtherDropdownOpen={closeColorList}>
             <div style={{ padding: '0px 4px', overflowY: 'auto', }}>
-                {colorList.map((color, index) => {
-                    if (color === "null") color = '';
-                    return <button key={index} onClick={() => onSelectColor(color)}
-                        className='menuDropdownButton colorButton'>
-                        <div className="colorBox" style={{ backgroundColor: color === "" ? undefined : color }} />
-                        {color === "" ? "默认" : color}
-                    </button>
-                })}
+                {COROR_LIST.map(renderColorButton)}
             </div>
         </DropdownWarpper>;
     }
@@ -51,14 +52,14 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
         const input = inputRef.current;
         const onContextMenu = (event: MouseEvent) => {
             event.preventDefault();
-            setIsColorMenuVisible(!isColorMenuVisible);
+            setMenuVisible(!menuVisible);
         }
         input.addEventListener('click', onContextMenu);
     }, [inputRef]);
 
     React.useEffect(() => {
         // 调整菜单位置
-        if (!isColorMenuVisible) return;
+        if (!menuVisible) return;
         const input = inputRef.current;
         const menu = colorMenuRef.current;
         if (!input || !menu) return;
@@ -71,7 +72,7 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
         if (menuRect.top < 0) {
             menu.style.top = '0px';
         }
-    }, [colorMenuRef, isColorMenuVisible]);
+    }, [colorMenuRef, menuVisible]);
 
     return <>{renderColorList()}
         <EditorableTextField value={value} placeholder={placeholder} style={style} title={title}
@@ -79,9 +80,11 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
     </>
 });
 
-export const RegexTextField = React.forwardRef(function ({ fieldName, value, placeholder, style, title, onChange, onEnter }: {
-    fieldName: string, value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
+export const RegexTextField = React.forwardRef(function (prop: {
+    fieldName: string, value: string | undefined, regexEnable: boolean | undefined,
+    placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
+    onRegexEnableChange: (enable: boolean) => void,
 }, ref: React.Ref<HTMLInputElement> | undefined) {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -103,60 +106,55 @@ export const RegexTextField = React.forwardRef(function ({ fieldName, value, pla
 
     React.useEffect(() => {
         try {
-            value && new RegExp(value);
+            prop.regexEnable && prop.value && new RegExp(prop.value);
             setErrorMsg("");
         } catch (e) {
             let message = '正则表达式错误';
             if (e instanceof Error) {
-                message = value
-                    ? e.message.replace(`/${value}/:`, '')
+                message = prop.value
+                    ? e.message.replace(`/${prop.value}/:`, '')
                     : e.message;
             }
             setErrorMsg(message);
         }
-    }, [value]);
+    }, [prop.value]);
 
 
     const renderHint = () => {
         if (!errorMsg || !isEditing) return;
         return <div style={{ position: 'relative', height: "100%" }}>
             <div className='fieldHint'
-                style={{ position: 'absolute', bottom: "100%", left: 0, color: 'red' }}>{errorMsg}</div>
+                style={{ position: 'absolute', bottom: "100%", left: 0, color: 'red' }}>
+                {errorMsg}</div>
         </div >;
     }
 
     return <>
-        <span style={{ color: !!errorMsg ? "red" : undefined, }}>{fieldName}</span>
+        <span style={{ color: !!errorMsg ? "red" : undefined, }}>{prop.fieldName}</span>
         {renderHint()}
-        <EditorableTextField value={value} placeholder={placeholder} title={title}
-            onChange={onChange} onEnter={onEnter} ref={inputRef}
-            style={{ ...style, border: !!errorMsg ? "1px solid red" : "1px solid #ffffff00" }} />
+        <EditorableTextField value={prop.value} placeholder={prop.placeholder} title={prop.title}
+            onChange={prop.onChange} onEnter={prop.onEnter} ref={inputRef}
+            style={{ ...prop.style, border: !!errorMsg ? "1px solid red" : undefined }} />
+        <button className={prop.regexEnable ? "ruleButton activatedButton" : "ruleButton"}
+            title='使用正则表达式' onClick={() => prop.onRegexEnableChange(!prop.regexEnable)}>
+            启用正则 </button>
     </>
 });
 
 export const RuleLineWarpper = function (prop: {
-    children: React.ReactNode,
-    index: number,
-    enable: boolean,
-    rules: unknown[],
+    children: React.ReactNode, index: number, enable: boolean, rules: unknown[],
     menuItems?: { key: string, name: string | (() => string), disabled?: boolean, callback: () => void }[],
-    onRuleUp?: () => void,
-    onRuleDown?: () => void,
-    onRuleEnable?: () => void,
-    onRuleDelete?: () => void,
+    onRuleUp: () => void, onRuleDown: () => void,
+    onRuleEnable: () => void, onRuleDelete: () => void,
 }) {
     const menuItems = [];
     for (const item of prop.menuItems ?? []) {
-        menuItems.push({ key: item.key, name: item.name, disabled: item.disabled, callback: item.callback });
+        menuItems.push({ ...item });
     }
-    if (prop.onRuleUp)
-        menuItems.push({ key: "up", name: "上移规则", disabled: prop.index <= 0, callback: prop.onRuleUp });
-    if (prop.onRuleDown)
-        menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.rules.length - 1, callback: prop.onRuleDown });
-    if (prop.onRuleEnable)
-        menuItems.push({ key: "enable", name: () => prop.enable ? "禁用规则" : "启用规则", callback: prop.onRuleEnable });
-    if (prop.onRuleDelete)
-        menuItems.push({ key: "del", name: "删除规则", callback: prop.onRuleDelete });
+    menuItems.push({ key: "up", name: "上移规则", disabled: prop.index <= 0, callback: prop.onRuleUp });
+    menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.rules.length - 1, callback: prop.onRuleDown });
+    menuItems.push({ key: "enable", name: () => prop.enable ? "禁用规则" : "启用规则", callback: prop.onRuleEnable });
+    menuItems.push({ key: "del", name: "删除规则", callback: prop.onRuleDelete });
 
     return <ContextWarpper key={prop.index} className="ruleLine" menuItems={menuItems}>
         <button className={prop.enable ? "ruleButton activatedButton" : "ruleButton"}
@@ -170,5 +168,4 @@ export const RuleLineWarpper = function (prop: {
             <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">删除</button>
         </div>
     </ContextWarpper>
-    return <div className="ruleLine">{prop.children}</div>
 }

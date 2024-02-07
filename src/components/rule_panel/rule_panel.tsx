@@ -11,17 +11,17 @@ export const RulePanel = function () {
     const loadSetting = () => {
         const colorRules = [];
         for (const rule of ruleManager.colorRules) {
-            colorRules.push({ reg: rule.reg, background: rule.background, color: rule.color, enable: rule.enable, index: rule.index });
+            colorRules.push({ ...rule });
         }
         setColorRules(colorRules);
         const replaceRules = [];
         for (const rule of ruleManager.replaceRules) {
-            replaceRules.push({ reg: rule.reg, replace: rule.replace, enable: rule.enable, index: rule.index });
+            replaceRules.push({ ...rule });
         }
         setReplaceRules(replaceRules);
         const filterRules = [];
         for (const rule of ruleManager.filterRules) {
-            filterRules.push(rule);
+            filterRules.push({ ...rule });
         }
         setFilterRules(filterRules);
     }
@@ -48,12 +48,12 @@ export const RulePanel = function () {
             {colorRules.map(rule => {
                 const index = rule.index;
                 return <RuleLine_Color key={index} index={index}
+                    enable={rule.enable ?? false} reg={rule.reg ?? ""}
+                    regexEnable={rule.regexEnable ?? false}
+                    background={rule.background} color={rule.color}
                     onRegChange={onRegChange}
                     onBackColorChange={onBackColorChange}
-                    onFontColorChange={onFontColorChange}
-                    enable={rule.enable ?? false} reg={rule.reg ?? ""}
-                    background={rule.background} color={rule.color}
-                />
+                    onFontColorChange={onFontColorChange} />
             }
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
@@ -71,9 +71,11 @@ export const RulePanel = function () {
         return <><div className="ruleTitleText">替换规则</div>
             {replaceRules.map(rule =>
                 <RuleLine_Replace key={rule.index} index={rule.index}
-                    onRegChange={onRegChange} onReplaceChange={onReplaceChange}
-                    enable={rule.enable ?? false} reg={rule.reg} replace={rule.replace}
-                />
+                    replace={rule.replace}
+                    enable={rule.enable ?? false} reg={rule.reg}
+                    regexEnable={rule.regexEnable ?? false}
+                    onRegChange={onRegChange}
+                    onReplaceChange={onReplaceChange} />
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
         </>;
@@ -87,9 +89,10 @@ export const RulePanel = function () {
         return <><div className="ruleTitleText">过滤规则</div>
             {filterRules.map(rule =>
                 <RuleLine_Filter key={rule.index} index={rule.index}
-                    onRegChange={onRegChange} exclude={rule.exclude ?? false}
                     enable={rule.enable ?? false} reg={rule.reg}
-                />
+                    exclude={rule.exclude ?? false}
+                    regexEnable={rule.regexEnable ?? false}
+                    onRegChange={onRegChange} />
             )}
             <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
         </>;

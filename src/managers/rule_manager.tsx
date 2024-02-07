@@ -76,21 +76,31 @@ class RuleManager {
         if (setting.color !== undefined) {
             for (let i = 0; i < setting.color.length; i++) {
                 const rule = setting.color[i];
-                this.colorRules.push({ reg: rule.reg, color: rule.color, index: i, background: rule.background, enable: rule.enable ?? true });
+                this.colorRules.push({
+                    reg: rule.reg, regexEnable: rule.regexEnable,
+                    color: rule.color, index: i, background: rule.background,
+                    enable: rule.enable ?? true
+                });
             }
         }
 
         if (setting.replacing !== undefined) {
             for (let i = 0; i < setting.replacing.length; i++) {
                 const rule = setting.replacing[i];
-                this.replaceRules.push({ reg: rule.reg, replace: rule.replace, index: i, enable: rule.enable ?? true });
+                this.replaceRules.push({
+                    reg: rule.reg, regexEnable: rule.regexEnable,
+                    replace: rule.replace, index: i, enable: rule.enable ?? true
+                });
             }
         }
 
         if (setting.filter !== undefined) {
             for (let i = 0; i < setting.filter.length; i++) {
                 const rule = setting.filter[i];
-                this.filterRules.push({ reg: rule.reg, exclude: rule.exclude, index: i, enable: rule.enable ?? true });
+                this.filterRules.push({
+                    reg: rule.reg, regexEnable: rule.regexEnable,
+                    exclude: rule.exclude, index: i, enable: rule.enable ?? true
+                });
             }
         }
         this.refreshRules();
@@ -98,9 +108,19 @@ class RuleManager {
 
     public stringify(): string {
         const setting = {
-            color: this.colorRules.map(rule => ({ reg: rule.reg, color: rule.color, background: rule.background, enable: rule.enable })),
-            replacing: this.replaceRules.map(rule => ({ reg: rule.reg, replace: rule.replace, enable: rule.enable })),
-            filter: this.filterRules.map(rule => ({ reg: rule.reg, exclude: rule.exclude, enable: rule.enable })),
+            color: this.colorRules.map(rule => ({
+                reg: rule.reg, regexEnable: rule.regexEnable,
+                color: rule.color, background: rule.background,
+                enable: rule.enable
+            })),
+            replacing: this.replaceRules.map(rule => ({
+                reg: rule.reg, regexEnable: rule.regexEnable,
+                replace: rule.replace, enable: rule.enable
+            })),
+            filter: this.filterRules.map(rule => ({
+                reg: rule.reg, regexEnable: rule.regexEnable,
+                exclude: rule.exclude, enable: rule.enable
+            })),
         };
         return JSON.stringify(setting, undefined, 4);
     }
@@ -150,6 +170,14 @@ class RuleManager {
         const rule = ruleArray[index];
         if (!rule || rule.enable === enable) return;
         rule.enable = enable;
+        this.refreshRules();
+    }
+
+    public setRegexEnable(type: "color" | "filter" | "replace", index: number, enable: boolean): void {
+        const ruleArray = type === "color" ? this.colorRules : type === "filter" ? this.filterRules : this.replaceRules;
+        const rule = ruleArray[index];
+        if (!rule || rule.regexEnable === enable) return;
+        rule.regexEnable = enable;
         this.refreshRules();
     }
 

@@ -13,6 +13,7 @@ type ColorConfig = {
     background?: string,
     reg: string,
     enable?: boolean,
+    regexEnable?: boolean,
 }
 
 type ReplaceConfig = {
@@ -20,6 +21,7 @@ type ReplaceConfig = {
     reg: string,
     replace: string,
     enable?: boolean,
+    regexEnable?: boolean,
 }
 
 type FilterConfig = {
@@ -27,6 +29,7 @@ type FilterConfig = {
     reg: string,
     exclude: boolean,
     enable?: boolean,
+    regexEnable?: boolean,
 }
 
 type LogConfig = {

@@ -2,8 +2,8 @@ import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
 import { ColorRuleTextField, RegexTextField, RuleLineWarpper } from "./wappers";
 
-export const RuleLine_Color = function ({ index, enable, reg, background, color, onFontColorChange, onBackColorChange, onRegChange }: {
-    index: number, enable: boolean, reg: string,
+export const RuleLine_Color = function ({ index, enable, reg, background, color, regexEnable, onFontColorChange, onBackColorChange, onRegChange }: {
+    index: number, enable: boolean, reg: string, regexEnable: boolean,
     background: string | undefined, color: string | undefined,
     onFontColorChange: (index: number, color: string) => void,
     onBackColorChange: (index: number, color: string) => void,
@@ -13,9 +13,11 @@ export const RuleLine_Color = function ({ index, enable, reg, background, color,
         const rule = ruleManager.colorRules[index];
         return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
             <RegexTextField fieldName="匹配串" value={reg} placeholder="输入匹配串"
-                style={{ color: rule?.color, backgroundColor: rule?.background }}
+                regexEnable={regexEnable} style={{ color: rule?.color, backgroundColor: rule?.background }}
                 onChange={(text) => onRegChange(index, text)}
-                onEnter={(text) => ruleManager.setReg("color", index, text)} />
+                onEnter={(text) => ruleManager.setReg("color", index, text)}
+                onRegexEnableChange={(enable) => ruleManager.setRegexEnable("color", index, enable)}
+            />
         </div>
     }
 
