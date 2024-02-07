@@ -1,6 +1,6 @@
 import React from 'react';
-import { FixedSizeList } from "react-window";
 import { ILogManager } from "../managers/log_manager";
+import { IListView, ListView } from './common/list';
 
 const HIGHLIGHT_STYLE = { backgroundColor: "gray", color: "var(--theme-color-info-text-highlight)" };
 const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
@@ -18,44 +18,14 @@ const splitLog = function (text: string, keywords: string[]) {
     });
 }
 
-const LogRow = function ({ index, style, highlightLine, manager }: {
-    index: number, style: React.CSSProperties, highlightLine: number, manager: ILogManager
-}) {
-    const logText = manager.getLogText(index);
-    const line = manager.indexToLine(index);
-    const isExculed = manager.isDisableFilter() && !manager.lineToIndexMap.has(index);
-    const isHighlight = line >= 0 && line === highlightLine;
-    const lineStyle = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
-    const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
-
-    return <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
-        <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
-        <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
-    </div >
-}
-
-type TRendderData<T> = { ItemRenderer: React.ComponentType<{ index: number, style: React.CSSProperties } & T> } & T;
-export const ItemWrapper = function ({ data, index, style }: {
-    data: TRendderData<{ highlightLine: number, manager: ILogManager, }>,
-    index: number, style: React.CSSProperties
-}) {
-    return <data.ItemRenderer index={index} style={style} highlightLine={data.highlightLine} manager={data.manager} />;
-}
-
 export const LogContainer = function ({ style, manager, onChangeFile }: {
     style?: React.CSSProperties, manager: ILogManager, onChangeFile: (file: File | null) => void
 }) {
     const mainRef = React.createRef<HTMLDivElement>();
-    const listRef = React.createRef<FixedSizeList>();
+    const listRef = React.createRef<IListView>();
     const [dragging, setDragging] = React.useState(false);
     const [logCount, setLogCount] = React.useState(0);
     const [highlightLine, setHighlightLine] = React.useState(-1);
-    const [componentHeight, setComponentHeight] = React.useState(300);
-
-    const onHeightChange = () => {
-        const height = mainRef.current?.getBoundingClientRect().height ?? 300;
-        setComponentHeight(height);
-    }
 
     const onDrop = (event: DragEvent) => {
         event.preventDefault();
@@ -101,33 +71,37 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
         manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "smart");
 
         const current = mainRef.current;
-        let observer: ResizeObserver | undefined = undefined;
         if (current) {
-            observer = new ResizeObserver(onHeightChange);
-            observer.observe(mainRef.current);
             mainRef.current.addEventListener("drop", onDrop);
             current.addEventListener("dragover", onDragOver);
             current.addEventListener("dragleave", onDragLeave);
             current.addEventListener("dragenter", onDragEnter);
         }
-        console.log("LogContainer mounted");
         return () => {
-            observer?.disconnect();
             current?.removeEventListener("drop", onDrop);
             current?.removeEventListener("dragover", onDragOver);
             current?.removeEventListener("dragleave", onDragLeave);
             current?.removeEventListener("dragenter", onDragEnter);
-
         }
     }, [mainRef]);
 
+    const LogRowRenderer = function (index: number) {
+        const logText = manager.getLogText(index);
+        const line = manager.indexToLine(index);
+        const isExculed = manager.isDisableFilter() && !manager.lineToIndexMap.has(index);
+        const isHighlight = line >= 0 && line === highlightLine;
+        const lineStyle = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
+        const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
+
+        return <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
+            <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
+            <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
+        </div >
+    }
+
     return <div className="logContainer" ref={mainRef} style={{ ...style, position: 'relative' }}>
-        <FixedSizeList
-            ref={listRef} itemData={{ ItemRenderer: LogRow, highlightLine, manager }}
-            style={{ position: "absolute", overflow: "scroll", inset: "0%" }}
-            height={componentHeight} itemCount={logCount} itemSize={17} width={"auto"} overscanCount={3}>
-            {ItemWrapper}
-        </FixedSizeList>
+        <ListView ref={listRef} style={{ height: "100%", inset: "0%" }}
+            itemRender={LogRowRenderer} count={logCount} itemHeight={17} />
         {dragging && <div className='logContainerMask' style={{
             position: 'absolute', inset: "0%", zIndex: 100, display: 'flex',
             justifyContent: 'center', alignItems: 'center',
