@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { EditorableTextField } from '../../common/text_field';
 import { DropdownWarpper } from '../../common/dropdown';
+import { IRuleManager } from '../../../managers/rule_manager';
+import { ContextWarpper } from '../../common/context_wapper';
 
 const colorList = ["null", "red", "green", "blue", "yellow", "black", "white", "gray", "purple", "pink", "orange", "brown", "cyan", "magenta"];
 
@@ -131,3 +133,42 @@ export const RegexTextField = React.forwardRef(function ({ fieldName, value, pla
             style={{ ...style, border: !!errorMsg ? "1px solid red" : "1px solid #ffffff00" }} />
     </>
 });
+
+export const RuleLineWarpper = function (prop: {
+    children: React.ReactNode,
+    index: number,
+    enable: boolean,
+    manager: IRuleManager,
+    menuItems?: { key: string, name: string | (() => string), disabled?: boolean, callback: () => void }[],
+    onRuleUp?: () => void,
+    onRuleDown?: () => void,
+    onRuleEnable?: () => void,
+    onRuleDelete?: () => void,
+}) {
+    const menuItems = [];
+    for (const item of prop.menuItems ?? []) {
+        menuItems.push({ key: item.key, name: item.name, disabled: item.disabled, callback: item.callback });
+    }
+    if (prop.onRuleUp)
+        menuItems.push({ key: "up", name: "上移规则", disabled: prop.index <= 0, callback: prop.onRuleUp });
+    if (prop.onRuleDown)
+        menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.manager.colorRules.length - 1, callback: prop.onRuleDown });
+    if (prop.onRuleEnable)
+        menuItems.push({ key: "enable", name: () => prop.enable ? "禁用规则" : "启用规则", callback: prop.onRuleEnable });
+    if (prop.onRuleDelete)
+        menuItems.push({ key: "del", name: "删除规则", callback: prop.onRuleDelete });
+
+    return <ContextWarpper key={prop.index} className="ruleLine" menuItems={menuItems}>
+        <button className={prop.enable ? "ruleButton activatedButton" : "ruleButton"}
+            onClick={prop.onRuleEnable} title="是否启用该规则"> 启用</button>
+        {prop.children}
+        <div className="fixedRuleBlock">
+            <button className="ruleButton" onClick={prop.onRuleUp} title="将该条规则上移一行"
+                disabled={prop.index <= 0}>上移</button>
+            <button className="ruleButton" onClick={prop.onRuleDown} title="将该条规则下移一行"
+                disabled={prop.index >= prop.manager.colorRules.length - 1}>下移</button>
+            <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">删除</button>
+        </div>
+    </ContextWarpper>
+    return <div className="ruleLine">{prop.children}</div>
+}

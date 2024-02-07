@@ -1,8 +1,6 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
-import { ContextWarpper } from "../../common/context_wapper";
-import { EditorableTextField } from "../../common/text_field";
-import { RegexTextField } from "./rule_text_wapper";
+import { RegexTextField, RuleLineWarpper } from "./wappers";
 
 export const RuleLine_Filter = function ({ index, enable, reg, exclude, onRegChange }: {
     index: number, enable: boolean, reg: string, exclude: boolean,
@@ -28,28 +26,14 @@ export const RuleLine_Filter = function ({ index, enable, reg, exclude, onRegCha
         console.log(ruleManager.filterRules[index], ruleManager.filterRules[index].exclude, exclude);
     }
 
-    return <ContextWarpper key={index} menuItems={[
-        { key: "up", name: "上移规则", disabled: index <= 0, callback: ruleUp },
-        { key: "down", name: "下移规则", disabled: index >= ruleManager.colorRules.length - 1, callback: ruleDown },
-        { key: "enable", name: () => enable ? "禁用规则" : "启用规则", callback: enableRule },
-        { key: "exclude", name: () => exclude ? "包含匹配串" : "排除匹配串", callback: toggleExclude },
-        { key: "del", name: "删除规则", callback: deleteRule },
-
-    ]}>
-        <div key={index} className="ruleLine">
-            <button className={enable ? "ruleButton activatedButton" : "ruleButton"}
-                onClick={enableRule} title="是否启用该规则"> 启用</button>
-            {renderReg()}
-            <div className="fixedRuleBlock">
-                <button className={exclude ? "ruleButton activatedButton" : "ruleButton"}
-                    onClick={toggleExclude} title="满足该条匹配规则的日志将被筛除还是保留"
-                    disabled={index <= 0}>反向筛选</button>
-                <button className="ruleButton" onClick={ruleUp} title="将该条规则上移一行"
-                    disabled={index <= 0}>上移</button>
-                <button className="ruleButton" onClick={ruleDown} title="将该条规则下移一行"
-                    disabled={index >= ruleManager.filterRules.length - 1}>下移</button>
-                <button className="ruleButton" onClick={deleteRule} title="删除该条规则">删除</button>
-            </div>
+    return <RuleLineWarpper key={index} index={index} enable={enable} manager={ruleManager}
+        onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}
+        menuItems={[{ key: "exclude", name: () => exclude ? "包含匹配串" : "排除匹配串", callback: toggleExclude }]}>
+        {renderReg()}
+        <div className="fixedRuleBlock">
+            <button className={exclude ? "ruleButton activatedButton" : "ruleButton"}
+                onClick={toggleExclude} title="满足该条匹配规则的日志将被筛除还是保留"
+                disabled={index <= 0}>反向筛选</button>
         </div>
-    </ContextWarpper >
+    </RuleLineWarpper >
 }

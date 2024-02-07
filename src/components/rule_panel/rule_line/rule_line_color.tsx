@@ -1,7 +1,6 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
-import { ContextWarpper } from "../../common/context_wapper";
-import { ColorRuleTextField, RegexTextField } from "./rule_text_wapper";
+import { ColorRuleTextField, RegexTextField, RuleLineWarpper } from "./wappers";
 
 export const RuleLine_Color = function ({ index, enable, reg, background, color, onFontColorChange, onBackColorChange, onRegChange }: {
     index: number, enable: boolean, reg: string,
@@ -24,10 +23,9 @@ export const RuleLine_Color = function ({ index, enable, reg, background, color,
         return <div className="ruleBlock colorRuleBlock"
             title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串">
             背景色
-            <ColorRuleTextField
+            <ColorRuleTextField placeholder="选择背景色" value={background}
                 onChange={(text) => onBackColorChange(index, text)}
-                onEnter={(text) => ruleManager.setRuleBackgroundColor(index, text)}
-                placeholder="选择背景色" value={background} />
+                onEnter={(text) => ruleManager.setRuleBackgroundColor(index, text)} />
         </div>
     }
 
@@ -35,10 +33,9 @@ export const RuleLine_Color = function ({ index, enable, reg, background, color,
         return <div className="ruleBlock colorRuleBlock"
             title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串">
             字体色
-            <ColorRuleTextField
+            <ColorRuleTextField placeholder="选择字体色" value={color}
                 onChange={(text) => onFontColorChange(index, text)}
-                onEnter={(text) => ruleManager.setRuleFontColor(index, text)}
-                placeholder="选择字体色" value={color} />
+                onEnter={(text) => ruleManager.setRuleFontColor(index, text)} />
         </div>
     }
 
@@ -47,22 +44,8 @@ export const RuleLine_Color = function ({ index, enable, reg, background, color,
     const enableRule = () => ruleManager.setEnable("color", index, !enable);
     const deleteRule = () => ruleManager.removeRule("color", index);
 
-    return <ContextWarpper key={index} className="ruleLine" menuItems={[
-        { key: "up", name: "上移规则", disabled: index <= 0, callback: ruleUp },
-        { key: "down", name: "下移规则", disabled: index >= ruleManager.colorRules.length - 1, callback: ruleDown },
-        { key: "enable", name: () => enable ? "禁用规则" : "启用规则", callback: enableRule },
-        { key: "del", name: "删除规则", callback: deleteRule },
-
-    ]}>
-        <button className={enable ? "ruleButton activatedButton" : "ruleButton"}
-            onClick={enableRule} title="是否启用该规则"> 启用</button>
+    return <RuleLineWarpper key={index} index={index} enable={enable} manager={ruleManager}
+        onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
         {renderReg()} {renderBackColor()} {renderFontColor()}
-        <div className="fixedRuleBlock">
-            <button className="ruleButton" onClick={ruleUp} title="将该条规则上移一行"
-                disabled={index <= 0}>上移</button>
-            <button className="ruleButton" onClick={ruleDown} title="将该条规则下移一行"
-                disabled={index >= ruleManager.colorRules.length - 1}>下移</button>
-            <button className="ruleButton" onClick={deleteRule} title="删除该条规则">删除</button>
-        </div>
-    </ContextWarpper>
+    </RuleLineWarpper>
 }

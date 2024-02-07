@@ -207,4 +207,5 @@ class RuleManager {
     onRuleChanged: null | (() => void) = null;
 }
 
+export type IRuleManager = RuleManager;
 export const ruleManager = new RuleManager();

@@ -1,8 +1,7 @@
 import React from "react";
 import { ruleManager } from "../../../managers/rule_manager";
-import { ContextWarpper } from "../../common/context_wapper";
 import { EditorableTextField } from "../../common/text_field";
-import { RegexTextField } from "./rule_text_wapper";
+import { RegexTextField, RuleLineWarpper } from "./wappers";
 
 export const RuleLine_Replace = function ({ index, enable, reg, replace, onRegChange, onReplaceChange }: {
     index: number, enable: boolean, reg: string, replace: string,
@@ -32,24 +31,8 @@ export const RuleLine_Replace = function ({ index, enable, reg, replace, onRegCh
     const enableRule = () => ruleManager.setEnable("replace", index, !enable);
     const deleteRule = () => ruleManager.removeRule("replace", index);
 
-    return <ContextWarpper key={index} menuItems={[
-        { key: "up", name: "上移规则", disabled: index <= 0, callback: ruleUp },
-        { key: "down", name: "下移规则", disabled: index >= ruleManager.replaceRules.length - 1, callback: ruleDown },
-        { key: "enable", name: () => enable ? "禁用规则" : "启用规则", callback: enableRule },
-        { key: "del", name: "删除规则", callback: deleteRule },
-    ]}>
-        <div className="ruleLine">
-            <button className={enable ? "ruleButton activatedButton" : "ruleButton"}
-                onClick={enableRule} title="是否启用该规则"> 启用</button>
-            {renderReg()}
-            {renderReplace()}
-            <div className="fixedRuleBlock">
-                <button className="ruleButton" onClick={ruleUp} title="将该条规则上移一行"
-                    disabled={index <= 0}>上移</button>
-                <button className="ruleButton" onClick={ruleDown} title="将该条规则下移一行"
-                    disabled={index >= ruleManager.replaceRules.length - 1}>下移</button>
-                <button className="ruleButton" onClick={deleteRule} title="删除该条规则">删除</button>
-            </div>
-        </div>
-    </ContextWarpper>
+    return <RuleLineWarpper key={index} index={index} enable={enable} manager={ruleManager}
+        onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
+        {renderReg()} {renderReplace()}
+    </RuleLineWarpper>
 }
