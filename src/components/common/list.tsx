@@ -39,7 +39,7 @@ export const ListView = React.forwardRef((props: {
                         top = index * itemHeight;
                         break;
                 }
-                container.scrollTo({ top, behavior: "smooth" });
+                container.scrollTo({ top, behavior: "instant" });
             }
         };
     });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ILogManager } from "../managers/log_manager";
 import { IListView, ListView } from './common/list';
+import { ContextWarpper } from './common/context_wapper';
 
 const HIGHLIGHT_STYLE = { backgroundColor: "gray", color: "var(--theme-color-info-text-highlight)" };
 const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
@@ -68,7 +69,7 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
     React.useEffect(() => {
         manager.onSetLogCount = setLogCount;
         manager.onSetHighlightLine = setHighlightLine;
-        manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "smart");
+        manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "center");
 
         const current = mainRef.current;
         if (current) {
@@ -93,10 +94,15 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
         const lineStyle = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
         const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
 
-        return <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
-            <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
-            <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
-        </div >
+        return <ContextWarpper menuItems={[
+            { key: "select", name: "选择", callback: () => manager.setHighlightLine(line) },
+            { key: "copy", name: "复制", callback: () => navigator.clipboard.writeText(logText) }
+        ]}>
+            <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
+                <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
+                <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
+            </div >
+        </ContextWarpper>
     }
 
     return <div className="logContainer" ref={mainRef} style={{ ...style, position: 'relative' }}>
