@@ -138,7 +138,7 @@ export const RuleLineWarpper = function (prop: {
     children: React.ReactNode,
     index: number,
     enable: boolean,
-    manager: IRuleManager,
+    rules: unknown[],
     menuItems?: { key: string, name: string | (() => string), disabled?: boolean, callback: () => void }[],
     onRuleUp?: () => void,
     onRuleDown?: () => void,
@@ -152,7 +152,7 @@ export const RuleLineWarpper = function (prop: {
     if (prop.onRuleUp)
         menuItems.push({ key: "up", name: "上移规则", disabled: prop.index <= 0, callback: prop.onRuleUp });
     if (prop.onRuleDown)
-        menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.manager.colorRules.length - 1, callback: prop.onRuleDown });
+        menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.rules.length - 1, callback: prop.onRuleDown });
     if (prop.onRuleEnable)
         menuItems.push({ key: "enable", name: () => prop.enable ? "禁用规则" : "启用规则", callback: prop.onRuleEnable });
     if (prop.onRuleDelete)
@@ -166,7 +166,7 @@ export const RuleLineWarpper = function (prop: {
             <button className="ruleButton" onClick={prop.onRuleUp} title="将该条规则上移一行"
                 disabled={prop.index <= 0}>上移</button>
             <button className="ruleButton" onClick={prop.onRuleDown} title="将该条规则下移一行"
-                disabled={prop.index >= prop.manager.colorRules.length - 1}>下移</button>
+                disabled={prop.index >= prop.rules.length - 1}>下移</button>
             <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">删除</button>
         </div>
     </ContextWarpper>

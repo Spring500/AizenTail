@@ -31,7 +31,7 @@ export const RuleLine_Replace = function ({ index, enable, reg, replace, onRegCh
     const enableRule = () => ruleManager.setEnable("replace", index, !enable);
     const deleteRule = () => ruleManager.removeRule("replace", index);
 
-    return <RuleLineWarpper key={index} index={index} enable={enable} manager={ruleManager}
+    return <RuleLineWarpper key={index} index={index} enable={enable} rules={ruleManager.replaceRules}
         onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
         {renderReg()} {renderReplace()}
     </RuleLineWarpper>

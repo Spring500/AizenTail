@@ -44,7 +44,7 @@ export const RuleLine_Color = function ({ index, enable, reg, background, color,
     const enableRule = () => ruleManager.setEnable("color", index, !enable);
     const deleteRule = () => ruleManager.removeRule("color", index);
 
-    return <RuleLineWarpper key={index} index={index} enable={enable} manager={ruleManager}
+    return <RuleLineWarpper key={index} index={index} enable={enable} rules={ruleManager.colorRules}
         onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
         {renderReg()} {renderBackColor()} {renderFontColor()}
     </RuleLineWarpper>

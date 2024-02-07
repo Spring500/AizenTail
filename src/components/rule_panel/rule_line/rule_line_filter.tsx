@@ -26,7 +26,7 @@ export const RuleLine_Filter = function ({ index, enable, reg, exclude, onRegCha
         console.log(ruleManager.filterRules[index], ruleManager.filterRules[index].exclude, exclude);
     }
 
-    return <RuleLineWarpper key={index} index={index} enable={enable} manager={ruleManager}
+    return <RuleLineWarpper key={index} index={index} enable={enable} rules={ruleManager.filterRules}
         onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}
         menuItems={[{ key: "exclude", name: () => exclude ? "包含匹配串" : "排除匹配串", callback: toggleExclude }]}>
         {renderReg()}
