@@ -73,16 +73,18 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
 
         const current = mainRef.current;
         if (current) {
-            mainRef.current.addEventListener("drop", onDrop);
+            current.addEventListener("drop", onDrop);
             current.addEventListener("dragover", onDragOver);
             current.addEventListener("dragleave", onDragLeave);
             current.addEventListener("dragenter", onDragEnter);
         }
         return () => {
-            current?.removeEventListener("drop", onDrop);
-            current?.removeEventListener("dragover", onDragOver);
-            current?.removeEventListener("dragleave", onDragLeave);
-            current?.removeEventListener("dragenter", onDragEnter);
+            if (current) {
+                current.removeEventListener("drop", onDrop);
+                current.removeEventListener("dragover", onDragOver);
+                current.removeEventListener("dragleave", onDragLeave);
+                current.removeEventListener("dragenter", onDragEnter);
+            }
             if (manager.onSetLogCount === setLogCount)
                 manager.onSetLogCount = null;
             if (manager.onSetHighlightLine === setHighlightLine)
