@@ -2,16 +2,23 @@ import React from "react";
 
 export type IListView = {
     scrollToItem: (index: number, align: "auto" | "smart" | "center" | "end" | "start") => void;
+    startIndex: number;
+    endIndex: number;
 };
 
 export const ListView = React.forwardRef((props: {
     itemRender: (index: number) => React.ReactNode;
     count: number; itemHeight: number;
-    style: React.CSSProperties;
+    style: React.CSSProperties; onListScroll?: () => void;
 }, ref: React.Ref<IListView> | undefined) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = React.useState(0);
-    const [scrollProgress, setScrollProgress] = React.useState(0);
+    const [progress, setProgress] = React.useState(0);
+
+    const visibleStart = Math.floor(progress * props.count);
+    const visibleEnd = visibleStart + Math.ceil(containerHeight / props.itemHeight);
+    const renderStart = visibleStart - 3;
+    const renderEnd = visibleEnd + 3;
 
     React.useImperativeHandle(ref, () => {
         return {
@@ -40,7 +47,9 @@ export const ListView = React.forwardRef((props: {
                         break;
                 }
                 container.scrollTo({ top, behavior: "instant" });
-            }
+            },
+            startIndex: Math.max(visibleStart, 0),
+            endIndex: Math.min(visibleEnd, props.count),
         };
     });
 
@@ -56,11 +65,10 @@ export const ListView = React.forwardRef((props: {
 
     const renderItems = () => {
         // 只渲染可见的部分
-        const start = Math.floor(scrollProgress * props.count);
-        const visibleCount = Math.ceil(containerHeight / props.itemHeight) + 3;
-        const end = Math.min(start + visibleCount, props.count);
         const items = [];
-        for (let i = start; i < end; i++) {
+        for (let i = renderStart; i < renderEnd; i++) {
+            if (i < 0 || i >= props.count)
+                continue;
             items.push(<div key={i} style={{ position: "absolute", top: i * props.itemHeight, width: "100%" }}>
                 {props.itemRender(i)}
             </div>);
@@ -71,7 +79,8 @@ export const ListView = React.forwardRef((props: {
     const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
         let progress = event.currentTarget.scrollTop / event.currentTarget.scrollHeight;
         progress = Math.max(0, Math.min(progress, 1));
-        setScrollProgress(progress);
+        setProgress(progress);
+        props.onListScroll?.();
     }
     return <div style={{ ...props.style, overflow: "scroll", position: "relative" }}
         onScroll={onScroll} ref={containerRef}>
