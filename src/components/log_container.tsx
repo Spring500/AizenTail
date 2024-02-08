@@ -66,31 +66,42 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
         }
     }
 
+    // 监听高亮行的位置变化
     React.useEffect(() => {
+        if (highlightLine < 0) return;
+        listRef.current?.scrollToItem(highlightLine, "center");
+    }, [highlightLine]);
+
+    // 监听manager的变化
+    React.useEffect(() => {
+        if (!manager) return;
         manager.onSetLogCount = setLogCount;
         manager.onSetHighlightLine = setHighlightLine;
         manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "center");
-
-        const current = mainRef.current;
-        if (current) {
-            current.addEventListener("drop", onDrop);
-            current.addEventListener("dragover", onDragOver);
-            current.addEventListener("dragleave", onDragLeave);
-            current.addEventListener("dragenter", onDragEnter);
-        }
         return () => {
-            if (current) {
-                current.removeEventListener("drop", onDrop);
-                current.removeEventListener("dragover", onDragOver);
-                current.removeEventListener("dragleave", onDragLeave);
-                current.removeEventListener("dragenter", onDragEnter);
-            }
             if (manager.onSetLogCount === setLogCount)
                 manager.onSetLogCount = null;
             if (manager.onSetHighlightLine === setHighlightLine)
                 manager.onSetHighlightLine = null;
             if (manager.onScrollToItem === listRef.current?.scrollToItem)
                 manager.onScrollToItem = null;
+        }
+    }, [mainRef]);
+
+    // 监听文件拖放
+    React.useEffect(() => {
+        const current = mainRef.current;
+        if (!current) return;
+        current.addEventListener("drop", onDrop);
+        current.addEventListener("dragover", onDragOver);
+        current.addEventListener("dragleave", onDragLeave);
+        current.addEventListener("dragenter", onDragEnter);
+
+        return () => {
+            current.removeEventListener("drop", onDrop);
+            current.removeEventListener("dragover", onDragOver);
+            current.removeEventListener("dragleave", onDragLeave);
+            current.removeEventListener("dragenter", onDragEnter);
         }
     }, [mainRef]);
 
