@@ -76,7 +76,7 @@ class LogManager {
         for (const rule of this.rules.replaceRules) {
             if (!rule.enable) continue;
             if (rule.regexEnable) {
-                const reg = ruleManager.getFilterRegExp(rule.index);
+                const reg = ruleManager.getReplaceRegExp(rule.index);
                 if (reg) text = text.replace(reg, rule.replace);
             } else {
                 if (text.includes(rule.reg)) text = text.replace(rule.reg, rule.replace);

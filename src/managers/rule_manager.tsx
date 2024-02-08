@@ -13,7 +13,7 @@ class RuleManager {
     public getColorRegExp(index: number): RegExp | undefined {
         const reg = this.colorRegExps[index];
         if (!reg) {
-            try { this.colorRegExps[index] = new RegExp(this.colorRules[index].reg); }
+            try { this.colorRegExps[index] = new RegExp(this.colorRules[index].reg, "gi"); }
             catch (e) { this.colorRegExps[index] = undefined; }
         }
         return this.colorRegExps[index];
@@ -23,7 +23,7 @@ class RuleManager {
     public getReplaceRegExp(index: number): RegExp | undefined {
         const reg = this.replaceRegExps[index];
         if (!reg) {
-            try { this.replaceRegExps[index] = new RegExp(this.replaceRules[index].reg); }
+            try { this.replaceRegExps[index] = new RegExp(this.replaceRules[index].reg, "gi"); }
             catch (e) { this.replaceRegExps[index] = undefined; }
         }
         return this.replaceRegExps[index];
@@ -33,7 +33,7 @@ class RuleManager {
     public getFilterRegExp(index: number): RegExp | undefined {
         const reg = this.filterRegExps[index];
         if (!reg) {
-            try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg); }
+            try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg, "gi"); }
             catch (e) { this.filterRegExps[index] = undefined; }
         }
         return this.filterRegExps[index];
