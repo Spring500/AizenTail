@@ -68,8 +68,9 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
 
     // 监听高亮行的位置变化
     React.useEffect(() => {
-        if (highlightLine < 0) return;
-        listRef.current?.scrollToItem(highlightLine, "center");
+        const index = manager.lineToIndex(highlightLine);
+        if (index < 0) return;
+        listRef.current?.scrollToItem(index, "center", 'smooth');
     }, [highlightLine]);
 
     // 监听manager的变化

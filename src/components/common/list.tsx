@@ -1,7 +1,11 @@
 import React from "react";
 
 export type IListView = {
-    scrollToItem: (index: number, align: "auto" | "smart" | "center" | "end" | "start") => void;
+    scrollToItem: (
+        index: number,
+        align: "auto" | "smart" | "center" | "end" | "start",
+        behavior?: "auto" | "instant" | "smooth"
+    ) => void;
     startIndex: number;
     endIndex: number;
 };
@@ -22,7 +26,7 @@ export const ListView = React.forwardRef((props: {
 
     React.useImperativeHandle(ref, () => {
         return {
-            scrollToItem: (index, align) => {
+            scrollToItem: (index, align, behavior) => {
                 const container = containerRef.current;
                 if (!container) return;
                 let top = container.scrollTop;
@@ -46,7 +50,7 @@ export const ListView = React.forwardRef((props: {
                         top = index * itemHeight;
                         break;
                 }
-                container.scrollTo({ top, behavior: "instant" });
+                container.scrollTo({ top, behavior: behavior ?? "instant" });
             },
             startIndex: Math.max(visibleStart, 0),
             endIndex: Math.min(visibleEnd, props.count),
