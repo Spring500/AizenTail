@@ -83,6 +83,12 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
             current?.removeEventListener("dragover", onDragOver);
             current?.removeEventListener("dragleave", onDragLeave);
             current?.removeEventListener("dragenter", onDragEnter);
+            if (manager.onSetLogCount === setLogCount)
+                manager.onSetLogCount = null;
+            if (manager.onSetHighlightLine === setHighlightLine)
+                manager.onSetHighlightLine = null;
+            if (manager.onScrollToItem === listRef.current?.scrollToItem)
+                manager.onScrollToItem = null;
         }
     }, [mainRef]);
 
@@ -108,9 +114,7 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
     return <div className="logContainer" ref={mainRef} style={{ ...style, position: 'relative' }}>
         <ListView ref={listRef} style={{ height: "100%", inset: "0%" }}
             itemRender={LogRowRenderer} count={logCount} itemHeight={17} />
-        {dragging && <div className='logContainerMask' style={{
-            position: 'absolute', inset: "0%", zIndex: 100, display: 'flex',
-            justifyContent: 'center', alignItems: 'center',
-        }}> 拖曳至此打开日志文件 </div>}
+        {dragging && <div className='logContainerMask' style={{ zIndex: 100 }}>
+            拖曳至此打开日志文件 </div>}
     </div>
 }
