@@ -33,8 +33,8 @@ export const RuleLine_Filter = function ({ index, enable, reg, exclude, onRegCha
         {renderReg()}
         <div className="fixedRuleBlock">
             <button className={exclude ? "ruleButton activatedButton" : "ruleButton"}
-                onClick={toggleExclude} title="满足该条匹配规则的日志将被筛除还是保留"
-                disabled={index <= 0}>反向筛选</button>
+                onClick={toggleExclude} title="满足该条匹配规则的日志将被筛除还是保留">
+                反向筛选</button>
         </div>
     </RuleLineWarpper >
 }
