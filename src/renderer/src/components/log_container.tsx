@@ -1,7 +1,8 @@
 import { ILogManager } from "../managers/log_manager";
 import { IListView, ListView } from './common/list';
 import { ContextWarpper } from './common/context_wapper';
-import { createRef, useEffect, useState } from "react";
+import { useEffect, useState } from "preact/hooks";
+import { createRef } from "preact";
 
 const HIGHLIGHT_STYLE = { backgroundColor: "gray", color: "var(--theme-color-info-text-highlight)" };
 const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
@@ -14,13 +15,14 @@ const splitLog = function (text: string, keywords: string[]) {
         splitedText = splitedText.replace(new RegExp(`(${plainedKeyword})`, "gi"), "\x01\x02$1\x01");
     }
     return splitedText.split("\x01").map((text, index) => {
-        if (text[0] !== "\x02") return <span key={index}>{text}</span >
+        if (text[0] !== "\x02")
+            return <span key={index}>{text}</span >
         return <span className='logSearchHit' key={index}>{text.substring(1)}</span>
     });
 }
 
 export const LogContainer = function ({ style, manager, onChangeFile }: {
-    style?: React.CSSProperties, manager: ILogManager, onChangeFile: (file: File | null) => void
+    style?: preact.JSX.CSSProperties, manager: ILogManager, onChangeFile: (file: File | null) => void
 }) {
     const mainRef = createRef<HTMLDivElement>();
     const listRef = createRef<IListView>();

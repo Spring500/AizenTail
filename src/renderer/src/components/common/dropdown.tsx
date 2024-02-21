@@ -9,7 +9,7 @@ function isInRect(rect: DOMRect, x: number, y: number) {
 export const Dropdown = React.forwardRef(function ({ visible, items, style, onClickOutside }: {
     visible: boolean, items: ItemType[], style?: React.CSSProperties,
     onClickOutside?: (event: MouseEvent) => void,
-}, ref: React.Ref<HTMLUListElement> | undefined) {
+}, ref: React.ForwardedRef<HTMLUListElement>) {
     return <DropdownWarpper visible={visible} style={style} onClickOutside={onClickOutside} ref={ref}>
         {items.map((item, index) => {
             const disabled = !!item.disabled;
@@ -26,7 +26,7 @@ export const DropdownWarpper = React.forwardRef(function (props: {
     children: React.ReactNode, className?: string,
     onClickOutside?: (event: MouseEvent) => void,
     onOtherDropdownOpen?: () => void,
-}, ref: React.Ref<HTMLUListElement> | undefined) {
+}, ref: React.ForwardedRef<HTMLUListElement>) {
     const dropdownRef = React.useRef<HTMLUListElement>(null);
     // 当点击其它位置时，隐藏菜单
     React.useEffect(() => {

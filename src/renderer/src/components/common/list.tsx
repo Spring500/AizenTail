@@ -14,7 +14,7 @@ export const ListView = React.forwardRef((props: {
     itemRender: (index: number) => React.ReactNode;
     count: number; itemHeight: number;
     style: React.CSSProperties; onListScroll?: () => void;
-}, ref: React.Ref<IListView> | undefined) => {
+}, ref: React.ForwardedRef<IListView>) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = React.useState(0);
     const [progress, setProgress] = React.useState(0);
@@ -80,7 +80,7 @@ export const ListView = React.forwardRef((props: {
         return items;
     };
 
-    const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const onScroll = (event: React.JSX.TargetedUIEvent<HTMLDivElement>) => {
         let progress = event.currentTarget.scrollTop / event.currentTarget.scrollHeight;
         progress = Math.max(0, Math.min(progress, 1));
         setProgress(progress);

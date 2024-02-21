@@ -10,7 +10,7 @@ const COROR_LIST = [
 export const ColorRuleTextField = React.forwardRef(function ({ value, placeholder, style, title, onChange, onEnter }: {
     value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
-}, ref: React.Ref<HTMLInputElement> | undefined) {
+}, ref: React.ForwardedRef<HTMLInputElement>) {
     const [menuVisible, setMenuVisible] = React.useState(false);
 
     const colorMenuRef = React.useRef<HTMLUListElement>(null);
@@ -84,7 +84,7 @@ export const RegexTextField = React.forwardRef(function (prop: {
     placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
     onRegexEnableChange: (enable: boolean) => void,
-}, ref: React.Ref<HTMLInputElement> | undefined) {
+}, ref: React.ForwardedRef<HTMLInputElement>) {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
 

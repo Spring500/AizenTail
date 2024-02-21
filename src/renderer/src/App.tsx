@@ -3,7 +3,7 @@ import { LogContainer } from './components/log_container';
 import { TitleBar } from './components/title_bar';
 import { MenuBar } from './components/menu_bar';
 import { RulePanel } from './components/rule_panel/rule_panel';
-import { useState } from 'react';
+import { useState } from 'preact/hooks';
 
 export const App = function () {
     const [fileUrl, setFileUrl] = useState('file directory');

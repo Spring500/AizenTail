@@ -1,7 +1,7 @@
 import { logManager } from '../managers/log_manager';
 import { Dropdown } from './common/dropdown';
 import { ruleManager } from '../managers/rule_manager';
-import { Component } from 'react';
+import { createRef, useState } from 'react';
 
 
 const openLogFile = async () => {
@@ -38,70 +38,60 @@ const saveRuleFile = async () => {
     await ruleManager.saveFile(filepath);
 }
 
-export class MenuBar extends Component<
-    { switchRulePanelVisible: () => void, rulePanelVisible: boolean },
-    { autoScroll: boolean, alwaysOnTop: boolean, openedMenu: undefined | "file" | "view" }> {
-    constructor(props: { switchRulePanelVisible: () => void, rulePanelVisible: boolean }) {
-        super(props);
-        this.state = { autoScroll: true, alwaysOnTop: false, openedMenu: undefined };
-        logManager.onSetAutoScroll = (autoScroll) => this.setState({ autoScroll });
-        logManager.onSetAlwaysOnTop = (alwaysOnTop) => this.setState({ alwaysOnTop });
-    }
-    private onInputFilter = (event: React.ChangeEvent<HTMLInputElement>) => logManager.setInputFilter(event.target.value);
-    private onClickToggleAutoScroll = () => logManager.toggleAutoScroll();
-    private onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!this.state.alwaysOnTop);
+export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible }: {
+    switchRulePanelVisible: () => void, rulePanelVisible: boolean
+}) {
+    const [autoScroll, setAutoScroll] = useState(true);
+    const [alwaysOnTop, setAlwaysOnTop] = useState(false);
+    const [openedMenu, setOpenedMenu] = useState<undefined | "file" | "view">();
+    logManager.onSetAutoScroll = (autoScroll) => setAutoScroll(autoScroll);
+    logManager.onSetAlwaysOnTop = (alwaysOnTop) => setAlwaysOnTop(alwaysOnTop);
 
-    protected switchMenu(menu: "file" | "view") {
-        this.setState({ openedMenu: this.state.openedMenu === menu ? undefined : menu });
-    }
+    const inputFilterRef = createRef<HTMLInputElement>();
+    const onInputFilter = () => inputFilterRef.current && logManager.setInputFilter(inputFilterRef.current.value);
+    const onClickToggleAutoScroll = () => logManager.toggleAutoScroll();
+    const onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!alwaysOnTop);
 
-    override componentDidMount() {
-        logManager.registerHotKey('f', true, false, false, () => this.switchMenu('file'));
-        logManager.registerHotKey('v', true, false, false, () => this.switchMenu('view'));
+    const switchMenu = (menu: "file" | "view") => {
+        setOpenedMenu(openedMenu === menu ? undefined : menu);
     }
 
-    override componentWillUnmount() {
-        logManager.unregisterHotKey('f', true, false, false);
-        logManager.unregisterHotKey('v', true, false, false);
-    }
+    const closeMenu = () => setOpenedMenu(undefined);
 
-    public render() {
-        const closeMenu = () => this.setState({ openedMenu: undefined });
-        return <>
-            <div className='menuBar' style={{ listStyleType: "none" }}>
-                <div style={{ position: "relative", height: "100%" }}>
-                    <Dropdown visible={this.state.openedMenu === "file"}
-                        onClickOutside={closeMenu}
-                        items={
-                            [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
-                            { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
-                            { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
-                            { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
-                            { key: 'exit', name: '退出', callback: () => window.close() }]
+    return <>
+        <div className='menuBar' style={{ listStyleType: "none" }}>
+            <div style={{ position: "relative", height: "100%" }}>
+                <Dropdown visible={openedMenu === "file"}
+                    onClickOutside={closeMenu}
+                    items={
+                        [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
+                        { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
+                        { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
+                        { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
+                        { key: 'exit', name: '退出', callback: () => window.close() }]
 
-                        } style={{ position: "absolute", top: "100%", display: "block" }} />
-                </div>
-                <button className='menuButton' aria-expanded={this.state.openedMenu === "file"} onClick={() => this.switchMenu("file")}>文件(F)</button>
-                <div style={{ position: "relative", height: "100%" }}>
-                    <Dropdown visible={this.state.openedMenu === "view"}
-                        onClickOutside={closeMenu}
-                        items={[
-                            { key: 'autoScroll', name: () => `自动滚动: ${this.state.autoScroll ? "开" : "关"}`, callback: this.onClickToggleAutoScroll },
-                            { key: 'alwaysOnTop', name: () => `窗口置顶: ${this.state.alwaysOnTop ? "开" : "关"}`, callback: this.onClickToggleAlwaysOnTop },
-                        ]}
-                        style={{ position: "absolute", top: "100%", display: "block" }}
-                    />
-                </div>
-                <button className='menuButton' aria-expanded={this.state.openedMenu === "view"} onClick={() => this.switchMenu("view")}>视图(V)</button>
-                <button className={this.props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
-                    onClick={this.props.switchRulePanelVisible}
-                    title='开关筛选及高亮规则配置面板'>规则面板
-                </button>
-                <button className={!logManager.isDisableFilter() ? 'menuButton activatedButton' : 'menuButton'}
-                    onClick={() => { logManager.setFilterDisabled(!logManager.isDisableFilter()) }}
-                    title='暂时开关日志筛选功能 (ctrl+H)'>{logManager.isDisableFilter() ? '日志筛选: 关' : '日志筛选: 开'}
-                </button>
-                <input type="text" className='menuFilter' placeholder='搜索日志' onChange={this.onInputFilter} />
-            </div></>
-    }
+                    } style={{ position: "absolute", top: "100%", display: "block" }} />
+            </div>
+            <button className='menuButton' aria-expanded={openedMenu === "file"} onClick={() => switchMenu("file")}>文件(F)</button>
+            <div style={{ position: "relative", height: "100%" }}>
+                <Dropdown visible={openedMenu === "view"}
+                    onClickOutside={closeMenu}
+                    items={[
+                        { key: 'autoScroll', name: () => `自动滚动: ${autoScroll ? "开" : "关"}`, callback: onClickToggleAutoScroll },
+                        { key: 'alwaysOnTop', name: () => `窗口置顶: ${alwaysOnTop ? "开" : "关"}`, callback: onClickToggleAlwaysOnTop },
+                    ]}
+                    style={{ position: "absolute", top: "100%", display: "block" }}
+                />
+            </div>
+            <button className='menuButton' aria-expanded={openedMenu === "view"} onClick={() => switchMenu("view")}>视图(V)</button>
+            <button className={rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
+                onClick={switchRulePanelVisible}
+                title='开关筛选及高亮规则配置面板'>规则面板
+            </button>
+            <button className={!logManager.isDisableFilter() ? 'menuButton activatedButton' : 'menuButton'}
+                onClick={() => { logManager.setFilterDisabled(!logManager.isDisableFilter()) }}
+                title='暂时开关日志筛选功能 (ctrl+H)'>{logManager.isDisableFilter() ? '日志筛选: 关' : '日志筛选: 开'}
+            </button>
+            <input type="text" className='menuFilter' placeholder='搜索日志' ref={inputFilterRef} onChange={onInputFilter} />
+        </div></>
 }

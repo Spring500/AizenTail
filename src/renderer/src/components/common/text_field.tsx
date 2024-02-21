@@ -6,16 +6,16 @@ export const TextField = React.forwardRef(function ({ className, value, placehol
     placeholder?: string, style?: React.CSSProperties,
     title?: string, list?: string | undefined,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
-}, ref: React.Ref<HTMLInputElement> | undefined) {
+}, ref: React.ForwardedRef<HTMLInputElement>) {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current!);
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e.currentTarget.value);
     }
-    const onKeyUpHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const onKeyUpHandler = (e: React.JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
         e.key === "Enter" && e.currentTarget.blur();
     }
-    const onBlurHandler = (e: React.FocusEvent<HTMLInputElement>) => {
+    const onBlurHandler = (e: React.JSX.TargetedFocusEvent<HTMLInputElement>) => {
         onEnter && onEnter(e.currentTarget.value);
     }
     return <input className={className} type='text'
@@ -30,7 +30,7 @@ export const EditorableTextField = React.forwardRef(function ({ value, placehold
     value: string | undefined, placeholder?: string, style?: React.CSSProperties,
     title?: string, list?: string | undefined,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
-}, ref: React.Ref<HTMLInputElement> | undefined) {
+}, ref: React.ForwardedRef<HTMLInputElement>) {
     return <ContextWarpper className='ruleInputWarpper' menuItems={[
         { key: "selectAll", name: "全选", callback: () => document.execCommand("selectAll") },
         { key: "copy", name: "复制", callback: () => document.execCommand("copy") },
