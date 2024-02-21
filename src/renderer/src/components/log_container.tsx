@@ -81,6 +81,10 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
         manager.onSetLogCount = setLogCount;
         manager.onSetHighlightLine = setHighlightLine;
         manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "center");
+        if (manager.highlightLine !== -1) {
+            const index = manager.lineToIndex(manager.highlightLine);
+            if (index !== -1) listRef.current?.scrollToItem(index, "center");
+        }
         return () => {
             if (manager.onSetLogCount === setLogCount)
                 manager.onSetLogCount = null;
