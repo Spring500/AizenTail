@@ -181,8 +181,9 @@ class LogManager {
         if (this.hasFilter()) {
             for (let line = 0; line < this.logs.length; line++) {
                 if (this.calculateExcluded(line)) continue;
+                const index = this.filtedLogIds.length;
+                this.lineToIndexMap.set(line, index);
                 this.filtedLogIds.push(line);
-                this.lineToIndexMap.set(line, this.filtedLogIds.length);
             }
             this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`);
         }
