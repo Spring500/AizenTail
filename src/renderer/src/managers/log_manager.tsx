@@ -1,13 +1,9 @@
-import { ruleManager } from "./rule_manager";
-
 class LogManager {
     readonly logs = new Array<LogMeta>();
     autoScroll = true;
     alwaysOnTop = false;
     filtedLogIds = new Array<number>();
     /**当开启筛选时，获取显示行数对应的日志行 */ lineToIndexMap = new Map<number, number>();
-
-    rules: LogConfig = { colorRules: [], replaceRules: [], filterRules: [] };
 
     constructor() {
         console.log("LogManager constructor");
@@ -26,9 +22,6 @@ class LogManager {
             }
             this.handleHotKey(e.key, e.altKey, e.ctrlKey, e.shiftKey);
         }
-
-        // 解析setting.json
-        this.rules = ruleManager;
     }
 
     private hotKeyMap = new Map<string, () => unknown>();
@@ -73,32 +66,7 @@ class LogManager {
     public getLogText(index: number) {
         index = this.isFiltering() ? this.filtedLogIds[index] : index;
         let text = this.logs[index]?.text ?? "";
-        for (const rule of this.rules.replaceRules) {
-            if (!rule.enable) continue;
-            if (rule.regexEnable) {
-                const reg = ruleManager.getReplaceRegExp(rule.index);
-                if (reg) text = text.replace(reg, rule.replace);
-            } else {
-                if (text.includes(rule.reg)) text = text.replace(rule.reg, rule.replace);
-            }
-        }
         return text;
-    }
-
-    public getLogColor(log: string): { backgroundColor?: string, color?: string } {
-        for (const rule of this.rules.colorRules) {
-            if (!rule.enable) continue;
-            if (rule.regexEnable) {
-                if (!ruleManager.getFilterRegExp(rule.index)?.test(log)) continue;
-            } else {
-                if (!log.includes(rule.reg)) continue;
-            }
-            return {
-                backgroundColor: rule.background,
-                color: rule.color,
-            };
-        };
-        return {};
     }
 
     async openFile(filepath: string) {
@@ -136,7 +104,7 @@ class LogManager {
     }
 
     hasFilter() {
-        return this.inputFilters.length > 0 || this.rules.filterRules.some(rule => rule.enable);
+        return this.inputFilters.length > 0 || this.filterRules.some(rule => rule.enable);
     }
 
     private disableFilter: boolean = false;
@@ -228,15 +196,31 @@ class LogManager {
         }, 0);
     }
 
+    private filterRules: FilterConfig[] = [];
+    setFilterRules(rules: FilterConfig[]) {
+        this.filterRules = rules;
+        this.filterRegExps.length = 0;
+        this.refreshFilter();
+    }
+    private readonly filterRegExps: (RegExp | undefined)[] = [];
+    public getFilterRegExp(index: number): RegExp | undefined {
+        const reg = this.filterRegExps[index];
+        if (!reg) {
+            try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg, "gi"); }
+            catch (e) { this.filterRegExps[index] = undefined; }
+        }
+        return this.filterRegExps[index];
+    }
+
     private calculateExcluded(line: number): boolean {
         const text = this.logs[line].text;
         let include = false;
         let hasIncludeFilter = false;
-        for (const rule of this.rules.filterRules) {
+        for (const rule of this.filterRules) {
             if (!rule.enable) continue;
             if (!rule.exclude) hasIncludeFilter = true;
             if (rule.regexEnable) {
-                if (!ruleManager.getFilterRegExp(rule.index)?.test(text)) continue;
+                if (!this.getFilterRegExp(rule.index)?.test(text)) continue;
             } else {
                 if (!text.includes(rule.reg)) continue;
             }

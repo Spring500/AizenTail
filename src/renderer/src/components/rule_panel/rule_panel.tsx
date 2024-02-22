@@ -1,104 +1,57 @@
-import { createRef, useEffect, useState } from "react";
-import { ruleManager } from "../../managers/rule_manager";
 import { RuleLine_Color, RuleLine_Replace, RuleLine_Filter } from "../rule_panel/rule_line";
 
-export const RulePanel = function () {
-    const ruleContainerRef = createRef<HTMLDivElement>();
-    const [colorRules, setColorRules] = useState(ruleManager.colorRules);
-    const [replaceRules, setReplaceRules] = useState(ruleManager.replaceRules);
-    const [filterRules, setFilterRules] = useState(ruleManager.filterRules);
-
-    const loadSetting = () => {
-        const colorRules: ColorConfig[] = [];
-        for (const rule of ruleManager.colorRules) {
-            colorRules.push({ ...rule });
-        }
-        setColorRules(colorRules);
-        const replaceRules: ReplaceConfig[] = [];
-        for (const rule of ruleManager.replaceRules) {
-            replaceRules.push({ ...rule });
-        }
-        setReplaceRules(replaceRules);
-        const filterRules: FilterConfig[] = [];
-        for (const rule of ruleManager.filterRules) {
-            filterRules.push({ ...rule });
-        }
-        setFilterRules(filterRules);
-    }
-
-    useEffect(() => {
-        ruleManager.onRuleChanged = () => { loadSetting(); }
-        loadSetting();
-        const div = ruleContainerRef.current;
-        if (!div) return;
-    }, []);
+export const RulePanel = function (props: {
+    replaceRules: ReplaceConfig[],
+    setReplaceRules: (replaceRules: ReplaceConfig[]) => void,
+    colorRules: ColorConfig[],
+    setColorRules: (colorRules: ColorConfig[]) => void,
+    filterRules: FilterConfig[],
+    setFilterRules: (filterRules: FilterConfig[]) => void,
+}) {
 
     const renderColorRuleList = () => {
-        const onRegChange = (index: number, reg: string) => {
-            setColorRules(colorRules.map(rule => rule.index === index ? { ...rule, reg } : rule));
-        }
-        const onBackColorChange = (index: number, color: string) => {
-            setColorRules(colorRules.map(rule => rule.index === index ? { ...rule, background: color } : rule));
-        }
-        const onFontColorChange = (index: number, color: string) => {
-            setColorRules(colorRules.map(rule => rule.index === index ? { ...rule, color } : rule));
-        }
-        const onAddRule = () => { ruleManager.addRule("color"); }
+        const addRule = () => props.setColorRules([
+            ...props.colorRules,
+            { index: props.colorRules.length, reg: "" }
+        ]);
         return <><div className="ruleTitleText">颜色规则</div>
-            {colorRules.map(rule => {
-                const index = rule.index;
-                return <RuleLine_Color key={index} index={index}
-                    enable={rule.enable ?? false} reg={rule.reg ?? ""}
-                    regexEnable={rule.regexEnable ?? false}
-                    background={rule.background} color={rule.color}
-                    onRegChange={onRegChange}
-                    onBackColorChange={onBackColorChange}
-                    onFontColorChange={onFontColorChange} />
-            }
+            {props.colorRules.map(rule =>
+                <RuleLine_Color key={rule.index} index={rule.index}
+                    rules={props.colorRules} setRules={props.setColorRules} />
             )}
-            <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
+            <div className="ruleLine"><button className="ruleButton" onClick={addRule}>添加规则</button></div>
         </>
     }
 
     const renderReplaceRuleList = () => {
-        const onRegChange = (index: number, reg: string) => {
-            setReplaceRules(replaceRules.map(rule => rule.index === index ? { ...rule, reg } : { ...rule }));
-        }
-        const onReplaceChange = (index: number, replace: string) => {
-            setReplaceRules(replaceRules.map(rule => rule.index === index ? { ...rule, replace } : rule));
-        }
-        const onAddRule = () => { ruleManager.addRule("replace"); }
+        const addRule = () => props.setReplaceRules([
+            ...props.replaceRules,
+            { index: props.replaceRules.length, reg: "", replace: "" }
+        ]);
         return <><div className="ruleTitleText">替换规则</div>
-            {replaceRules.map(rule =>
+            {props.replaceRules.map(rule =>
                 <RuleLine_Replace key={rule.index} index={rule.index}
-                    replace={rule.replace}
-                    enable={rule.enable ?? false} reg={rule.reg}
-                    regexEnable={rule.regexEnable ?? false}
-                    onRegChange={onRegChange}
-                    onReplaceChange={onReplaceChange} />
+                    rules={props.replaceRules} setRules={props.setReplaceRules} />
             )}
-            <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
+            <div className="ruleLine"><button className="ruleButton" onClick={addRule}>添加规则</button></div>
         </>;
     }
 
     const renderFilterRuleList = () => {
-        const onRegChange = (index: number, reg: string) => {
-            setFilterRules(filterRules.map(rule => rule.index === index ? { ...rule, reg } : rule));
-        }
-        const onAddRule = () => { ruleManager.addRule("filter"); }
+        const addRule = () => props.setFilterRules([
+            ...props.filterRules,
+            { index: props.filterRules.length, reg: "", exclude: false }
+        ]);
         return <><div className="ruleTitleText">过滤规则</div>
-            {filterRules.map(rule =>
+            {props.filterRules.map(rule =>
                 <RuleLine_Filter key={rule.index} index={rule.index}
-                    enable={rule.enable ?? false} reg={rule.reg}
-                    exclude={rule.exclude ?? false}
-                    regexEnable={rule.regexEnable ?? false}
-                    onRegChange={onRegChange} />
+                    rules={props.filterRules} setRules={props.setFilterRules} />
             )}
-            <div className="ruleLine"><button className="ruleButton" onClick={onAddRule}>添加规则</button></div>
+            <div className="ruleLine"><button className="ruleButton" onClick={addRule}>添加规则</button></div>
         </>;
     }
 
-    return <div className="ruleContainer" ref={ruleContainerRef} >
+    return <div className="ruleContainer" >
         {renderColorRuleList()}
         {renderReplaceRuleList()}
         {renderFilterRuleList()}

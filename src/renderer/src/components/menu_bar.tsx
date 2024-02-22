@@ -1,6 +1,5 @@
 import { logManager } from '../managers/log_manager';
 import { Dropdown } from './common/dropdown';
-import { ruleManager } from '../managers/rule_manager';
 import { createRef, useState } from 'react';
 
 
@@ -16,30 +15,14 @@ const openLogFile = async () => {
     await logManager.openFile(filepath);
 }
 
-const openRuleFile = async () => {
-    const filepath: string = await window.electron.openFileDialog("加载规则文件",
-        undefined,
-        [
-            { name: "All Files", extensions: ["*"] },
-            { name: "JSON Files", extensions: ["json"] },
-        ],
-    );
-    await ruleManager.openFile(filepath);
-}
 
-const saveRuleFile = async () => {
-    const filepath: string = await window.electron.openSaveDialog("规则文件另存为",
-        'AizenTailSetting.json',
-        [
-            { name: "All Files", extensions: ["*"] },
-            { name: "JSON Files", extensions: ["json"] },
-        ],
-    );
-    await ruleManager.saveFile(filepath);
-}
 
-export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible }: {
-    switchRulePanelVisible: () => void, rulePanelVisible: boolean
+
+
+export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible, loadRule, saveRule }: {
+    switchRulePanelVisible: () => void, rulePanelVisible: boolean,
+    loadRule: (filepath: string) => void,
+    saveRule: (filepath: string) => void,
 }) {
     const [autoScroll, setAutoScroll] = useState(true);
     const [alwaysOnTop, setAlwaysOnTop] = useState(false);
@@ -57,6 +40,28 @@ export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible }: {
     }
 
     const closeMenu = () => setOpenedMenu(undefined);
+
+    const openRuleFile = async () => {
+        const filepath: string = await window.electron.openFileDialog("加载规则文件",
+            undefined,
+            [
+                { name: "All Files", extensions: ["*"] },
+                { name: "JSON Files", extensions: ["json"] },
+            ],
+        );
+        loadRule(filepath);
+    }
+
+    const saveRuleFile = async () => {
+        const filepath: string = await window.electron.openSaveDialog("规则文件另存为",
+            'AizenTailSetting.json',
+            [
+                { name: "All Files", extensions: ["*"] },
+                { name: "JSON Files", extensions: ["json"] },
+            ],
+        );
+        saveRule(filepath);
+    }
 
     return <>
         <div className='menuBar' style={{ listStyleType: "none" }}>

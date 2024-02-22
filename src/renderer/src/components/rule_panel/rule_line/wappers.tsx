@@ -141,7 +141,7 @@ export const RegexTextField = React.forwardRef(function (prop: {
 });
 
 export const RuleLineWarpper = function (prop: {
-    children: React.ReactNode, index: number, enable: boolean, rules: unknown[],
+    children: React.ReactNode, index: number, enable: boolean, ruleCount: number,
     menuItems?: { key: string, name: string | (() => string), disabled?: boolean, callback: () => void }[],
     onRuleUp: () => void, onRuleDown: () => void,
     onRuleEnable: () => void, onRuleDelete: () => void,
@@ -151,7 +151,7 @@ export const RuleLineWarpper = function (prop: {
         menuItems.push({ ...item });
     }
     menuItems.push({ key: "up", name: "上移规则", disabled: prop.index <= 0, callback: prop.onRuleUp });
-    menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.rules.length - 1, callback: prop.onRuleDown });
+    menuItems.push({ key: "down", name: "下移规则", disabled: prop.index >= prop.ruleCount - 1, callback: prop.onRuleDown });
     menuItems.push({ key: "enable", name: () => prop.enable ? "禁用规则" : "启用规则", callback: prop.onRuleEnable });
     menuItems.push({ key: "del", name: "删除规则", callback: prop.onRuleDelete });
 
@@ -163,7 +163,7 @@ export const RuleLineWarpper = function (prop: {
             <button className="ruleButton" onClick={prop.onRuleUp} title="将该条规则上移一行"
                 disabled={prop.index <= 0}>上移</button>
             <button className="ruleButton" onClick={prop.onRuleDown} title="将该条规则下移一行"
-                disabled={prop.index >= prop.rules.length - 1}>下移</button>
+                disabled={prop.index >= prop.ruleCount - 1}>下移</button>
             <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">删除</button>
         </div>
     </ContextWarpper>

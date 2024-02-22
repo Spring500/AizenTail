@@ -1,38 +1,50 @@
-import { ruleManager } from "../../../managers/rule_manager";
 import { EditorableTextField } from "../../common/text_field";
 import { RegexTextField, RuleLineWarpper } from "./wappers";
 
-export const RuleLine_Replace = function ({ index, enable, reg, replace, regexEnable, onRegChange, onReplaceChange }: {
-    index: number, enable: boolean, reg: string, replace: string, regexEnable: boolean,
-    /**匹配串发生输入变更时的回调函数 */ onRegChange: (index: number, reg: string) => void,
-    /**替换串发生输入变更时的回调函数 */ onReplaceChange: (index: number, replace: string) => void,
+export const RuleLine_Replace = function ({ index, rules, setRules }: {
+    index: number, rules: ReplaceConfig[],
+    setRules: (rules: ReplaceConfig[]) => void,
 }) {
+    const rule = rules[index];
+    const setRule = (index: number, rule: ReplaceConfig) => {
+        setRules(rules.map((r, i) => i === index ? rule : r));
+    }
+    const switchRules = (index: number, newIndex: number) => {
+        if (newIndex < 0 || newIndex >= rules.length
+            || index < 0 || index >= rules.length) return;
+        [rules[index], rules[newIndex]] = [rules[newIndex], rules[index]];
+        setRules([...rules]);
+    }
+    const deleteRule = (index: number) => {
+        rules.splice(index, 1);
+        setRules([...rules]);
+    }
     const renderReg = () => {
         return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
-            <RegexTextField fieldName="匹配串" value={reg} placeholder="输入匹配串"
-                regexEnable={regexEnable}
-                onChange={(value) => onRegChange(index, value)}
-                onEnter={(value) => ruleManager.setReg("replace", index, value)}
-                onRegexEnableChange={(enable) => ruleManager.setRegexEnable("replace", index, enable)} />
+            <RegexTextField fieldName="匹配串" value={rule.reg} placeholder="输入匹配串"
+                regexEnable={rule.regexEnable}
+                onChange={(value) => setRule(index, { ...rule, reg: value })}
+                onEnter={(value) => setRule(index, { ...rule, reg: value })}
+                onRegexEnableChange={(enable) => setRule(index, { ...rule, regexEnable: enable })} />
         </div>
     }
 
     const renderReplace = () => {
         const title = "将根据正则表达式匹配得到的字符串替换显示为对应的字符串。用$1、$2...等分别表示与正则表达式中的第1、2...个子表达式相匹配的文本";
         return <div className="ruleBlock" title={title}> 替换串
-            <EditorableTextField value={replace} placeholder="替换"
-                onChange={(value) => onReplaceChange(index, value)}
-                onEnter={(value) => ruleManager.setRuleReplace(index, value)} />
+            <EditorableTextField value={rule.replace} placeholder="替换"
+                onChange={(value) => setRule(index, { ...rule, replace: value })}
+                onEnter={(value) => setRule(index, { ...rule, replace: value })} />
         </div>
     }
 
-    const ruleUp = () => ruleManager.switchRules("replace", index, index - 1);
-    const ruleDown = () => ruleManager.switchRules("replace", index, index + 1);
-    const enableRule = () => ruleManager.setEnable("replace", index, !enable);
-    const deleteRule = () => ruleManager.removeRule("replace", index);
+    const ruleUp = () => switchRules(index, index - 1);
+    const ruleDown = () => switchRules(index, index + 1);
+    const enableRule = () => setRule(index, { ...rule, enable: !rule.enable });
+    const onRuleDelete = () => deleteRule(index);
 
-    return <RuleLineWarpper key={index} index={index} enable={enable} rules={ruleManager.replaceRules}
-        onRuleDelete={deleteRule} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
+    return <RuleLineWarpper key={index} index={index} enable={!!rule.enable} ruleCount={rules.length}
+        onRuleDelete={onRuleDelete} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
         {renderReg()} {renderReplace()}
     </RuleLineWarpper>
 }

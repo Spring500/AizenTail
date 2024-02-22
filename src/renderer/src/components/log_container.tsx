@@ -21,8 +21,12 @@ const splitLog = function (text: string, keywords: string[]) {
     });
 }
 
-export const LogContainer = function ({ style, manager, onChangeFile }: {
-    style?: preact.JSX.CSSProperties, manager: ILogManager, onChangeFile: (file: File | null) => void
+export const LogContainer = function ({ style, manager, onChangeFile, replaceRules, colorRules }: {
+    style?: preact.JSX.CSSProperties,
+    manager: ILogManager,
+    onChangeFile: (file: File | null) => void,
+    replaceRules: ReplaceConfig[],
+    colorRules: ColorConfig[]
 }) {
     const mainRef = createRef<HTMLDivElement>();
     const listRef = createRef<IListView>();
@@ -81,6 +85,10 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
         manager.onSetLogCount = setLogCount;
         manager.onSetHighlightLine = setHighlightLine;
         manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "center");
+        if (highlightLine !== -1) {
+            const index = manager.lineToIndex(manager.highlightLine);
+            if (index !== -1) listRef.current?.scrollToItem(index, "center");
+        }
         return () => {
             if (manager.onSetLogCount === setLogCount)
                 manager.onSetLogCount = null;
@@ -108,12 +116,55 @@ export const LogContainer = function ({ style, manager, onChangeFile }: {
         }
     }, [mainRef]);
 
+    const rexCache = new Map<string, RegExp | undefined>();
+    const getRegExp = function (matchText: string): RegExp | undefined {
+        if (rexCache.has(matchText))
+            return rexCache.get(matchText);
+        let res: RegExp | undefined = undefined;
+        try { res = new RegExp(matchText, "gi"); }
+        catch { }
+        finally { rexCache.set(matchText, res); }
+        return res;
+    }
+
+    // 替换日志
+    const replaceLog = function (rawText: string) {
+        let text = rawText ?? "";
+        for (const rule of replaceRules) {
+            if (!rule.enable) continue;
+            if (rule.regexEnable) {
+                const reg = getRegExp(rule.reg);
+                if (reg) text = text.replace(reg, rule.replace);
+            } else {
+                if (text.includes(rule.reg)) text = text.replace(rule.reg, rule.replace);
+            }
+        }
+        return text;
+    }
+
+    // 获取日志颜色
+    const getLogColor = function (log: string) {
+        for (const rule of colorRules) {
+            if (!rule.enable) continue;
+            if (rule.regexEnable) {
+                if (!getRegExp(rule.reg)?.test(log)) continue;
+            } else {
+                if (!log.includes(rule.reg)) continue;
+            }
+            return {
+                backgroundColor: rule.background,
+                color: rule.color,
+            };
+        };
+        return {};
+    }
+
     const LogRowRenderer = function (index: number) {
-        const logText = manager.getLogText(index);
+        const logText = replaceLog(manager.getLogText(index));
         const line = manager.indexToLine(index);
         const isExculed = manager.isDisableFilter() && !manager.lineToIndexMap.has(index);
         const isHighlight = line >= 0 && line === highlightLine;
-        const lineStyle = isHighlight ? HIGHLIGHT_STYLE : manager.getLogColor(logText);
+        const lineStyle = isHighlight ? HIGHLIGHT_STYLE : getLogColor(logText);
         const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
 
         return <ContextWarpper menuItems={[
