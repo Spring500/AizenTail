@@ -80,12 +80,18 @@ export const ListView = React.forwardRef((props: {
         return items;
     };
 
-    const onScroll = (event: React.JSX.TargetedUIEvent<HTMLDivElement>) => {
-        let progress = event.currentTarget.scrollTop / event.currentTarget.scrollHeight;
-        progress = Math.max(0, Math.min(progress, 1));
-        setProgress(progress);
+    const onScroll = () => {
+        const container = containerRef.current;
+        if (!container) return;
+        let newProgress = container.scrollTop / container.scrollHeight;
+        newProgress = Math.max(0, Math.min(newProgress, 1));
+        if (newProgress === progress) return;
+        setProgress(newProgress);
         props.onListScroll?.();
     }
+
+    onScroll();
+
     return <div style={{ ...props.style, overflow: "scroll", position: "relative" }}
         onScroll={onScroll} ref={containerRef}>
         <div style={{ height: props.itemHeight * props.count, }} />
