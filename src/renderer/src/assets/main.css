@@ -242,6 +242,18 @@ body,
     height: 100%;
 }
 
+.highlightLogText{
+    /* background: gray;
+    color: var(--theme-color-info-text-highlight); */
+    animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+    0% { background: none; color: none; }
+    50% { background: gray; color: var(--theme-color-info-text-highlight); }
+    100% { background: none; color: none; }
+}
+
 .logSearchHit{
     background: var(--theme-color-log-search-hit-background);
     color: var(--theme-color-log-search-hit-text);

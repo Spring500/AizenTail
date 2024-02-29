@@ -4,10 +4,9 @@ import { ContextWarpper } from './common/context_wapper';
 import { useEffect, useState } from "preact/hooks";
 import { createRef } from "preact";
 
-const HIGHLIGHT_STYLE = { backgroundColor: "gray", color: "var(--theme-color-info-text-highlight)" };
-const HIGHLIGHT_INDEX_COLOR = "var(--theme-color-log)";
 const EXCLUDED_OPACITY = 0.3;
 
+// TODO: highlight line迁移到log_container
 const splitLog = function (text: string, keywords: string[]) {
     let splitedText = text;
     for (const keyword of keywords) {
@@ -21,12 +20,15 @@ const splitLog = function (text: string, keywords: string[]) {
     });
 }
 
-export const LogContainer = function ({ style, manager, onChangeFile, replaceRules, colorRules }: {
+export const LogContainer = function ({ style, manager, isFiltering, isAutoScroll, onChangeFile, replaceRules, colorRules, filterRules }: {
     style?: preact.JSX.CSSProperties,
     manager: ILogManager,
+    isFiltering: boolean,
+    isAutoScroll: boolean,
     onChangeFile: (file: File | null) => void,
     replaceRules: ReplaceConfig[],
-    colorRules: ColorConfig[]
+    colorRules: ColorConfig[],
+    filterRules: FilterConfig[],
 }) {
     const mainRef = createRef<HTMLDivElement>();
     const listRef = createRef<IListView>();
@@ -74,28 +76,25 @@ export const LogContainer = function ({ style, manager, onChangeFile, replaceRul
 
     // 监听高亮行的位置变化
     useEffect(() => {
+        const list = listRef.current;
+        if (!list) return;
         const index = manager.lineToIndex(highlightLine);
         if (index < 0) return;
-        listRef.current?.scrollToItem(index, "center", 'smooth');
-    }, [highlightLine]);
+        if (index >= list.startIndex && index <= list.endIndex) return;
+        list.scrollToItem(index, "center", 'smooth');
+        console.log('普通调整，设置高亮');
+    }, [listRef, highlightLine]);
 
+    const scrollToItem = function (index: number, behavior: "auto" | "instant" | "smooth" = "smooth") {
+        listRef.current?.scrollToItem(index, "center", behavior);
+    }
     // 监听manager的变化
     useEffect(() => {
         if (!manager) return;
         manager.onSetLogCount = setLogCount;
-        manager.onSetHighlightLine = setHighlightLine;
-        manager.onScrollToItem = (index) => listRef.current?.scrollToItem(index, "center");
-        if (highlightLine !== -1) {
-            const index = manager.lineToIndex(manager.highlightLine);
-            if (index !== -1) listRef.current?.scrollToItem(index, "center");
-        }
         return () => {
             if (manager.onSetLogCount === setLogCount)
                 manager.onSetLogCount = null;
-            if (manager.onSetHighlightLine === setHighlightLine)
-                manager.onSetHighlightLine = null;
-            if (manager.onScrollToItem === listRef.current?.scrollToItem)
-                manager.onScrollToItem = null;
         }
     }, [mainRef]);
 
@@ -115,6 +114,18 @@ export const LogContainer = function ({ style, manager, onChangeFile, replaceRul
             current.removeEventListener("dragenter", onDragEnter);
         }
     }, [mainRef]);
+
+    useEffect(() => {
+        if (!isAutoScroll) return;
+        if (highlightLine !== -1) {
+            const index = manager.lineToIndex(highlightLine);
+            if (index !== -1) scrollToItem(index, 'instant')
+        } else {
+            scrollToItem(isFiltering
+                ? manager.filtedLogIds.length - 1
+                : manager.logs.length - 1);
+        }
+    }, [logCount, isFiltering]);
 
     const rexCache = new Map<string, RegExp | undefined>();
     const getRegExp = function (matchText: string): RegExp | undefined {
@@ -159,21 +170,24 @@ export const LogContainer = function ({ style, manager, onChangeFile, replaceRul
         return {};
     }
 
+    const hasFilter = filterRules.length > 0 && filterRules.some(rule => rule.enable);
+
     const LogRowRenderer = function (index: number) {
         const logText = replaceLog(manager.getLogText(index));
         const line = manager.indexToLine(index);
-        const isExculed = manager.isDisableFilter() && !manager.lineToIndexMap.has(index);
+        const isExculed = !isFiltering && hasFilter && !manager.lineToIndexMap.has(index);
         const isHighlight = line >= 0 && line === highlightLine;
-        const lineStyle = isHighlight ? HIGHLIGHT_STYLE : getLogColor(logText);
-        const onClick = () => manager.setHighlightLine(line !== highlightLine ? line : -1);
+        const onClick = () => setHighlightLine(line !== highlightLine ? line : -1);
 
         return <ContextWarpper menuItems={[
-            { key: "select", name: "选择", callback: () => manager.setHighlightLine(line) },
+            { key: "select", name: "选择", callback: () => setHighlightLine(line) },
             { key: "copy", name: "复制", callback: () => navigator.clipboard.writeText(logText) }
         ]}>
             <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
-                <div className="logIndex" style={{ color: isHighlight ? HIGHLIGHT_INDEX_COLOR : undefined }}>{line >= 0 ? line : ''}</div>
-                <div className="logText" style={{ ...lineStyle, whiteSpace: "pre" }}>{splitLog(logText, manager.inputFilters)}<br /></div>
+                <div className="logIndex">{line >= 0 ? line : ''}</div>
+                <div className={`logText${isHighlight ? ' highlightLogText' : ''}`}
+                    style={{ ...getLogColor(logText), whiteSpace: "pre" }}>
+                    {splitLog(logText, manager.inputFilters)}<br /></div>
             </div >
         </ContextWarpper>
     }

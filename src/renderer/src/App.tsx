@@ -11,22 +11,41 @@ export const App = function () {
     const [fileUrl, setFileUrl] = useState('file directory');
     const [hint, setHint] = useState('');
     const [rulePanelVisible, setRulePanelVisible] = useState(false);
-    // TODO: 用state管理Rules，当Rules变化时，重新渲染RulePanel和LogContainer
     const [colorRules, setColorRules] = useState<ColorConfig[]>([]);
     const [replaceRules, setReplaceRules] = useState<ReplaceConfig[]>([]);
     const [filterRules, setFilterRules] = useState<FilterConfig[]>([]);
     const [ruleInited, setRuleInited] = useState(false);
+    const [isFiltering, setIsFiltering] = useState(false);
+    const [isAutoScroll, setIsAutoScroll] = useState(true);
 
+    const onKeyUp = (e: KeyboardEvent) => {
+        switch (e.key) {
+            case 'r':
+                e.altKey && setIsAutoScroll(!isAutoScroll); return;
+            case 'h':
+                e.ctrlKey && setIsFiltering(!isFiltering); return;
+            case 't':
+                e.altKey && logManager.setAlwaysOnTop(!logManager.alwaysOnTop); return;
+            case 'F12': window.electron.openDevTools(); return;
+        }
+    }
     useEffect(() => {
         logManager.onSetHint = setHint;
         logManager.onSetFileUrl = setFileUrl;
+        document.onkeyup = onKeyUp;
         return () => {
             if (logManager.onSetHint == setHint)
                 logManager.onSetHint = null;
             if (logManager.onSetFileUrl == setFileUrl)
                 logManager.onSetFileUrl = null;
+            if (document.onkeyup == onKeyUp)
+                document.onkeyup = null;
         }
     }, []);
+
+    useEffect(() => {
+        logManager.setFilterDisabled(!isFiltering);
+    }, [isFiltering]);
 
     useEffect(() => {
         const onRuleChanged = (setting: TSetting) => {
@@ -42,6 +61,7 @@ export const App = function () {
     }, []);
 
     useEffect(() => {
+        if (!ruleInited) return;
         ruleManager.saveConfig({ color: colorRules, replacing: replaceRules, filter: filterRules });
         console.log('save config', { color: colorRules, replacing: replaceRules, filter: filterRules });
     }, [colorRules, replaceRules, filterRules]);
@@ -71,15 +91,20 @@ export const App = function () {
     return <>
         <TitleBar />
         <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
+            isFiltering={isFiltering} setIsFiltering={setIsFiltering}
+            isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
             rulePanelVisible={rulePanelVisible}
             loadRule={() => ruleManager.reloadSetting()}
             saveRule={(filepath: string) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
         />
         <LogContainer manager={logManager}
             style={logContainerStyle}
+            isFiltering={isFiltering}
+            isAutoScroll={isAutoScroll}
             onChangeFile={OnChangeFile}
             replaceRules={replaceRules}
             colorRules={colorRules}
+            filterRules={filterRules}
         />
         {rulePanelVisible && <RulePanel
             replaceRules={replaceRules} setReplaceRules={setReplaceRules}

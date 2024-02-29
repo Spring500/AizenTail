@@ -12,43 +12,6 @@ class LogManager {
 
     async init() {
         window.electron.watchLogChange(this.updateFile);
-
-        document.onkeyup = (e) => {
-            switch (e.key) {
-                case 'r': if (e.altKey) this.toggleAutoScroll(); return;
-                case 'h': if (e.ctrlKey) this.setFilterDisabled(!this.disableFilter); return;
-                case 't': if (e.altKey) this.setAlwaysOnTop(!this.alwaysOnTop); return;
-                case 'F12': window.electron.openDevTools(); break;
-            }
-            this.handleHotKey(e.key, e.altKey, e.ctrlKey, e.shiftKey);
-        }
-    }
-
-    private hotKeyMap = new Map<string, () => unknown>();
-
-    /**注册热键 */
-    public registerHotKey(
-        key: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean, callback: () => unknown
-    ) {
-        this.hotKeyMap.set(
-            `${key}_${altKey ? 'alt' : ''}_${ctrlKey ? 'ctrl' : ''}_${shiftKey ? 'shift' : ''}`
-            , callback);
-    }
-
-    /**处理热键 */
-    public handleHotKey(key: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean) {
-        const callback = this.hotKeyMap.get(
-            `${key}_${altKey ? 'alt' : ''}_${ctrlKey ? 'ctrl' : ''}_${shiftKey ? 'shift' : ''}`
-        );
-        console.log('handleHotKey', key, altKey, ctrlKey, shiftKey, callback);
-        if (callback) callback();
-    }
-
-    /**移除热键 */
-    public unregisterHotKey(key: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean) {
-        this.hotKeyMap.delete(
-            `${key}_${altKey ? 'alt' : ''}_${ctrlKey ? 'ctrl' : ''}_${shiftKey ? 'shift' : ''}`
-        );
     }
 
     /**获取日志行号 */
@@ -92,11 +55,6 @@ class LogManager {
         this.refreshFilter();
     }
 
-    toggleAutoScroll() {
-        this.autoScroll = !this.autoScroll;
-        this.onSetAutoScroll?.(this.autoScroll);
-    }
-
     setAlwaysOnTop(flag: boolean) {
         this.alwaysOnTop = flag;
         window.electron.setAlwaysOnTop(flag);
@@ -111,10 +69,6 @@ class LogManager {
     setFilterDisabled(flag: boolean) {
         this.disableFilter = flag;
         this.refreshFilter();
-    }
-
-    isDisableFilter() {
-        return this.disableFilter;
     }
 
     isFiltering() {
@@ -152,17 +106,6 @@ class LogManager {
         }
 
         this.refreshFilter();
-        if (this.autoScroll) setTimeout(() => {
-            if (this.highlightLine !== -1) {
-                const index = this.lineToIndex(this.highlightLine);
-                console.log("highlightLine", index, this.highlightLine);
-                if (index !== -1) this.onScrollToItem?.(index)
-            } else {
-                this.onScrollToItem?.(this.isFiltering()
-                    ? this.filtedLogIds.length - 1
-                    : this.logs.length - 1);
-            }
-        }, 0);
     }
 
     lastRefreshTime = 0;
@@ -188,13 +131,6 @@ class LogManager {
             this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`);
         }
         this.onSetLogCount?.(this.isFiltering() ? this.filtedLogIds.length + 1 : logManager.logs.length + 1);
-
-        setTimeout(() => {
-            if (this.highlightLine !== -1) {
-                const index = this.lineToIndex(this.highlightLine);
-                if (index !== -1) this.onScrollToItem?.(index)
-            }
-        }, 0);
     }
 
     private filterRules: FilterConfig[] = [];
@@ -217,11 +153,11 @@ class LogManager {
         const text = this.logs[line].text;
         let include = false;
         let hasIncludeFilter = false;
-        for (const rule of this.filterRules) {
+        for (const [index, rule] of this.filterRules.entries()) {
             if (!rule.enable) continue;
             if (!rule.exclude) hasIncludeFilter = true;
             if (rule.regexEnable) {
-                if (!this.getFilterRegExp(rule.index)?.test(text)) continue;
+                if (!this.getFilterRegExp(index)?.test(text)) continue;
             } else {
                 if (!text.includes(rule.reg)) continue;
             }
@@ -233,18 +169,9 @@ class LogManager {
         return !this.inputFilters?.some(filter => text.match(new RegExp(`(${filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi")));
     }
 
-    highlightLine = -1;
-    setHighlightLine(line: number) {
-        this.highlightLine = line;
-        this.onSetHighlightLine?.(line);
-    }
-
-    onSetHighlightLine: ((line: number) => void) | null = null;
     onSetFileUrl: ((fileUrl: string) => void) | null = null;
     onSetHint: ((hint: string) => void) | null = null;
     onSetLogCount: ((count: number) => void) | null = null;
-    onScrollToItem: ((index: number) => void) | null = null;
-    onSetAutoScroll: ((autoScroll: boolean) => void) | null = null;
     onSetAlwaysOnTop: ((alwaysOnTop: boolean) => void) | null = null;
 }
 export type ILogManager = LogManager;

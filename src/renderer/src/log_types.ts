@@ -8,7 +8,6 @@ type LogMeta = {
 }
 
 type ColorConfig = {
-    index: number,
     color?: string,
     background?: string,
     reg: string,
@@ -17,7 +16,6 @@ type ColorConfig = {
 }
 
 type ReplaceConfig = {
-    index: number,
     reg: string,
     replace: string,
     enable?: boolean,
@@ -25,7 +23,6 @@ type ReplaceConfig = {
 }
 
 type FilterConfig = {
-    index: number,
     reg: string,
     exclude: boolean,
     enable?: boolean,

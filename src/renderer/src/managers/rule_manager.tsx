@@ -9,10 +9,6 @@ export type TSetting = {
 
 class RuleManager {
 
-    public constructor() {
-        this.reloadSetting();
-    }
-
     async openFile(filepath: string) {
         console.log('打开文件', filepath);
         await this.reloadSetting(filepath);

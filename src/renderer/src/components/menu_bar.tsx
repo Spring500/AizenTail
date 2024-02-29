@@ -2,7 +2,6 @@ import { logManager } from '../managers/log_manager';
 import { Dropdown } from './common/dropdown';
 import { createRef, useState } from 'react';
 
-
 const openLogFile = async () => {
     const filepath: string = await window.electron.openFileDialog("打开日志文件",
         undefined,
@@ -15,24 +14,20 @@ const openLogFile = async () => {
     await logManager.openFile(filepath);
 }
 
-
-
-
-
-export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible, loadRule, saveRule }: {
+export const MenuBar = function (props: {
     switchRulePanelVisible: () => void, rulePanelVisible: boolean,
+    isFiltering: boolean, setIsFiltering: (v: boolean) => void,
+    isAutoScroll: boolean, setIsAutoScroll: (v: boolean) => void,
     loadRule: (filepath: string) => void,
     saveRule: (filepath: string) => void,
 }) {
-    const [autoScroll, setAutoScroll] = useState(true);
     const [alwaysOnTop, setAlwaysOnTop] = useState(false);
     const [openedMenu, setOpenedMenu] = useState<undefined | "file" | "view">();
-    logManager.onSetAutoScroll = (autoScroll) => setAutoScroll(autoScroll);
     logManager.onSetAlwaysOnTop = (alwaysOnTop) => setAlwaysOnTop(alwaysOnTop);
 
     const inputFilterRef = createRef<HTMLInputElement>();
     const onInputFilter = () => inputFilterRef.current && logManager.setInputFilter(inputFilterRef.current.value);
-    const onClickToggleAutoScroll = () => logManager.toggleAutoScroll();
+    const onClickToggleAutoScroll = () => props.setIsAutoScroll(!props.isAutoScroll);
     const onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!alwaysOnTop);
 
     const switchMenu = (menu: "file" | "view") => {
@@ -49,7 +44,7 @@ export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible, loa
                 { name: "JSON Files", extensions: ["json"] },
             ],
         );
-        loadRule(filepath);
+        props.loadRule(filepath);
     }
 
     const saveRuleFile = async () => {
@@ -60,7 +55,7 @@ export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible, loa
                 { name: "JSON Files", extensions: ["json"] },
             ],
         );
-        saveRule(filepath);
+        props.saveRule(filepath);
     }
 
     return <>
@@ -82,20 +77,20 @@ export const MenuBar = function ({ switchRulePanelVisible, rulePanelVisible, loa
                 <Dropdown visible={openedMenu === "view"}
                     onClickOutside={closeMenu}
                     items={[
-                        { key: 'autoScroll', name: () => `自动滚动: ${autoScroll ? "开" : "关"}`, callback: onClickToggleAutoScroll },
+                        { key: 'autoScroll', name: () => `自动滚动: ${props.isAutoScroll ? "开" : "关"}`, callback: onClickToggleAutoScroll },
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${alwaysOnTop ? "开" : "关"}`, callback: onClickToggleAlwaysOnTop },
                     ]}
                     style={{ position: "absolute", top: "100%", display: "block" }}
                 />
             </div>
             <button className='menuButton' aria-expanded={openedMenu === "view"} onClick={() => switchMenu("view")}>视图(V)</button>
-            <button className={rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
-                onClick={switchRulePanelVisible}
+            <button className={props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
+                onClick={props.switchRulePanelVisible}
                 title='开关筛选及高亮规则配置面板'>规则面板
             </button>
-            <button className={!logManager.isDisableFilter() ? 'menuButton activatedButton' : 'menuButton'}
-                onClick={() => { logManager.setFilterDisabled(!logManager.isDisableFilter()) }}
-                title='暂时开关日志筛选功能 (ctrl+H)'>{logManager.isDisableFilter() ? '日志筛选: 关' : '日志筛选: 开'}
+            <button className={props.isFiltering ? 'menuButton activatedButton' : 'menuButton'}
+                onClick={() => { props.setIsFiltering(!props.isFiltering) }}
+                title='暂时开关日志筛选功能 (ctrl+H)'>{props.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
             </button>
             <input type="text" className='menuFilter' placeholder='搜索日志' ref={inputFilterRef} onChange={onInputFilter} />
         </div></>

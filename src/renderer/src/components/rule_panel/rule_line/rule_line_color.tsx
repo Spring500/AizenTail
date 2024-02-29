@@ -1,20 +1,34 @@
 import { ColorRuleTextField, RegexTextField, RuleLineWarpper } from "./wappers";
 
+const isObjectEqual = (a: object, b: object) => {
+    for (let key in a) {
+        if (a[key] !== b[key]) return false;
+    }
+    for (let key in b) {
+        if (a[key] !== b[key]) return false;
+    }
+    return true;
+}
+
 export const RuleLine_Color = function ({ index, rules, setRules }: {
     index: number, rules: ColorConfig[],
     setRules: (rules: ColorConfig[]) => void,
 }) {
     const rule = rules[index];
     const setRule = (index: number, rule: ColorConfig) => {
+        if (index < 0 || index >= rules.length) return;
+        if (isObjectEqual(rules[index], rule)) return;
         setRules(rules.map((r, i) => i === index ? rule : r));
     }
     const switchRules = (index: number, newIndex: number) => {
         if (newIndex < 0 || newIndex >= rules.length
             || index < 0 || index >= rules.length) return;
+        if (isObjectEqual(rules[index], rules[newIndex])) return;
         [rules[index], rules[newIndex]] = [rules[newIndex], rules[index]];
         setRules([...rules]);
     }
     const deleteRule = (index: number) => {
+        if (index < 0 || index >= rules.length) return;
         rules.splice(index, 1);
         setRules([...rules]);
     }
