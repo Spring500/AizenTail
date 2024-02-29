@@ -3,7 +3,7 @@ import { LogContainer } from './components/log_container';
 import { TitleBar } from './components/title_bar';
 import { MenuBar } from './components/menu_bar';
 import { RulePanel } from './components/rule_panel/rule_panel';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { TSetting, ruleManager } from './managers/rule_manager';
 
 

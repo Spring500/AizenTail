@@ -1,8 +1,8 @@
 import { ILogManager } from "../managers/log_manager";
 import { IListView, ListView } from './common/list';
 import { ContextWarpper } from './common/context_wapper';
-import { useEffect, useState } from "preact/hooks";
-import { createRef } from "preact";
+import { useEffect, useState } from "react";
+import { createRef } from "react";
 
 const EXCLUDED_OPACITY = 0.3;
 
@@ -21,7 +21,7 @@ const splitLog = function (text: string, keywords: string[]) {
 }
 
 export const LogContainer = function ({ style, manager, isFiltering, isAutoScroll, onChangeFile, replaceRules, colorRules, filterRules }: {
-    style?: preact.JSX.CSSProperties,
+    style?: React.CSSProperties,
     manager: ILogManager,
     isFiltering: boolean,
     isAutoScroll: boolean,
@@ -190,7 +190,6 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
             </div >
         </ContextWarpper>
     }
-
     return <div className="logContainer" ref={mainRef} style={{ ...style, position: 'relative' }}>
         <ListView ref={listRef} style={{ height: "100%", inset: "0%" }}
             itemRender={LogRowRenderer} count={logCount} itemHeight={17} />
