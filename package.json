@@ -26,7 +26,6 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
-    "electron-updater": "^6.1.7",
     "node-watch": "^0.7.4",
     "preact": "^10.19.5"
   },
