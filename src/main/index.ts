@@ -104,8 +104,7 @@ app.whenReady().then(() => {
         watcher?.close();
         console.log('watching file', filename);
         fileCurrentSize = fs.statSync(filename).size;
-        watcher = watch(filename, { recursive: false, delay: 200 }, (evt, name) => {
-            console.log('watching file changed', evt, name,);
+        watcher = watch(filename, { recursive: false, delay: 200 }, (evt, _) => {
             switch (evt) {
                 case "update": {
                     const fd = fs.openSync(filename, 'r');
