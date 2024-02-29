@@ -17,12 +17,8 @@ export const ListView = React.forwardRef((props: {
 }, ref: React.ForwardedRef<IListView>) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = React.useState(0);
-    const [progress, setProgress] = React.useState(0);
-
-    const visibleStart = Math.floor(progress * props.count);
+    const [visibleStart, setVisibleStart] = React.useState(0);
     const visibleEnd = visibleStart + Math.ceil(containerHeight / props.itemHeight);
-    const renderStart = visibleStart - 3;
-    const renderEnd = visibleEnd + 3;
 
     React.useImperativeHandle(ref, () => {
         return {
@@ -68,6 +64,8 @@ export const ListView = React.forwardRef((props: {
     }, [containerRef]);
 
     const renderItems = () => {
+        const renderStart = visibleStart - 3;
+        const renderEnd = visibleEnd + 3;
         // 只渲染可见的部分
         const items: React.ReactNode[] = [];
         for (let i = renderStart; i < renderEnd; i++) {
@@ -85,12 +83,12 @@ export const ListView = React.forwardRef((props: {
         if (!container) return;
         let newProgress = container.scrollTop / container.scrollHeight;
         newProgress = Math.max(0, Math.min(newProgress, 1));
-        if (newProgress === progress) return;
-        setProgress(newProgress);
+
+        const newVisibleStart = Math.floor(newProgress * props.count);
+        if (newVisibleStart === visibleStart) return;
+        setVisibleStart(newVisibleStart);
         props.onListScroll?.();
     }
-
-    onScroll();
 
     return <div style={{ ...props.style, overflow: "scroll", position: "relative" }}
         onScroll={onScroll} ref={containerRef}>
