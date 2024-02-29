@@ -81,12 +81,11 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
         const index = manager.lineToIndex(highlightLine);
         if (index < 0) return;
         if (index >= list.startIndex && index <= list.endIndex) return;
-        list.scrollToItem(index, "center", 'smooth');
-        console.log('普通调整，设置高亮');
+        list.scrollToItem(index, "center");
     }, [listRef, highlightLine]);
 
-    const scrollToItem = function (index: number, behavior: "auto" | "instant" | "smooth" = "smooth") {
-        listRef.current?.scrollToItem(index, "center", behavior);
+    const scrollToItem = function (index: number) {
+        listRef.current?.scrollToItem(index, "center", "instant");
     }
     // 监听manager的变化
     useEffect(() => {
@@ -119,7 +118,7 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
         if (!isAutoScroll) return;
         if (highlightLine !== -1) {
             const index = manager.lineToIndex(highlightLine);
-            if (index !== -1) scrollToItem(index, 'instant')
+            if (index !== -1) scrollToItem(index)
         } else {
             scrollToItem(isFiltering
                 ? manager.filtedLogIds.length - 1
