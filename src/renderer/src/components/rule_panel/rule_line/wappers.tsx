@@ -54,6 +54,9 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
             setMenuVisible(!menuVisible);
         }
         input.addEventListener('click', onContextMenu);
+        return () => {
+            input.removeEventListener('click', onContextMenu);
+        }
     }, [inputRef]);
 
     React.useEffect(() => {
