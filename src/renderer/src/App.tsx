@@ -73,7 +73,7 @@ export const App = function () {
     // 当ruleInited为false时加载规则
     useEffect(() => {
         if (!ruleInited) {
-            ruleManager.reloadSetting();
+            ruleManager.reloadConfig();
             setRuleInited(true);
         }
     }, [ruleInited]);
@@ -94,7 +94,7 @@ export const App = function () {
             isFiltering={isFiltering} setIsFiltering={setIsFiltering}
             isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
             rulePanelVisible={rulePanelVisible}
-            loadRule={() => ruleManager.reloadSetting()}
+            loadRule={() => ruleManager.reloadConfig()}
             saveRule={(filepath: string) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
         />
         <LogContainer manager={logManager}

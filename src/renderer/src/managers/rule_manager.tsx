@@ -8,56 +8,44 @@ export type TSetting = {
 // TODO: 添加脏标记，只有在规则发生变化时才写入规则
 
 class RuleManager {
-
-    async openFile(filepath: string) {
-        console.log('打开文件', filepath);
-        await this.reloadSetting(filepath);
-    }
-
     async saveFile(filepath: string = SETTING_PATH, setting: TSetting) {
         console.log('保存文件', filepath);
         if (!filepath) return;
         await window.electron.writeFile(filepath, JSON.stringify(setting, undefined, 4));
     }
 
-    async reloadSetting(filepath: string = 'setting.json') {
+    async reloadConfig(filepath: string = 'setting.json') {
         const settingString = await window.electron.openFile(filepath);
         if (settingString === null) return;
         let setting: TSetting | undefined = undefined;
         try {
             console.log("initSetting file");
-            if (settingString !== null)
-                setting = JSON.parse(settingString);
-            else
-                console.log("initSetting file is null");
+            setting = JSON.parse(settingString);
         } catch (e) {
             console.error("initSetting error", e);
         }
         setting = setting ?? { color: [], replacing: [], filter: [] };
-        const color: ColorConfig[] = setting.color.map((rule: any, index: number) => ({ ...rule, index, enable: rule.enable ?? true }));
-        const replacing: ReplaceConfig[] = setting.replacing.map((rule: any, index: number) => ({ ...rule, index, enable: rule.enable ?? true }));
-        const filter: FilterConfig[] = setting.filter.map((rule: any, index: number) => ({ ...rule, index, enable: rule.enable ?? true }));
-
-        this.dispatch("ruleChanged", { color, replacing, filter });
+        this.dispatch("ruleChanged", {
+            color: setting.color.map((rule) => ({ ...rule, enable: rule.enable ?? true })),
+            replacing: setting.replacing.map((rule) => ({ ...rule, enable: rule.enable ?? true })),
+            filter: setting.filter.map((rule) => ({ ...rule, enable: rule.enable ?? true }))
+        });
     }
 
     public saveConfig(setting: TSetting): void {
         this.saveFile(SETTING_PATH, setting);
     }
 
-    onRuleChanged: null | (() => void) = null;
-    onReplaceRuleChanged: null | (() => void) = null;
-
-    private eventCallbacks = new Map<string, Set<(...args: any[]) => void>>();
+    private callbacks = new Map<string, Set<(...args: any[]) => void>>();
     listen(event: "ruleChanged", callback: (rules: TSetting) => void): void {
-        if (!this.eventCallbacks.has(event)) this.eventCallbacks.set(event, new Set());
-        this.eventCallbacks.get(event)?.add(callback);
+        if (!this.callbacks.has(event)) this.callbacks.set(event, new Set());
+        this.callbacks.get(event)?.add(callback);
     }
     unlisten(event: "ruleChanged", callback: (rules: TSetting) => void): void {
-        this.eventCallbacks.get(event)?.delete(callback);
+        this.callbacks.get(event)?.delete(callback);
     }
     dispatch(event: "ruleChanged", rules: TSetting): void {
-        this.eventCallbacks.get(event)?.forEach(callback => callback(rules));
+        this.callbacks.get(event)?.forEach(callback => callback(rules));
     }
 }
 
