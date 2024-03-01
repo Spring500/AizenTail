@@ -7,6 +7,7 @@ export const MenuBar = function (props: {
     isFiltering: boolean, setIsFiltering: (v: boolean) => void,
     isAutoScroll: boolean, setIsAutoScroll: (v: boolean) => void,
     isAlwaysOnTop: boolean, setIsAlwaysOnTop: (v: boolean) => void,
+    isShowHoverText: boolean, setIsShowHoverText: (v: boolean) => void,
     openLogFile: (filepath: string) => void,
     loadRule: (filepath: string) => void,
     saveRule: (filepath: string) => void,
@@ -79,6 +80,7 @@ export const MenuBar = function (props: {
                     items={[
                         { key: 'autoScroll', name: () => `自动滚动: ${props.isAutoScroll ? "开" : "关"}`, callback: onClickToggleAutoScroll },
                         { key: 'alwaysOnTop', name: () => `窗口置顶: ${props.isAlwaysOnTop ? "开" : "关"}`, callback: onClickToggleAlwaysOnTop },
+                        { key: 'showHoverText', name: () => `悬浮提示: ${props.isShowHoverText ? "开" : "关"}`, callback: () => props.setIsShowHoverText(!props.isShowHoverText) },
                     ]}
                     style={{ position: "absolute", top: "100%", display: "block" }}
                 />

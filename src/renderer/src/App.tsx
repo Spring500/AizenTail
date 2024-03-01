@@ -18,6 +18,7 @@ export const App = function () {
     const [isFiltering, setIsFiltering] = useState(false);
     const [isAutoScroll, setIsAutoScroll] = useState(true);
     const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
+    const [isShowHoverText, setIsShowHoverText] = useState(false);
 
     const onKeyUp = (e: KeyboardEvent) => {
         switch (e.key) {
@@ -94,6 +95,7 @@ export const App = function () {
             isFiltering={isFiltering} setIsFiltering={setIsFiltering}
             isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
             isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
+            isShowHoverText={isShowHoverText} setIsShowHoverText={setIsShowHoverText}
             rulePanelVisible={rulePanelVisible}
             loadRule={() => ruleManager.reloadConfig()}
             saveRule={(filepath: string) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
@@ -106,6 +108,7 @@ export const App = function () {
             style={logContainerStyle}
             isFiltering={isFiltering}
             isAutoScroll={isAutoScroll}
+            isShowHoverText={isShowHoverText}
             onChangeFile={OnChangeFile}
             replaceRules={replaceRules}
             colorRules={colorRules}

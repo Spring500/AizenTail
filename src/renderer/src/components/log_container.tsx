@@ -19,11 +19,12 @@ const splitLog = function (text: string, keywords: string[]) {
     });
 }
 
-export const LogContainer = function ({ style, manager, isFiltering, isAutoScroll, onChangeFile, replaceRules, colorRules, filterRules }: {
+export const LogContainer = function (props: {
     style?: React.CSSProperties,
     manager: ILogManager,
     isFiltering: boolean,
     isAutoScroll: boolean,
+    isShowHoverText: boolean,
     onChangeFile: (file: File | null) => void,
     replaceRules: ReplaceConfig[],
     colorRules: ColorConfig[],
@@ -40,7 +41,7 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
         event.stopPropagation();
         setDragging(false);
         if (event.dataTransfer && event.dataTransfer.files.length > 0)
-            onChangeFile(event.dataTransfer.files[0]);
+            props.onChangeFile(event.dataTransfer.files[0]);
     }
 
     const onDragOver = (event: DragEvent) => {
@@ -77,7 +78,7 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
     useEffect(() => {
         const list = listRef.current;
         if (!list) return;
-        const index = manager.lineToIndex(highlightLine);
+        const index = props.manager.lineToIndex(highlightLine);
         if (index < 0) return;
         if (index >= list.startIndex && index <= list.endIndex) return;
         list.scrollToItem(index, "center");
@@ -88,6 +89,7 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
     }
     // 监听manager的变化
     useEffect(() => {
+        const manager = props.manager;
         if (!manager) return;
         manager.onSetLogCount = setLogCount;
         return () => {
@@ -114,16 +116,16 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
     }, [mainRef]);
 
     useEffect(() => {
-        if (!isAutoScroll) return;
+        if (!props.isAutoScroll) return;
         if (highlightLine !== -1) {
-            const index = manager.lineToIndex(highlightLine);
+            const index = props.manager.lineToIndex(highlightLine);
             if (index !== -1) scrollToItem(index)
         } else {
-            scrollToItem(isFiltering
-                ? manager.filtedLogIds.length - 1
-                : manager.logs.length - 1);
+            scrollToItem(props.isFiltering
+                ? props.manager.filtedLogIds.length - 1
+                : props.manager.logs.length - 1);
         }
-    }, [logCount, isFiltering]);
+    }, [logCount, props.isFiltering]);
 
     const rexCache = new Map<string, RegExp | undefined>();
     const getRegExp = function (matchText: string): RegExp | undefined {
@@ -139,7 +141,7 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
     // 替换日志
     const replaceLog = function (rawText: string) {
         let text = rawText ?? "";
-        for (const rule of replaceRules) {
+        for (const rule of props.replaceRules) {
             if (!rule.enable) continue;
             if (rule.regexEnable) {
                 const reg = getRegExp(rule.reg);
@@ -153,7 +155,7 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
 
     // 获取日志颜色
     const getLogColor = function (log: string) {
-        for (const rule of colorRules) {
+        for (const rule of props.colorRules) {
             if (!rule.enable) continue;
             if (rule.regexEnable) {
                 if (!getRegExp(rule.reg)?.test(log)) continue;
@@ -168,12 +170,13 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
         return {};
     }
 
-    const hasFilter = filterRules.length > 0 && filterRules.some(rule => rule.enable);
+    const hasFilter = props.filterRules.length > 0 && props.filterRules.some(rule => rule.enable);
 
     const LogRowRenderer = function (index: number) {
+        const manager = props.manager;
         const logText = replaceLog(manager.getLogText(index));
-        const line = manager.indexToLine(index);
-        const isExculed = !isFiltering && hasFilter && !manager.lineToIndexMap.has(index);
+        const line = props.manager.indexToLine(index);
+        const isExculed = !props.isFiltering && hasFilter && !manager.lineToIndexMap.has(index);
         const isHighlight = line >= 0 && line === highlightLine;
         const onClick = () => setHighlightLine(line !== highlightLine ? line : -1);
 
@@ -181,15 +184,16 @@ export const LogContainer = function ({ style, manager, isFiltering, isAutoScrol
             { key: "select", name: "选择", callback: () => setHighlightLine(line) },
             { key: "copy", name: "复制", callback: () => navigator.clipboard.writeText(logText) }
         ]}>
-            <div className="log" style={{ ...style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
+            <div className="log" style={{ ...props.style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
                 <div className="logIndex">{line >= 0 ? line : ''}</div>
                 <div className={`logText${isHighlight ? ' highlightLogText' : ''}`}
+                    title={props.isShowHoverText ? logText : undefined}
                     style={{ ...getLogColor(logText), whiteSpace: "pre" }}>
                     {splitLog(logText, manager.inputFilters)}<br /></div>
             </div >
         </ContextWarpper>
     }
-    return <div className="logContainer" ref={mainRef} style={{ ...style, position: 'relative' }}>
+    return <div className="logContainer" ref={mainRef} style={{ ...props.style, position: 'relative' }}>
         <ListView ref={listRef} style={{ height: "100%", inset: "0%" }}
             itemRender={LogRowRenderer} count={logCount} itemHeight={17} />
         {dragging && <div className='logContainerMask' style={{ zIndex: 100 }}>
