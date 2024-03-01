@@ -12,11 +12,11 @@ export const TextField = React.forwardRef(function TextFieldRef({ className, val
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e.currentTarget.value);
     }
-    const onKeyUpHandler = (e: React.JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
-        e.key === "Enter" && e.currentTarget.blur();
+    const onKeyUpHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        event.key === "Enter" && event.currentTarget.blur();
     }
-    const onBlurHandler = (e: React.JSX.TargetedFocusEvent<HTMLInputElement>) => {
-        onEnter && onEnter(e.currentTarget.value);
+    const onBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
+        onEnter && onEnter(event.currentTarget.value);
     }
     return <input className={className} type='text'
         title={title} value={value} placeholder={placeholder}
