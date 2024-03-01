@@ -10,11 +10,11 @@ export type IListView = {
     endIndex: number;
 };
 
-export const ListView = React.forwardRef((props: {
+export const ListView = React.forwardRef(function ListViewRef(props: {
     itemRender: (index: number) => React.ReactNode;
     count: number; itemHeight: number;
     style: React.CSSProperties; onListScroll?: () => void;
-}, ref: React.ForwardedRef<IListView>) => {
+}, ref: React.ForwardedRef<IListView>) {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = React.useState(0);
     const [visibleStart, setVisibleStart] = React.useState(0);

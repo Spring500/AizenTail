@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ContextWarpper } from './context_wapper';
 
-export const TextField = React.forwardRef(function ({ className, value, placeholder, style, title, list, onChange, onEnter }: {
+export const TextField = React.forwardRef(function TextFieldRef({ className, value, placeholder, style, title, list, onChange, onEnter }: {
     className?: string, value: string | undefined,
     placeholder?: string, style?: React.CSSProperties,
     title?: string, list?: string | undefined,
@@ -26,7 +26,7 @@ export const TextField = React.forwardRef(function ({ className, value, placehol
     />;
 });
 
-export const EditorableTextField = React.forwardRef(function ({ value, placeholder, style, title, list, onChange, onEnter }: {
+export const EditorableTextField = React.forwardRef(function EditorableTextFieldRef({ value, placeholder, style, title, list, onChange, onEnter }: {
     value: string | undefined, placeholder?: string, style?: React.CSSProperties,
     title?: string, list?: string | undefined,
     onChange: (value: string) => void, onEnter?: (value: string) => void,

@@ -6,7 +6,7 @@ function isInRect(rect: DOMRect, x: number, y: number) {
     return x >= rect.left && x <= rect.left + rect.width && y >= rect.top && y <= rect.top + rect.height;
 }
 
-export const Dropdown = React.forwardRef(function ({ visible, items, style, onClickOutside }: {
+export const Dropdown = React.forwardRef(function DropdownRef({ visible, items, style, onClickOutside }: {
     visible: boolean, items: ItemType[], style?: React.CSSProperties,
     onClickOutside?: (event: MouseEvent) => void,
 }, ref: React.ForwardedRef<HTMLUListElement>) {
@@ -21,7 +21,7 @@ export const Dropdown = React.forwardRef(function ({ visible, items, style, onCl
     </DropdownWarpper>;
 });
 
-export const DropdownWarpper = React.forwardRef(function (props: {
+export const DropdownWarpper = React.forwardRef(function DropdownWarpperRef(props: {
     visible: boolean, style?: React.CSSProperties,
     children: React.ReactNode, className?: string,
     onClickOutside?: (event: MouseEvent) => void,

@@ -7,7 +7,7 @@ const COROR_LIST = [
     "null", "red", "green", "blue", "yellow", "black", "white",
     "gray", "purple", "pink", "orange", "brown", "cyan", "magenta"];
 
-export const ColorRuleTextField = React.forwardRef(function ({ value, placeholder, style, title, onChange, onEnter }: {
+export const ColorRuleTextField = React.forwardRef(function ColorRuleTextFieldRef({ value, placeholder, style, title, onChange, onEnter }: {
     value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
 }, ref: React.ForwardedRef<HTMLInputElement>) {
@@ -82,7 +82,7 @@ export const ColorRuleTextField = React.forwardRef(function ({ value, placeholde
     </>
 });
 
-export const RegexTextField = React.forwardRef(function (prop: {
+export const RegexTextField = React.forwardRef(function RegexTextFieldRef(prop: {
     fieldName: string, value: string | undefined, regexEnable: boolean | undefined,
     placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
