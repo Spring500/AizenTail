@@ -17,6 +17,7 @@ export const App = function () {
     const [ruleInited, setRuleInited] = useState(false);
     const [isFiltering, setIsFiltering] = useState(false);
     const [isAutoScroll, setIsAutoScroll] = useState(true);
+    const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
 
     const onKeyUp = (e: KeyboardEvent) => {
         switch (e.key) {
@@ -25,27 +26,26 @@ export const App = function () {
             case 'h':
                 e.ctrlKey && setIsFiltering(!isFiltering); return;
             case 't':
-                e.altKey && logManager.setAlwaysOnTop(!logManager.alwaysOnTop); return;
+                e.altKey && setIsAlwaysOnTop(!isAlwaysOnTop); return;
             case 'F12': window.electron.openDevTools(); return;
         }
     }
     useEffect(() => {
         logManager.onSetHint = setHint;
-        logManager.onSetFileUrl = setFileUrl;
         document.onkeyup = onKeyUp;
         return () => {
-            if (logManager.onSetHint == setHint)
-                logManager.onSetHint = null;
-            if (logManager.onSetFileUrl == setFileUrl)
-                logManager.onSetFileUrl = null;
-            if (document.onkeyup == onKeyUp)
-                document.onkeyup = null;
+            if (logManager.onSetHint == setHint) logManager.onSetHint = null;
+            if (document.onkeyup == onKeyUp) document.onkeyup = null;
         }
     }, []);
 
     useEffect(() => {
         logManager.setFilterDisabled(!isFiltering);
     }, [isFiltering]);
+
+    useEffect(() => {
+        window.electron.setAlwaysOnTop(isAlwaysOnTop);
+    }, [isAlwaysOnTop]);
 
     useEffect(() => {
         const onRuleChanged = (setting: TSetting) => {
@@ -93,9 +93,14 @@ export const App = function () {
         <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
             isFiltering={isFiltering} setIsFiltering={setIsFiltering}
             isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
+            isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
             rulePanelVisible={rulePanelVisible}
             loadRule={() => ruleManager.reloadConfig()}
             saveRule={(filepath: string) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
+            openLogFile={(filepath: string) => {
+                logManager.openFile(filepath);
+                setFileUrl(filepath);
+            }}
         />
         <LogContainer manager={logManager}
             style={logContainerStyle}

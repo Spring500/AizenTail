@@ -2,39 +2,39 @@ import { logManager } from '../managers/log_manager';
 import { Dropdown } from './common/dropdown';
 import { createRef, useState } from 'react';
 
-const openLogFile = async () => {
-    const filepath: string = await window.electron.openFileDialog("打开日志文件",
-        undefined,
-        [
-            { name: "All Files", extensions: ["*"] },
-            { name: "Log Files", extensions: ["log"] },
-            { name: "Text Files", extensions: ["txt"] },
-        ],
-    );
-    await logManager.openFile(filepath);
-}
-
 export const MenuBar = function (props: {
     switchRulePanelVisible: () => void, rulePanelVisible: boolean,
     isFiltering: boolean, setIsFiltering: (v: boolean) => void,
     isAutoScroll: boolean, setIsAutoScroll: (v: boolean) => void,
+    isAlwaysOnTop: boolean, setIsAlwaysOnTop: (v: boolean) => void,
+    openLogFile: (filepath: string) => void,
     loadRule: (filepath: string) => void,
     saveRule: (filepath: string) => void,
 }) {
-    const [alwaysOnTop, setAlwaysOnTop] = useState(false);
-    const [openedMenu, setOpenedMenu] = useState<undefined | "file" | "view">();
-    logManager.onSetAlwaysOnTop = (alwaysOnTop) => setAlwaysOnTop(alwaysOnTop);
-
     const inputFilterRef = createRef<HTMLInputElement>();
+    const [openedMenu, setOpenedMenu] = useState<undefined | "file" | "view">();
+
     const onInputFilter = () => inputFilterRef.current && logManager.setInputFilter(inputFilterRef.current.value);
     const onClickToggleAutoScroll = () => props.setIsAutoScroll(!props.isAutoScroll);
-    const onClickToggleAlwaysOnTop = () => logManager.setAlwaysOnTop(!alwaysOnTop);
+    const onClickToggleAlwaysOnTop = () => props.setIsAlwaysOnTop(!props.isAlwaysOnTop);
 
     const switchMenu = (menu: "file" | "view") => {
         setOpenedMenu(openedMenu === menu ? undefined : menu);
     }
 
     const closeMenu = () => setOpenedMenu(undefined);
+
+    const openLogFile = async () => {
+        const filepath: string = await window.electron.openFileDialog("打开日志文件",
+            undefined,
+            [
+                { name: "All Files", extensions: ["*"] },
+                { name: "Log Files", extensions: ["log"] },
+                { name: "Text Files", extensions: ["txt"] },
+            ],
+        );
+        props.openLogFile(filepath);
+    }
 
     const openRuleFile = async () => {
         const filepath: string = await window.electron.openFileDialog("加载规则文件",
@@ -78,7 +78,7 @@ export const MenuBar = function (props: {
                     onClickOutside={closeMenu}
                     items={[
                         { key: 'autoScroll', name: () => `自动滚动: ${props.isAutoScroll ? "开" : "关"}`, callback: onClickToggleAutoScroll },
-                        { key: 'alwaysOnTop', name: () => `窗口置顶: ${alwaysOnTop ? "开" : "关"}`, callback: onClickToggleAlwaysOnTop },
+                        { key: 'alwaysOnTop', name: () => `窗口置顶: ${props.isAlwaysOnTop ? "开" : "关"}`, callback: onClickToggleAlwaysOnTop },
                     ]}
                     style={{ position: "absolute", top: "100%", display: "block" }}
                 />

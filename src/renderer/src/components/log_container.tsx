@@ -6,7 +6,6 @@ import { createRef } from "react";
 
 const EXCLUDED_OPACITY = 0.3;
 
-// TODO: highlight line迁移到log_container
 const splitLog = function (text: string, keywords: string[]) {
     let splitedText = text;
     for (const keyword of keywords) {

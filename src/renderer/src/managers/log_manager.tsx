@@ -7,10 +7,6 @@ class LogManager {
 
     constructor() {
         console.log("LogManager constructor");
-        this.init();
-    }
-
-    async init() {
         window.electron.watchLogChange(this.updateFile);
     }
 
@@ -45,20 +41,12 @@ class LogManager {
         window.electron.watchFile(filepath);
         this.logs.length = 0;
         await this.updateFile(null, 'add', resultText);
-
-        this.onSetFileUrl?.(filepath);
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`);
     }
 
     clear() {
         this.logs.length = 0;
         this.refreshFilter();
-    }
-
-    setAlwaysOnTop(flag: boolean) {
-        this.alwaysOnTop = flag;
-        window.electron.setAlwaysOnTop(flag);
-        this.onSetAlwaysOnTop?.(flag);
     }
 
     hasFilter() {
@@ -169,10 +157,8 @@ class LogManager {
         return !this.inputFilters?.some(filter => text.match(new RegExp(`(${filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi")));
     }
 
-    onSetFileUrl: ((fileUrl: string) => void) | null = null;
     onSetHint: ((hint: string) => void) | null = null;
     onSetLogCount: ((count: number) => void) | null = null;
-    onSetAlwaysOnTop: ((alwaysOnTop: boolean) => void) | null = null;
 }
 export type ILogManager = LogManager;
 export let logManager = new LogManager();
