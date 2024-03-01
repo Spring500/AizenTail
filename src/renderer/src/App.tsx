@@ -85,7 +85,7 @@ export const App = function () {
         const filepath = file.path;
         await logManager.openFile(filepath);
     }
-    const logContainerStyle = rulePanelVisible
+    const logContainerStyle: React.CSSProperties = rulePanelVisible
         ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
         : { resize: 'none', height: 'auto', flex: '1 1 auto' };
     return <>

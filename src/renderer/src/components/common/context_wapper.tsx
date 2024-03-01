@@ -39,7 +39,7 @@ export const ContextWarpper = function (props: {
     const [menuVisible, setMenuVisible] = React.useState(false);
 
     // 当右键点击该行时，显示右键菜单
-    const onContextmenu: React.JSX.MouseEventHandler<HTMLDivElement> = (event) => {
+    const onContextmenu: React.MouseEventHandler<HTMLDivElement> = (event) => {
         const holder = selfRef.current;
         if (!holder || !(event.target instanceof HTMLElement)) return;
         // 检查事件点击对象是否是该行的子对象
