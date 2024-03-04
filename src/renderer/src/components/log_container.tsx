@@ -129,12 +129,12 @@ export const LogContainer = function (props: {
 
     const rexCache = new Map<string, RegExp | undefined>();
     const getRegExp = function (matchText: string): RegExp | undefined {
-        if (rexCache.has(matchText))
-            return rexCache.get(matchText);
-        let res: RegExp | undefined = undefined;
-        try { res = new RegExp(matchText, "gi"); }
-        catch { }
-        finally { rexCache.set(matchText, res); }
+        let res = rexCache.get(matchText);
+        if (!res) {
+            try { res = new RegExp(matchText, "gi"); }
+            catch { }
+            finally { rexCache.set(matchText, res); }
+        } else res.lastIndex = 0;
         return res;
     }
 
