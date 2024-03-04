@@ -97,9 +97,9 @@ export const App = function () {
             isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
             isShowHoverText={isShowHoverText} setIsShowHoverText={setIsShowHoverText}
             rulePanelVisible={rulePanelVisible}
-            loadRule={() => ruleManager.reloadConfig()}
-            saveRule={(filepath: string) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
-            openLogFile={(filepath: string) => {
+            loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
+            saveRule={(filepath) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
+            openLogFile={(filepath) => {
                 logManager.openFile(filepath);
                 setFileUrl(filepath);
             }}
