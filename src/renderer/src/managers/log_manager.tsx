@@ -133,7 +133,7 @@ class LogManager {
         if (!reg) {
             try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg, "gi"); }
             catch (e) { this.filterRegExps[index] = undefined; }
-        }
+        } else reg.lastIndex = 0;
         return this.filterRegExps[index];
     }
 
