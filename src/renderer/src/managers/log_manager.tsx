@@ -131,7 +131,7 @@ class LogManager {
     public getFilterRegExp(index: number): RegExp | undefined {
         const reg = this.filterRegExps[index];
         if (!reg) {
-            try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg, "gi"); }
+            try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg); }
             catch (e) { this.filterRegExps[index] = undefined; }
         } else reg.lastIndex = 0;
         return this.filterRegExps[index];
