@@ -3,9 +3,31 @@ import { EditorableTextField } from '../../common/text_field';
 import { DropdownWarpper, ItemType } from '../../common/dropdown';
 import { ContextWarpper } from '../../common/context_wapper';
 
-const COROR_LIST = [
-    "null", "red", "green", "blue", "yellow", "black", "white",
-    "gray", "purple", "pink", "orange", "brown", "cyan", "magenta"];
+const COROR_LIST: [string | undefined, string][] = [
+    [undefined, "默认"],
+    // 红色系
+    ["red", "红色"],
+    ["pink", "粉红"],
+    // 橙色系
+    ["orange", "橙色"],
+    ["tomato", "番茄"],
+    // 黄色系
+    ["yellow", "黄色"],
+    ["gold", "金色"],
+    // 绿色系
+    ["green", "绿色"],
+    // 青色系
+    ["cyan", "青色"],
+    // 蓝色系
+    ["blue", "蓝色"],
+    // 紫色系
+    ["purple", "紫色"],
+    // 灰色系
+    ["gray", "灰色"],
+    ["silver", "银色"],
+    ["black", "黑色"],
+    ["white", "白色"],
+];
 
 export const ColorRuleTextField = React.forwardRef(function ColorRuleTextFieldRef({ value, placeholder, style, title, onChange, onEnter }: {
     value: string | undefined, placeholder?: string, style?: React.CSSProperties, title?: string,
@@ -27,12 +49,10 @@ export const ColorRuleTextField = React.forwardRef(function ColorRuleTextFieldRe
         setMenuVisible(false);
     }
 
-    const renderColorButton = (color: string, index: number) => {
-        if (color === "null") color = '';
-        const backgroundColor = color === "" ? undefined : color;
-        return <button key={index} onClick={() => clickColor(color)}
+    const renderColorButton = ([color, displayName]: [string | undefined, string], index: number) => {
+        return <button key={index} onClick={() => clickColor(color ?? '')}
             className="menuDropdownButton colorButton">
-            <div className="colorBox" style={{ backgroundColor }} /> {color || "默认"}
+            <div className="colorBox" style={{ backgroundColor: color }} /> {displayName}
         </button>
     }
 
