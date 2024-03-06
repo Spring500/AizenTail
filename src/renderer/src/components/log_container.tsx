@@ -74,27 +74,24 @@ export const LogContainer = function (props: {
         }
     }
 
-    // 监听高亮行的位置变化
-    useEffect(() => {
-        const list = listRef.current;
-        if (!list) return;
-        const index = props.manager.lineToIndex(highlightLine);
-        if (index < 0) return;
-        if (index >= list.startIndex && index <= list.endIndex) return;
-        list.scrollToItem(index, "center");
-    }, [listRef, highlightLine]);
 
     const scrollToItem = function (index: number) {
         listRef.current?.scrollToItem(index, "center", "instant");
+    }
+
+    const onTick = function () {
+        props.manager.refreshFile();
     }
     // 监听manager的变化
     useEffect(() => {
         const manager = props.manager;
         if (!manager) return;
         manager.onSetLogCount = setLogCount;
+        const timer = setInterval(onTick, 100);
         return () => {
             if (manager.onSetLogCount === setLogCount)
                 manager.onSetLogCount = null;
+            clearInterval(timer);
         }
     }, [mainRef]);
 

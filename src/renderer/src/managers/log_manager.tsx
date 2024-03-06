@@ -1,3 +1,4 @@
+// TODO：已经计算好的日志行号和日志行号对应的索引，可以直接使用，不需要每次都计算
 class LogManager {
     readonly logs = new Array<LogMeta>();
     autoScroll = true;
@@ -71,11 +72,28 @@ class LogManager {
         this.refreshFilter();
     }
 
+    updateCache: { data: string, type: 'add' | 'replace' } | undefined = undefined;
     public updateFile = async (_: any, type: 'add' | 'clear', data: string) => {
+        if (type === 'add') {
+            if (!this.updateCache) this.updateCache = { data, type };
+            else {
+                this.updateCache.data += data;
+            }
+        } else if (type === 'clear') {
+            this.updateCache = { data: '', type: 'replace' };
+        }
+    }
+
+    public refreshFile = async () => {
+        if (this.updateCache === undefined) {
+            return;
+        }
         if (this.logs.length <= 0)
             this.logs.push({ offset: 0, index: 0, text: '' });
+        if (this.updateCache.type === 'add') {
+            let data = this.updateCache.data;
+            if (data.length <= 0) return;
 
-        if (type === 'add') {
             let count = this.logs.length;
             let lineEnded = false;
             if (data[data.length - 1] === '\n') {
@@ -87,12 +105,18 @@ class LogManager {
             for (let i = 1; i < newLogs.length; i++) {
                 this.logs.push({ offset: 0, index: count++, text: newLogs[i] })
             }
-
             if (lineEnded) this.logs.push({ offset: 0, index: count++, text: '' });
-        } else if (type === 'clear') {
+        } else if (this.updateCache.type === 'replace') {
             this.logs.length = 0;
+            let data = this.updateCache.data;
+            if (data.length > 0) {
+                const newLogs = data.split('\n');
+                for (let i = 0; i < newLogs.length; i++) {
+                    this.logs.push({ offset: 0, index: i, text: newLogs[i] });
+                }
+            }
         }
-
+        this.updateCache = undefined;
         this.refreshFilter();
     }
 
@@ -133,7 +157,7 @@ class LogManager {
         if (!reg) {
             try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg); }
             catch (e) { this.filterRegExps[index] = undefined; }
-        } else reg.lastIndex = 0;
+        }
         return this.filterRegExps[index];
     }
 
