@@ -249,9 +249,9 @@ body,
 }
 
 @keyframes blink {
-    0% { background: none; color: none; }
+    0% {  }
     50% { background: gray; color: var(--theme-color-info-text-highlight); }
-    100% { background: none; color: none; }
+    100% {  }
 }
 
 .logSearchHit{
