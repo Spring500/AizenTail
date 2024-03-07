@@ -1,3 +1,14 @@
+type LogMeta = {
+    /**该行日志在文件中的起始偏移量 */
+    offset: number,
+    /**日志是第几行 */
+    index: number,
+    /**后续去除对text的直接存储 */
+    text: string,
+    /**测试结果缓存 */
+    testResult: Map<number, boolean>,
+}
+
 // TODO：已经计算好的日志行号和日志行号对应的索引，可以直接使用，不需要每次都计算
 class LogManager {
     readonly logs = new Array<LogMeta>();
@@ -89,7 +100,7 @@ class LogManager {
             return;
         }
         if (this.logs.length <= 0)
-            this.logs.push({ offset: 0, index: 0, text: '' });
+            this.logs.push({ offset: 0, index: 0, text: '', testResult: new Map() });
         if (this.updateCache.type === 'add') {
             let data = this.updateCache.data;
             if (data.length <= 0) return;
@@ -103,16 +114,16 @@ class LogManager {
             const newLogs = data.split('\n');
             this.logs[this.logs.length - 1].text += newLogs[0];
             for (let i = 1; i < newLogs.length; i++) {
-                this.logs.push({ offset: 0, index: count++, text: newLogs[i] })
+                this.logs.push({ offset: 0, index: count++, text: newLogs[i], testResult: new Map() })
             }
-            if (lineEnded) this.logs.push({ offset: 0, index: count++, text: '' });
+            if (lineEnded) this.logs.push({ offset: 0, index: count++, text: '', testResult: new Map() });
         } else if (this.updateCache.type === 'replace') {
             this.logs.length = 0;
             let data = this.updateCache.data;
             if (data.length > 0) {
                 const newLogs = data.split('\n');
                 for (let i = 0; i < newLogs.length; i++) {
-                    this.logs.push({ offset: 0, index: i, text: newLogs[i] });
+                    this.logs.push({ offset: 0, index: i, text: newLogs[i], testResult: new Map() });
                 }
             }
         }
@@ -129,13 +140,36 @@ class LogManager {
             this.refreshTimer = setTimeout(this.refreshFilter.bind(this), 100);
             return;
         }
+        const invalidRuleIds = new Set<[string, number]>();
+        // 检查并去除无效的正则表达式
+        for (const rulePair of this.ruleIndexMap.entries()) {
+            if (!this.filterRules.some(rule => this.getRuleIndex(rule) === rulePair[1])
+                && !this.inputFilters.some(pattern => this.getPatternIndex(pattern) === rulePair[1])) {
+                invalidRuleIds.add(rulePair);
+            }
+        }
+        if (invalidRuleIds.size > 3) {
+            console.log('去除非法rule', [...invalidRuleIds].map(pair => pair[0]));
+            for (const [ruleKey, ruleId] of invalidRuleIds) {
+                this.ruleIndexMap.delete(ruleKey);
+                this.regCache[ruleId] = undefined;
+            }
+            for (const log of this.logs) {
+                for (const [_, ruleId] of invalidRuleIds) {
+                    log.testResult.delete(ruleId);
+                }
+            }
+        }
+
         this.lastRefreshTime = Date.now();
 
         this.filtedLogIds.length = 0;
         this.lineToIndexMap.clear();
+        const rules = this.filterRules.map((rule) => ({ ...rule, ruleId: this.getRuleIndex(rule) }));
+        const patterns = this.inputFilters.map((pattern) => ({ pattern, patternId: this.getPatternIndex(pattern) }));
         if (this.hasFilter()) {
             for (let line = 0; line < this.logs.length; line++) {
-                if (this.calculateExcluded(line)) continue;
+                if (this.calculateExcluded(line, rules, patterns)) continue;
                 const index = this.filtedLogIds.length;
                 this.lineToIndexMap.set(line, index);
                 this.filtedLogIds.push(line);
@@ -148,37 +182,96 @@ class LogManager {
     private filterRules: FilterConfig[] = [];
     setFilterRules(rules: FilterConfig[]) {
         this.filterRules = rules;
-        this.filterRegExps.length = 0;
         this.refreshFilter();
     }
-    private readonly filterRegExps: (RegExp | undefined)[] = [];
-    public getFilterRegExp(index: number): RegExp | undefined {
-        const reg = this.filterRegExps[index];
-        if (!reg) {
-            try { this.filterRegExps[index] = new RegExp(this.filterRules[index].reg); }
-            catch (e) { this.filterRegExps[index] = undefined; }
+    // TODO: 适时清理已经不再使用的表达式
+    private ruleIndexMap = new Map<string, number>();
+    private ruleIndexMax = 0;
+    private readonly regCache: (RegExp | undefined | null)[] = [];
+
+    private keyToIndex(key: string) {
+        let index = this.ruleIndexMap.get(key);
+        if (index === undefined) {
+            index = this.ruleIndexMax++;
+            this.regCache[index] = null;
+            this.ruleIndexMap.set(key, index);
         }
-        return this.filterRegExps[index];
+        return index;
     }
 
-    private calculateExcluded(line: number): boolean {
-        const text = this.logs[line].text;
+    private getRuleIndex(rule: FilterConfig): number {
+        return this.keyToIndex(this.ruleToKey(rule));
+    }
+
+    private getPatternIndex(pattern: string): number {
+        return this.keyToIndex(this.patternToKey(pattern));
+    }
+
+    private ruleToKey(rule: FilterConfig) {
+        return `r_${rule.reg}_${rule.regexEnable}`;
+    }
+
+    private patternToKey(pattern: string) {
+        return `p_${pattern}`;
+    }
+
+    private getRuleReg(rule: FilterConfig) {
+        let ruleId = this.getRuleIndex(rule);
+        let regExp = this.regCache[ruleId];
+        if (regExp === null) {
+            try { this.regCache[ruleId] = new RegExp(rule.reg); }
+            catch (e) { this.regCache[ruleId] = undefined; }
+        }
+        return this.regCache[ruleId];
+    }
+
+    private getPatternReg(pattern: string) {
+        let ruleId = this.keyToIndex(this.patternToKey(pattern));
+        let regExp = this.regCache[ruleId];
+        if (regExp === null) {
+            try { this.regCache[ruleId] = new RegExp(`(${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "i"); }
+            catch (e) { this.regCache[ruleId] = undefined; }
+        }
+        return this.regCache[ruleId];
+    }
+
+    private testRule(rule: FilterConfig & { ruleId: number }, log: LogMeta) {
+        const ruleId = rule.ruleId;
+        let result = log.testResult.get(ruleId);
+        if (result !== undefined) return result;
+        if (rule.regexEnable) {
+            result = !!(this.getRuleReg(rule)?.test(log.text));
+        } else {
+            result = log.text.includes(rule.reg);
+        }
+        log.testResult.set(ruleId, result);
+        return result;
+    }
+
+    private testPattern(pattern: { pattern: string, patternId: number }, log: LogMeta) {
+        let result = log.testResult.get(pattern.patternId);
+        if (result !== undefined) return result;
+        result = !!(this.getPatternReg(pattern.pattern)?.test(log.text));
+        log.testResult.set(pattern.patternId, result);
+        return result;
+    }
+
+    private calculateExcluded(line: number, rules: (FilterConfig & { ruleId: number })[], patterns: ({ pattern: string, patternId: number })[]): boolean {
+        const log = this.logs[line];
         let include = false;
         let hasIncludeFilter = false;
-        for (const [index, rule] of this.filterRules.entries()) {
+        for (const rule of rules) {
             if (!rule.enable) continue;
             if (!rule.exclude) hasIncludeFilter = true;
-            if (rule.regexEnable) {
-                if (!this.getFilterRegExp(index)?.test(text)) continue;
-            } else {
-                if (!text.includes(rule.reg)) continue;
+            if (!this.testRule(rule, log)) {
+                continue;
             }
             if (rule.exclude) return true;
             include = true;
         }
         if (!include && hasIncludeFilter) return true;
-        if (this.inputFilters.length <= 0) return false;
-        return !this.inputFilters?.some(filter => text.match(new RegExp(`(${filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi")));
+        if (patterns.length <= 0) return false;
+        return !patterns.some(pattern => this.testPattern(pattern, log));
     }
 
     onSetHint: ((hint: string) => void) | null = null;
