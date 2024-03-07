@@ -10,6 +10,8 @@ export type IListView = {
     endIndex: number;
 };
 
+const MAX_DIV_HEIGHT = 999999;
+
 export const ListView = React.forwardRef(function ListViewRef(props: {
     itemRender: (index: number) => React.ReactNode;
     count: number; itemHeight: number;
@@ -64,14 +66,21 @@ export const ListView = React.forwardRef(function ListViewRef(props: {
     }, [containerRef]);
 
     const renderItems = () => {
+        const container = containerRef.current;
+        if (!container) return;
         const renderStart = visibleStart - 3;
         const renderEnd = visibleEnd + 3;
         // 只渲染可见的部分
         const items: React.ReactNode[] = [];
+        let visibleOffset = 0;
+        if (props.itemHeight * props.count >= MAX_DIV_HEIGHT) {
+            visibleOffset = container.scrollTop - visibleStart * props.itemHeight;
+        }
         for (let i = renderStart; i < renderEnd; i++) {
             if (i < 0 || i >= props.count)
                 continue;
-            items.push(<div key={i} style={{ position: "absolute", top: i * props.itemHeight, width: "100%" }}>
+            const top = Math.min(i * props.itemHeight + visibleOffset, MAX_DIV_HEIGHT - props.itemHeight);
+            items.push(<div key={i} style={{ position: "absolute", top, width: "100%" }}>
                 {props.itemRender(i)}
             </div>);
         }
@@ -81,10 +90,16 @@ export const ListView = React.forwardRef(function ListViewRef(props: {
     const onScroll = () => {
         const container = containerRef.current;
         if (!container) return;
-        let newProgress = container.scrollTop / container.scrollHeight;
-        newProgress = Math.max(0, Math.min(newProgress, 1));
-
-        const newVisibleStart = Math.floor(container.scrollTop / props.itemHeight);
+        let newVisibleStart = 0;
+        if (props.itemHeight * props.count < MAX_DIV_HEIGHT) {
+            newVisibleStart = Math.floor(container.scrollTop / props.itemHeight);
+            console.log("刷新滚动起点", newVisibleStart, container.scrollTop, container.scrollHeight, containerHeight, container.scrollHeight - container.scrollTop, props.count);
+        } else {
+            const inViewCount = Math.ceil(container.clientHeight / props.itemHeight);
+            newVisibleStart = container.scrollTop / (container.scrollHeight - container.clientHeight) * (props.count - inViewCount);
+            newVisibleStart = Math.floor(newVisibleStart);
+            console.log("刷新滚动起点", newVisibleStart, container.scrollTop, container.scrollHeight, container.scrollHeight - container.scrollTop, props.count, inViewCount);
+        }
         if (newVisibleStart === visibleStart) return;
         setVisibleStart(newVisibleStart);
         props.onListScroll?.();
@@ -92,7 +107,7 @@ export const ListView = React.forwardRef(function ListViewRef(props: {
 
     return <div style={{ ...props.style, overflow: "scroll", position: "relative" }}
         onScroll={onScroll} ref={containerRef}>
-        <div style={{ height: props.itemHeight * props.count, }} />
+        <div style={{ height: Math.min(props.itemHeight * props.count, MAX_DIV_HEIGHT) }} />
         {renderItems()}
     </div>;
 }) 
