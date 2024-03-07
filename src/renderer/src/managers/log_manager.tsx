@@ -9,6 +9,9 @@ type LogMeta = {
     testResult: Map<number, boolean>,
 }
 
+const RULE_CACHE_MAX = 5;
+const RULE_CACHE_MIN = 2;
+
 // TODO：已经计算好的日志行号和日志行号对应的索引，可以直接使用，不需要每次都计算
 class LogManager {
     readonly logs = new Array<LogMeta>();
@@ -140,28 +143,30 @@ class LogManager {
             this.refreshTimer = setTimeout(this.refreshFilter.bind(this), 100);
             return;
         }
-        const invalidRuleIds = new Set<[string, number]>();
+        this.lastRefreshTime = Date.now();
+
+        const invalidRuleKeys: string[] = [];
         // 检查并去除无效的正则表达式
         for (const rulePair of this.ruleIndexMap.entries()) {
             if (!this.filterRules.some(rule => this.getRuleIndex(rule) === rulePair[1])
                 && !this.inputFilters.some(pattern => this.getPatternIndex(pattern) === rulePair[1])) {
-                invalidRuleIds.add(rulePair);
+                invalidRuleKeys.push(rulePair[0]);
             }
         }
-        if (invalidRuleIds.size > 3) {
-            console.log('去除非法rule', [...invalidRuleIds].map(pair => pair[0]));
-            for (const [ruleKey, ruleId] of invalidRuleIds) {
-                this.ruleIndexMap.delete(ruleKey);
-                this.regCache[ruleId] = undefined;
+        if (invalidRuleKeys.length >= RULE_CACHE_MAX) {
+            const trashCount = invalidRuleKeys.length;
+            const removeCount = trashCount - RULE_CACHE_MIN;
+            const removeKeyList: string[] = [];
+            // 根据lru删除部分无效的rule
+            for (const ruleId of this.ruleIdLru) {
+                const ruleKey = [...this.ruleIndexMap].find(([_, id]) => id === ruleId)?.[0];
+                if (ruleKey === undefined || !invalidRuleKeys.some(key => key === ruleKey))
+                    continue;
+                removeKeyList.push(ruleKey);
+                if (removeKeyList.length >= removeCount) break;
             }
-            for (const log of this.logs) {
-                for (const [_, ruleId] of invalidRuleIds) {
-                    log.testResult.delete(ruleId);
-                }
-            }
+            this.removeRuleCaches(removeKeyList);
         }
-
-        this.lastRefreshTime = Date.now();
 
         this.filtedLogIds.length = 0;
         this.lineToIndexMap.clear();
@@ -184,10 +189,31 @@ class LogManager {
         this.filterRules = rules;
         this.refreshFilter();
     }
-    // TODO: 适时清理已经不再使用的表达式
     private ruleIndexMap = new Map<string, number>();
     private ruleIndexMax = 0;
+    private ruleIdLru = new Set<number>();
     private readonly regCache: (RegExp | undefined | null)[] = [];
+
+    private removeRuleCaches(ruleKeys: string[]) {
+        if (ruleKeys.length <= 0) return;
+        const ruleIds: number[] = [];
+        for (const key of ruleKeys) {
+            const ruleId = this.ruleIndexMap.get(key);
+            if (ruleId === undefined) {
+                console.warn(`ruleId not found for key: ${key}`);
+                continue;
+            }
+            ruleIds.push(ruleId);
+            this.ruleIndexMap.delete(key);
+            this.regCache[ruleId] = undefined;
+            this.ruleIdLru.delete(ruleId);
+        }
+        for (const log of this.logs) {
+            for (const ruleId of ruleIds) {
+                log.testResult.delete(ruleId);
+            }
+        }
+    }
 
     private keyToIndex(key: string) {
         let index = this.ruleIndexMap.get(key);
@@ -196,6 +222,8 @@ class LogManager {
             this.regCache[index] = null;
             this.ruleIndexMap.set(key, index);
         }
+        this.ruleIdLru.delete(index);
+        this.ruleIdLru.add(index);
         return index;
     }
 
@@ -208,7 +236,7 @@ class LogManager {
     }
 
     private ruleToKey(rule: FilterConfig) {
-        return `r_${rule.reg}_${rule.regexEnable}`;
+        return `r_${rule.reg}_${!!rule.regexEnable}`;
     }
 
     private patternToKey(pattern: string) {
