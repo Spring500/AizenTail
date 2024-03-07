@@ -93,12 +93,10 @@ export const ListView = React.forwardRef(function ListViewRef(props: {
         let newVisibleStart = 0;
         if (props.itemHeight * props.count < MAX_DIV_HEIGHT) {
             newVisibleStart = Math.floor(container.scrollTop / props.itemHeight);
-            console.log("刷新滚动起点", newVisibleStart, container.scrollTop, container.scrollHeight, containerHeight, container.scrollHeight - container.scrollTop, props.count);
         } else {
             const inViewCount = Math.ceil(container.clientHeight / props.itemHeight);
             newVisibleStart = container.scrollTop / (container.scrollHeight - container.clientHeight) * (props.count - inViewCount);
             newVisibleStart = Math.floor(newVisibleStart);
-            console.log("刷新滚动起点", newVisibleStart, container.scrollTop, container.scrollHeight, container.scrollHeight - container.scrollTop, props.count, inViewCount);
         }
         if (newVisibleStart === visibleStart) return;
         setVisibleStart(newVisibleStart);
