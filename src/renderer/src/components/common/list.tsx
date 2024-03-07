@@ -84,7 +84,7 @@ export const ListView = React.forwardRef(function ListViewRef(props: {
         let newProgress = container.scrollTop / container.scrollHeight;
         newProgress = Math.max(0, Math.min(newProgress, 1));
 
-        const newVisibleStart = Math.floor(newProgress * props.count);
+        const newVisibleStart = Math.floor(container.scrollTop / props.itemHeight);
         if (newVisibleStart === visibleStart) return;
         setVisibleStart(newVisibleStart);
         props.onListScroll?.();
