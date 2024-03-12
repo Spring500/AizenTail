@@ -1,14 +1,17 @@
 import * as React from 'react';
-import { ContextWarpper } from './context_wapper';
+import { Dropdown, MenuProps } from 'antd';
 
-export const TextField = React.forwardRef(function TextFieldRef({ className, value, placeholder, style, title, list, onChange, onEnter }: {
-    className?: string, value: string | undefined,
-    placeholder?: string, style?: React.CSSProperties,
+export const TextField = React.forwardRef(function TextFieldRef({ value, placeholder, className, style, title, list, onChange, onEnter }: {
+    value: string | undefined, placeholder?: string, style?: React.CSSProperties, className?: string | undefined,
     title?: string, list?: string | undefined,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
 }, ref: React.ForwardedRef<HTMLInputElement>) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    React.useImperativeHandle(ref, () => inputRef.current!);
+    const items: MenuProps['items'] = [
+        { key: "selectAll", label: <div onClick={() => document.execCommand("selectAll")}>全选</div>, },
+        { key: "copy", label: <div onClick={() => document.execCommand("copy")}>复制</div>, },
+        { key: "cut", label: <div onClick={() => document.execCommand("cut")}>剪切</div>, },
+        { key: "paste", label: <div onClick={() => document.execCommand("paste")}>粘贴</div>, },
+    ];
     const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e.currentTarget.value);
     }
@@ -18,27 +21,16 @@ export const TextField = React.forwardRef(function TextFieldRef({ className, val
     const onBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
         onEnter && onEnter(event.currentTarget.value);
     }
-    return <input className={className} type='text'
-        title={title} value={value} placeholder={placeholder}
-        style={style} list={list} ref={inputRef}
-        onChange={onChangeHandler} onKeyUp={onKeyUpHandler}
-        onBlur={onBlurHandler}
-    />;
-});
-
-export const EditorableTextField = React.forwardRef(function EditorableTextFieldRef({ value, placeholder, style, title, list, onChange, onEnter }: {
-    value: string | undefined, placeholder?: string, style?: React.CSSProperties,
-    title?: string, list?: string | undefined,
-    onChange: (value: string) => void, onEnter?: (value: string) => void,
-}, ref: React.ForwardedRef<HTMLInputElement>) {
-    return <ContextWarpper className='ruleInputWarpper' menuItems={[
-        { key: "selectAll", name: "全选", callback: () => document.execCommand("selectAll") },
-        { key: "copy", name: "复制", callback: () => document.execCommand("copy") },
-        { key: "cut", name: "剪切", callback: () => document.execCommand("cut") },
-        { key: "paste", name: "粘贴", callback: () => document.execCommand("paste") },
-    ]}>
-        <TextField className="ruleInput" value={value}
-            placeholder={placeholder} style={style} title={title}
-            list={list} onChange={onChange} onEnter={onEnter} ref={ref} />
-    </ContextWarpper>
+    return <div className='ruleInputWarpper' onContextMenu={(e) => e.stopPropagation()}>
+        <Dropdown trigger={['contextMenu']} menu={{ items }}>
+            <span style={{ display: 'flex', width: '100%' }}>
+                <input className={((className ?? '') + " ruleInput").trim()} type='text'
+                    title={title} value={value} placeholder={placeholder}
+                    style={style} list={list} ref={ref}
+                    onChange={onChangeHandler} onKeyUp={onKeyUpHandler}
+                    onBlur={onBlurHandler}
+                />
+            </span>
+        </Dropdown>
+    </div>
 });

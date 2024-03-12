@@ -17,8 +17,9 @@ const createWindow = () => {
         movable: true,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
-            sandbox: false
-          }
+            sandbox: false,
+            spellcheck: false,
+        }
     });
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
@@ -27,6 +28,9 @@ const createWindow = () => {
     } else {
         mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
     }
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.webContents.setZoomFactor(1);
+    });
 }
 
 app.on('window-all-closed', () => {
@@ -50,6 +54,9 @@ app.whenReady().then(() => {
                 }
                 console.log('!!!open file dialog selected', result.filePaths[0]);
                 return result.filePaths[0];
+            }).catch( (err) => {
+                console.error('open file dialog failed', err);
+                return null;
             });
         return path;
     });

@@ -1,4 +1,4 @@
-import { EditorableTextField } from "../../common/text_field";
+import { TextField } from "../../common/text_field";
 import { RegexTextField, RuleLineWarpper } from "./wappers";
 
 const isObjectEqual = (a: object, b: object) => {
@@ -46,7 +46,7 @@ export const RuleLine_Replace = function ({ index, rules, setRules }: {
     const renderReplace = () => {
         const title = "将根据正则表达式匹配得到的字符串替换显示为对应的字符串。用$1、$2...等分别表示与正则表达式中的第1、2...个子表达式相匹配的文本";
         return <div className="ruleBlock" title={title}> 替换串
-            <EditorableTextField value={rule.replace} placeholder="替换"
+            <TextField value={rule.replace} placeholder="替换"
                 onChange={(value) => setRule(index, { ...rule, replace: value })}
                 onEnter={(value) => setRule(index, { ...rule, replace: value })} />
         </div>

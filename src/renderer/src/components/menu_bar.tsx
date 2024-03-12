@@ -1,6 +1,6 @@
 import { logManager } from '../managers/log_manager';
-import { Dropdown } from './common/dropdown';
-import { createRef, useState } from 'react';
+import { Dropdown, MenuProps } from 'antd';
+import { createRef } from 'react';
 
 export const MenuBar = function (props: {
     switchRulePanelVisible: () => void, rulePanelVisible: boolean,
@@ -13,17 +13,10 @@ export const MenuBar = function (props: {
     saveRule: (filepath: string) => void,
 }) {
     const inputFilterRef = createRef<HTMLInputElement>();
-    const [openedMenu, setOpenedMenu] = useState<undefined | "file" | "view">();
 
     const onInputFilter = () => inputFilterRef.current && logManager.setInputFilter(inputFilterRef.current.value);
     const onClickToggleAutoScroll = () => props.setIsAutoScroll(!props.isAutoScroll);
     const onClickToggleAlwaysOnTop = () => props.setIsAlwaysOnTop(!props.isAlwaysOnTop);
-
-    const switchMenu = (menu: "file" | "view") => {
-        setOpenedMenu(openedMenu === menu ? undefined : menu);
-    }
-
-    const closeMenu = () => setOpenedMenu(undefined);
 
     const openLogFile = async () => {
         const filepath: string = await window.electron.openFileDialog("打开日志文件",
@@ -59,33 +52,28 @@ export const MenuBar = function (props: {
         props.saveRule(filepath);
     }
 
+    const fileMenu: MenuProps['items'] = [
+        { key: 'file', label: (<div onClick={openLogFile}>打开日志文件</div>), },
+        { key: 'clear', label: (<div onClick={() => { logManager.clear() }}>清空日志</div>) },
+        { key: 'loadRule', label: (<div onClick={openRuleFile}>加载规则文件...</div>) },
+        { key: 'saveRuleAs', label: (<div onClick={saveRuleFile}>规则文件另存为...</div>) },
+        { key: 'exit', label: (<div onClick={() => window.close()}>退出</div>) }
+    ]
+
+    const viewMenu: MenuProps['items'] = [
+        { key: 'autoScroll', label: `自动滚动: ${props.isAutoScroll ? "开" : "关"}`, onClick: onClickToggleAutoScroll },
+        { key: 'alwaysOnTop', label: `窗口置顶: ${props.isAlwaysOnTop ? "开" : "关"}`, onClick: onClickToggleAlwaysOnTop },
+        { key: 'showHoverText', label: `悬浮提示: ${props.isShowHoverText ? "开" : "关"}`, onClick: () => props.setIsShowHoverText(!props.isShowHoverText) },
+    ]
+
     return <>
         <div className='menuBar' style={{ listStyleType: "none" }}>
-            <div style={{ position: "relative", height: "100%" }}>
-                <Dropdown visible={openedMenu === "file"}
-                    onClickOutside={closeMenu}
-                    items={
-                        [{ key: 'file', name: '打开日志...', callback: () => { openLogFile(), closeMenu() } },
-                        { key: 'clear', name: '清空日志', callback: () => { logManager.clear(), closeMenu() } },
-                        { key: 'loadRule', name: '加载规则文件...', callback: () => { openRuleFile(), closeMenu() } },
-                        { key: 'saveRuleAs', name: '规则文件另存为...', callback: () => { saveRuleFile(), closeMenu() } },
-                        { key: 'exit', name: '退出', callback: () => window.close() }]
-
-                    } style={{ position: "absolute", top: "100%", display: "block" }} />
-            </div>
-            <button className='menuButton' aria-expanded={openedMenu === "file"} onClick={() => switchMenu("file")}>文件(F)</button>
-            <div style={{ position: "relative", height: "100%" }}>
-                <Dropdown visible={openedMenu === "view"}
-                    onClickOutside={closeMenu}
-                    items={[
-                        { key: 'autoScroll', name: () => `自动滚动: ${props.isAutoScroll ? "开" : "关"}`, callback: onClickToggleAutoScroll },
-                        { key: 'alwaysOnTop', name: () => `窗口置顶: ${props.isAlwaysOnTop ? "开" : "关"}`, callback: onClickToggleAlwaysOnTop },
-                        { key: 'showHoverText', name: () => `悬浮提示: ${props.isShowHoverText ? "开" : "关"}`, callback: () => props.setIsShowHoverText(!props.isShowHoverText) },
-                    ]}
-                    style={{ position: "absolute", top: "100%", display: "block" }}
-                />
-            </div>
-            <button className='menuButton' aria-expanded={openedMenu === "view"} onClick={() => switchMenu("view")}>视图(V)</button>
+            <Dropdown menu={{ items: fileMenu }} trigger={['click']}>
+                <button className='menuButton'>文件(F)</button>
+            </Dropdown>
+            <Dropdown menu={{ items: viewMenu }} trigger={['click']}>
+                <button className='menuButton'>视图(V)</button>
+            </Dropdown>
             <button className={props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
                 onClick={props.switchRulePanelVisible}
                 title='开关筛选及高亮规则配置面板'>规则面板

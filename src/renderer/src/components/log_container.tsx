@@ -1,8 +1,8 @@
 import { ILogManager } from "../managers/log_manager";
 import { IListView, ListView } from './common/list';
-import { ContextWarpper } from './common/context_wapper';
 import { useEffect, useState } from "react";
 import { createRef } from "react";
+import { Dropdown } from "antd";
 
 const EXCLUDED_OPACITY = 0.3;
 
@@ -177,10 +177,12 @@ export const LogContainer = function (props: {
         const isHighlight = line >= 0 && line === highlightLine;
         const onClick = () => setHighlightLine(line !== highlightLine ? line : -1);
 
-        return <ContextWarpper menuItems={[
-            { key: "select", name: "选择", callback: () => setHighlightLine(line) },
-            { key: "copy", name: "复制", callback: () => navigator.clipboard.writeText(logText) }
-        ]}>
+        const items = [
+            { key: "select", label: <div onClick={() => setHighlightLine(line)}>选择</div>, disabled: line < 0 || line === highlightLine },
+            { key: "copy", label: <div onClick={() => navigator.clipboard.writeText(logText)}>复制</div> },
+            { key: "clear", label: <div onClick={() => manager.clear()}>清空日志</div> }
+        ];
+        return <Dropdown menu={{ items }} trigger={["contextMenu"]}>
             <div className="log" style={{ ...props.style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
                 <div className="logIndex">{line >= 0 ? line : ''}</div>
                 <div className={`logText${isHighlight ? ' highlightLogText' : ''}`}
@@ -188,7 +190,7 @@ export const LogContainer = function (props: {
                     style={{ ...getLogColor(logText), whiteSpace: "pre" }}>
                     {splitLog(logText, manager.inputFilters)}<br /></div>
             </div >
-        </ContextWarpper>
+        </Dropdown>
     }
     return <div className="logContainer" ref={mainRef} style={{ ...props.style, position: 'relative' }}>
         <ListView ref={listRef} style={{ height: "100%", inset: "0%" }}

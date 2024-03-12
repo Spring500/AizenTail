@@ -1,4 +1,5 @@
-import { ColorRuleTextField, RegexTextField, RuleLineWarpper } from "./wappers";
+import { ColorPicker } from "antd";
+import { RegexTextField, RuleLineWarpper } from "./wappers";
 
 const isObjectEqual = (a: object, b: object) => {
     for (let key in a) {
@@ -44,23 +45,29 @@ export const RuleLine_Color = function ({ index, rules, setRules }: {
         </div>
     }
 
+    const ColorField = function ({ value, style, onChange }: {
+        value: string | undefined, style?: React.CSSProperties,
+        onChange: (value: string | undefined) => void,
+    }) {
+        return <ColorPicker defaultValue={value} allowClear disabledAlpha arrow={false}
+            style={{ ...style, backgroundColor: '#00000000', borderColor: "#ffffff20", }}
+            onChangeComplete={color => { onChange(color.toRgb().a > 0 ? color.toHexString() : undefined) }}
+            // showText={(color) => <span>Custom Text ({color.toHexString()})</span>}
+            size='small'
+        />
+    }
+
     const renderBackColor = () => {
-        return <div className="ruleBlock colorRuleBlock"
-            title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串">
-            背景色
-            <ColorRuleTextField placeholder="选择背景色" value={rule.background}
-                onChange={(text) => setRule(index, { ...rule, background: text })}
-                onEnter={(text) => setRule(index, { ...rule, background: text })} />
+        return <div className="ruleBlock"
+            title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串"> 背景色
+            <ColorField value={rule.background} onChange={(text) => setRule(index, { ...rule, background: text })} />
         </div>
     }
 
     const renderFontColor = () => {
-        return <div className="ruleBlock colorRuleBlock"
-            title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串">
-            字体色
-            <ColorRuleTextField placeholder="选择字体色" value={rule.color}
-                onChange={(text) => setRule(index, { ...rule, color: text })}
-                onEnter={(text) => setRule(index, { ...rule, color: text })} />
+        return <div className="ruleBlock"
+            title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串"> 字体色
+            <ColorField value={rule.color} onChange={(text) => setRule(index, { ...rule, color: text })} />
         </div>
     }
 

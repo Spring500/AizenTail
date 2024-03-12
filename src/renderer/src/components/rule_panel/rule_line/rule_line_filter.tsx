@@ -54,7 +54,8 @@ export const RuleLine_Filter = function ({ index, rules, setRules }: {
 
     return <RuleLineWarpper key={index} index={index} enable={!!rule.enable} ruleCount={rules.length}
         onRuleDelete={onRuleDelete} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}
-        menuItems={[{ key: "exclude", name: () => rule.exclude ? "包含匹配串" : "排除匹配串", callback: toggleExclude }]}>
+        menuItems={[{ key: "exclude", label: <div onClick={toggleExclude}>{rule.exclude ? "包含匹配串" : "排除匹配串"}</div> }]}
+    >
         {renderReg()}
         <div className="fixedRuleBlock">
             <button className={rule.exclude ? "ruleButton activatedButton" : "ruleButton"}
