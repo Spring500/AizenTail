@@ -21,7 +21,7 @@ export const TextField = React.forwardRef(function TextFieldRef({ value, placeho
     const onBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
         onEnter && onEnter(event.currentTarget.value);
     }
-    return <div className='ruleInputWarpper' onContextMenu={(e) => e.stopPropagation()}>
+    return <div onContextMenu={(e) => e.stopPropagation()} style={{ flex: '1 1 auto', minWidth: 0 }}>
         <Dropdown trigger={['contextMenu']} menu={{ items }}>
             <span style={{ display: 'flex', width: '100%' }}>
                 <input className={((className ?? '') + " ruleInput").trim()} type='text'

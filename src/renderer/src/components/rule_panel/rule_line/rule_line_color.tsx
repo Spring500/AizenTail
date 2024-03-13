@@ -1,4 +1,4 @@
-import { ColorPicker } from "antd";
+import { ColorPicker, Flex } from "antd";
 import { RegexTextField, RuleLineWarpper } from "./wappers";
 
 const isObjectEqual = (a: object, b: object) => {
@@ -35,14 +35,15 @@ export const RuleLine_Color = function ({ index, rules, setRules }: {
     }
 
     const renderReg = () => {
-        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
+        return <Flex title="根据输入的正则表达式匹配日志条目" align="center" gap={4} style={{ flex: "1 1 auto" }}>
             <RegexTextField fieldName="匹配串" value={rule.reg} placeholder="输入匹配串"
                 regexEnable={rule.regexEnable} style={{ color: rule.color, backgroundColor: rule.background }}
                 onChange={(text) => setRule(index, { ...rule, reg: text })}
                 onEnter={(text) => setRule(index, { ...rule, reg: text })}
                 onRegexEnableChange={(enable) => setRule(index, { ...rule, regexEnable: enable })}
             />
-        </div>
+        </Flex>
+
     }
 
     const ColorField = function ({ value, style, onChange }: {
@@ -52,28 +53,27 @@ export const RuleLine_Color = function ({ index, rules, setRules }: {
         return <ColorPicker defaultValue={value} allowClear disabledAlpha arrow={false}
             style={{ ...style, backgroundColor: '#00000000', borderColor: "#ffffff20", }}
             onChangeComplete={color => { onChange(color.toRgb().a > 0 ? color.toHexString() : undefined) }}
-            // showText={(color) => <span>Custom Text ({color.toHexString()})</span>}
             size='small'
         />
     }
 
     const renderBackColor = () => {
-        return <div className="ruleBlock"
+        return <Flex align="center" flex={"0 0 auto"}
             title="满足匹配条件的日志将应用选取的背景色，可以填写xml格式颜色字符串"> 背景色
             <ColorField value={rule.background} onChange={(text) => setRule(index, { ...rule, background: text })} />
-        </div>
+        </Flex>
     }
 
     const renderFontColor = () => {
-        return <div className="ruleBlock"
-            title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串"> 字体色
+        return <Flex align="center" flex={"0 0 auto"}
+            title="满足匹配条件的日志将应用选取的字体色，可以填写xml格式颜色字符串" > 字体色
             <ColorField value={rule.color} onChange={(text) => setRule(index, { ...rule, color: text })} />
-        </div>
+        </Flex>
     }
 
     const onRuleUp = () => switchRules(index, index - 1);
     const onRuleDown = () => switchRules(index, index + 1);
-    const onRuleEnable = () => setRule(index, { ...rule, enable: !rule.enable });
+    const onRuleEnable = (enable: boolean) => setRule(index, { ...rule, enable });
     const onRuleDelete = () => deleteRule(index);
 
     return <RuleLineWarpper key={index} index={index} enable={!!rule.enable} ruleCount={rules.length}

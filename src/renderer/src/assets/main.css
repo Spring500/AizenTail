@@ -56,14 +56,9 @@ body,
     flex: none;
 }
 .titleBar{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
     -webkit-app-region: drag;
-    background: var(--theme-color-background);
     height: 28px;
     justify-content: flex-end;
-    flex: 0 0 auto;
 }
 
 .titleBarText{
@@ -94,17 +89,6 @@ body,
 .titleBarButton:hover {
     background: var(--theme-color-button-hover);
     color: var(--theme-color-info-text-highlight);
-}
-
-.menuBar{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    -webkit-app-region: no-drag;
-    background: var(--theme-color-background);
-    height: 35px;
-    padding: 0 4px 0 4px;
-    flex: 0 0 auto;
 }
 
 .menuButton{
@@ -260,60 +244,14 @@ body,
     border-radius: 2px;
 }
 
-.ruleContainer{
-    background:var(--theme-color-content);
-    color:var(--theme-color-log);
-    flex: 1 1 0;
-    min-height: 0;
-    margin: 0 4px 4px 4px;
-    width: auto;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
-
-.ruleTitleText{
-    color: var(--theme-color-info-text);
-    font-size: 16px;
-    font-weight: bold;
-    vertical-align: middle;
-    user-select: none;
-    width: 100%;
-    margin: 16px 0 4px 4px;
-}
-
-.ruleButton{
-    background: var(--theme-color-button);
-    color: var(--theme-color-info-text);
-    width: fit-content;
-    min-width: fit-content;
-    height: 100%;
-    padding: 0 8px 0 8px;
-    border: none;
-    border-radius: 8px;
-    display: inline-block;
-    position: relative;
-    text-align: center;
-    flex: 0 0 auto;
-}
-
 .activatedButton{
     background: var(--theme-color-button-activated);
     color: var(--theme-color-button-text-activated);
 }
 
-.ruleButton:hover {
-    background: var(--theme-color-button-hover);
-    color: var(--theme-color-info-text-highlight);
-}
-
 .activatedButton:hover{
     background: var(--theme-color-button-activated-hover);
     color: var(--theme-color-button-text-activated-hover);
-}
-
-.ruleButton:disabled{
-    background: var(--theme-color-button);
-    color: var(--theme-color-info-text-darker);
 }
 
 .ruleLine{

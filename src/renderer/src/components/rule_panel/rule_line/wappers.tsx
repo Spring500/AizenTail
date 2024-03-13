@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TextField } from '../../common/text_field';
-import { Dropdown, MenuProps } from 'antd';
+import { Button, Dropdown, Flex, MenuProps, Switch, Tooltip } from 'antd';
 
 export const RegexTextField = React.forwardRef(function RegexTextFieldRef(prop: {
     fieldName: string, value: string | undefined, regexEnable: boolean | undefined,
@@ -41,25 +41,20 @@ export const RegexTextField = React.forwardRef(function RegexTextFieldRef(prop: 
         }
     }, [prop.value]);
 
-
-    const renderHint = () => {
-        if (!errorMsg || !isEditing) return;
-        return <div style={{ position: 'relative', height: "100%" }}>
-            <div className='fieldHint'
-                style={{ position: 'absolute', bottom: "100%", left: 0, color: 'red' }}>
-                {errorMsg}</div>
-        </div >;
-    }
-
     return <>
-        <span style={{ color: !!errorMsg ? "red" : undefined, }}>{prop.fieldName}</span>
-        {renderHint()}
-        <TextField value={prop.value} placeholder={prop.placeholder} title={prop.title}
-            onChange={prop.onChange} onEnter={prop.onEnter} ref={inputRef}
-            style={{ ...prop.style, border: !!errorMsg ? "1px solid red" : undefined }} />
-        <button className={prop.regexEnable ? "ruleButton activatedButton" : "ruleButton"}
-            title='使用正则表达式' onClick={() => prop.onRegexEnableChange(!prop.regexEnable)}>
-            启用正则 </button>
+        <Flex style={{ color: !!errorMsg ? "red" : undefined, }} align='center' flex='0 0 auto' gap={4}>
+            {prop.fieldName}
+        </Flex>
+        <Tooltip title={<span style={{ color: 'red' }}> {errorMsg}</span>} open={!!errorMsg && isEditing}>
+            <TextField value={prop.value} placeholder={prop.placeholder} title={prop.title}
+                onChange={prop.onChange} onEnter={prop.onEnter} ref={inputRef}
+                style={{ ...prop.style, border: !!errorMsg ? "1px solid red" : undefined, flex: "1 1 auto" }} />
+        </Tooltip>
+        <Flex gap={4} flex="0 0 auto" align="center">  启用正则
+            <Switch size='small' checked={prop.regexEnable}
+                title='使用正则表达式' onClick={() => prop.onRegexEnableChange(!prop.regexEnable)}>
+            </Switch>
+        </Flex>
     </>
 });
 
@@ -67,7 +62,7 @@ export const RuleLineWarpper = function (prop: {
     children: React.ReactNode, index: number, enable: boolean, ruleCount: number,
     menuItems?: MenuProps['items'],
     onRuleUp: () => void, onRuleDown: () => void,
-    onRuleEnable: () => void, onRuleDelete: () => void,
+    onRuleEnable: (result: boolean) => void, onRuleDelete: () => void,
 }) {
     const items: MenuProps['items'] = [];
     for (const item of prop.menuItems ?? []) {
@@ -75,21 +70,22 @@ export const RuleLineWarpper = function (prop: {
     }
     items.push({ key: "up", label: <div onClick={prop.onRuleUp}>上移规则</div>, disabled: prop.index <= 0 });
     items.push({ key: "down", label: <div onClick={prop.onRuleDown}>下移规则</div>, disabled: prop.index >= prop.ruleCount - 1 });
-    items.push({ key: "enable", label: <div onClick={prop.onRuleEnable}>{prop.enable ? "禁用规则" : "启用规则"}</div> });
+    items.push({ key: "enable", label: <div onClick={() => prop.onRuleEnable(!prop.enable)}>{prop.enable ? "禁用规则" : "启用规则"}</div> });
     items.push({ key: "del", label: <div onClick={prop.onRuleDelete}>删除规则</div> });
 
     return <Dropdown trigger={['contextMenu']} key={prop.index} menu={{ items }}>
-        <div className="ruleLine">
-            <button className={prop.enable ? "ruleButton activatedButton" : "ruleButton"}
-                onClick={prop.onRuleEnable} title="是否启用该规则"> 启用</button>
+        <Flex gap='small' align='center'>
+            <Flex align="center" gap={4} flex="0 0 auto"> 启用
+                <Switch size='small' title="是否启用该规则" onClick={prop.onRuleEnable} value={prop.enable} />
+            </Flex>
             {prop.children}
-            <div className="fixedRuleBlock">
-                <button className="ruleButton" onClick={prop.onRuleUp} title="将该条规则上移一行"
-                    disabled={prop.index <= 0}>上移</button>
-                <button className="ruleButton" onClick={prop.onRuleDown} title="将该条规则下移一行"
-                    disabled={prop.index >= prop.ruleCount - 1}>下移</button>
-                <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">删除</button>
-            </div>
-        </div>
-    </Dropdown>
+            <Flex align='center' flex="0 0 auto">
+                <Button size='small' type='text' onClick={prop.onRuleUp} title="将该条规则上移一行"
+                    disabled={prop.index <= 0}> 上移</Button>
+                <Button size='small' type='text' onClick={prop.onRuleDown} title="将该条规则下移一行"
+                    disabled={prop.index >= prop.ruleCount - 1}> 下移</Button>
+                <Button size='small' type='text' onClick={prop.onRuleDelete} title="删除该条规则"> 删除</Button>
+            </Flex>
+        </Flex>
+    </Dropdown >
 }

@@ -54,7 +54,7 @@ export const RuleLine_Replace = function ({ index, rules, setRules }: {
 
     const ruleUp = () => switchRules(index, index - 1);
     const ruleDown = () => switchRules(index, index + 1);
-    const enableRule = () => setRule(index, { ...rule, enable: !rule.enable });
+    const enableRule = (enable: boolean) => setRule(index, { ...rule, enable });
     const onRuleDelete = () => deleteRule(index);
 
     return <RuleLineWarpper key={index} index={index} enable={!!rule.enable} ruleCount={rules.length}

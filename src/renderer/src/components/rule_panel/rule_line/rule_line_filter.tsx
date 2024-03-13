@@ -1,3 +1,4 @@
+import { Flex, Switch } from "antd";
 import { RegexTextField, RuleLineWarpper } from "./wappers";
 
 const isObjectEqual = (a: object, b: object) => {
@@ -48,7 +49,7 @@ export const RuleLine_Filter = function ({ index, rules, setRules }: {
 
     const ruleUp = () => switchRules(index, index - 1);
     const ruleDown = () => switchRules(index, index + 1);
-    const enableRule = () => setRule(index, { ...rule, enable: !rule.enable });
+    const enableRule = (enable: boolean) => setRule(index, { ...rule, enable });
     const onRuleDelete = () => deleteRule(index);
     const toggleExclude = () => setRule(index, { ...rule, exclude: !rule.exclude });
 
@@ -57,10 +58,9 @@ export const RuleLine_Filter = function ({ index, rules, setRules }: {
         menuItems={[{ key: "exclude", label: <div onClick={toggleExclude}>{rule.exclude ? "包含匹配串" : "排除匹配串"}</div> }]}
     >
         {renderReg()}
-        <div className="fixedRuleBlock">
-            <button className={rule.exclude ? "ruleButton activatedButton" : "ruleButton"}
-                onClick={toggleExclude} title="满足该条匹配规则的日志将被筛除还是保留">
-                反向筛选</button>
-        </div>
+        <Flex gap={4} flex="0 0 auto" align="center"> 反向筛选
+            <Switch size='small' checked={rule.exclude}
+                title="满足该条匹配规则的日志将被筛除还是保留" onClick={() => toggleExclude()} />
+        </Flex>
     </RuleLineWarpper >
 }

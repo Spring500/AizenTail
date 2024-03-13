@@ -5,6 +5,8 @@ import { MenuBar } from './components/menu_bar';
 import { RulePanel } from './components/rule_panel/rule_panel';
 import { useEffect, useState } from 'react';
 import { TSetting, ruleManager } from './managers/rule_manager';
+import Layout, { Content, Footer, Header } from 'antd/es/layout/layout';
+import { Flex } from 'antd';
 
 
 export const App = function () {
@@ -89,35 +91,77 @@ export const App = function () {
     const logContainerStyle: React.CSSProperties = rulePanelVisible
         ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
         : { resize: 'none', height: 'auto', flex: '1 1 auto' };
-    return <>
-        <TitleBar />
-        <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
-            isFiltering={isFiltering} setIsFiltering={setIsFiltering}
-            isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
-            isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
-            isShowHoverText={isShowHoverText} setIsShowHoverText={setIsShowHoverText}
-            rulePanelVisible={rulePanelVisible}
-            loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-            saveRule={(filepath) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
-            openLogFile={(filepath) => {
-                logManager.openFile(filepath);
-                setFileUrl(filepath);
-            }}
-        />
-        <LogContainer manager={logManager}
-            style={logContainerStyle}
-            isFiltering={isFiltering}
-            isAutoScroll={isAutoScroll}
-            isShowHoverText={isShowHoverText}
-            onChangeFile={OnChangeFile}
-            replaceRules={replaceRules}
-            colorRules={colorRules}
-            filterRules={filterRules}
-        />
-        {rulePanelVisible && <RulePanel
-            replaceRules={replaceRules} setReplaceRules={setReplaceRules}
-            colorRules={colorRules} setColorRules={setColorRules}
-            filterRules={filterRules} setFilterRules={setFilterRules}
-        />}
-        <div id='hintBar' className='systemInfo'><div>路径: {fileUrl}</div>{hint}</div></>;
+    // return <>
+    //     <TitleBar />
+    //     <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
+    //         isFiltering={isFiltering} setIsFiltering={setIsFiltering}
+    //         isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
+    //         isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
+    //         isShowHoverText={isShowHoverText} setIsShowHoverText={setIsShowHoverText}
+    //         rulePanelVisible={rulePanelVisible}
+    //         loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
+    //         saveRule={(filepath) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
+    //         openLogFile={(filepath) => {
+    //             logManager.openFile(filepath);
+    //             setFileUrl(filepath);
+    //         }}
+    //     />
+    //     <LogContainer manager={logManager}
+    //         style={logContainerStyle}
+    //         isFiltering={isFiltering}
+    //         isAutoScroll={isAutoScroll}
+    //         isShowHoverText={isShowHoverText}
+    //         onChangeFile={OnChangeFile}
+    //         replaceRules={replaceRules}
+    //         colorRules={colorRules}
+    //         filterRules={filterRules}
+    //     />
+    //     {rulePanelVisible && <RulePanel
+    //         replaceRules={replaceRules} setReplaceRules={setReplaceRules}
+    //         colorRules={colorRules} setColorRules={setColorRules}
+    //         filterRules={filterRules} setFilterRules={setFilterRules}
+    //     />}
+    //     <div id='hintBar' className='systemInfo'><div>路径: {fileUrl}</div>{hint}</div></>;
+    return <Layout>
+        <Header style={{ padding: 0 }}>
+            <Flex vertical style={{ height: '100%' }}>
+                <TitleBar />
+                <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
+                    isFiltering={isFiltering} setIsFiltering={setIsFiltering}
+                    isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
+                    isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
+                    isShowHoverText={isShowHoverText} setIsShowHoverText={setIsShowHoverText}
+                    rulePanelVisible={rulePanelVisible}
+                    loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
+                    saveRule={(filepath) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
+                    openLogFile={(filepath) => {
+                        logManager.openFile(filepath);
+                        setFileUrl(filepath);
+                    }}
+                />
+            </Flex>
+        </Header>
+        <Content>
+            <Flex vertical style={{ height: '100%' }}>
+                <LogContainer manager={logManager}
+                    style={logContainerStyle}
+                    isFiltering={isFiltering}
+                    isAutoScroll={isAutoScroll}
+                    isShowHoverText={isShowHoverText}
+                    onChangeFile={OnChangeFile}
+                    replaceRules={replaceRules}
+                    colorRules={colorRules}
+                    filterRules={filterRules}
+                />
+                {rulePanelVisible && <RulePanel
+                    replaceRules={replaceRules} setReplaceRules={setReplaceRules}
+                    colorRules={colorRules} setColorRules={setColorRules}
+                    filterRules={filterRules} setFilterRules={setFilterRules}
+                />}
+            </Flex>
+        </Content>
+        <Footer style={{ height: '20px', padding: '0px 20px' }}>
+            <div id='hintBar' className='systemInfo'><div>路径: {fileUrl}</div>{hint}</div>
+        </Footer>
+    </Layout>
 }
