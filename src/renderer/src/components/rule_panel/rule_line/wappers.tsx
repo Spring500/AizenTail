@@ -2,29 +2,14 @@ import * as React from 'react';
 import { TextField } from '../../common/text_field';
 import { Button, Dropdown, Flex, MenuProps, Switch, Tooltip } from 'antd';
 
-export const RegexTextField = React.forwardRef(function RegexTextFieldRef(prop: {
+export const RegexTextField = function (prop: {
     fieldName: string, value: string | undefined, regexEnable: boolean | undefined,
     placeholder?: string, style?: React.CSSProperties, title?: string,
     onChange: (value: string) => void, onEnter?: (value: string) => void,
     onRegexEnableChange: (enable: boolean) => void,
-}, ref: React.ForwardedRef<HTMLInputElement>) {
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    React.useImperativeHandle(ref, () => inputRef.current!);
-
+}) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [errorMsg, setErrorMsg] = React.useState("");
-    React.useEffect(() => {
-        if (!inputRef.current) return;
-        const input = inputRef.current;
-        const onFocus = () => setIsEditing(true);
-        const onBlur = () => setIsEditing(false);
-        input.addEventListener('focus', onFocus);
-        input.addEventListener('blur', onBlur);
-        return () => {
-            input.removeEventListener('focus', onFocus);
-            input.removeEventListener('blur', onBlur);
-        }
-    }, [inputRef]);
 
     React.useEffect(() => {
         try {
@@ -41,14 +26,24 @@ export const RegexTextField = React.forwardRef(function RegexTextFieldRef(prop: 
         }
     }, [prop.value]);
 
+    const onFocus = () => {
+        setIsEditing(true);
+    }
+
+    const onBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+        setIsEditing(false);
+        prop.onChange(event.currentTarget.value);
+    }
+
     return <>
-        <Flex style={{ color: !!errorMsg ? "red" : undefined, }} align='center' flex='0 0 auto' gap={4}>
-            {prop.fieldName}
-        </Flex>
         <Tooltip title={<span style={{ color: 'red' }}> {errorMsg}</span>} open={!!errorMsg && isEditing}>
             <TextField value={prop.value} placeholder={prop.placeholder} title={prop.title}
-                onChange={prop.onChange} onEnter={prop.onEnter} ref={inputRef}
-                style={{ ...prop.style, border: !!errorMsg ? "1px solid red" : undefined, flex: "1 1 auto" }} />
+                addonBefore={prop.fieldName}
+                onChange={prop.onChange} onFocus={onFocus} onBlur={onBlur}
+                status={!!errorMsg ? "error" : undefined}
+                style={{ ...prop.style }}
+
+            />
         </Tooltip>
         <Flex gap={4} flex="0 0 auto" align="center">  启用正则
             <Switch size='small' checked={prop.regexEnable}
@@ -56,7 +51,7 @@ export const RegexTextField = React.forwardRef(function RegexTextFieldRef(prop: 
             </Switch>
         </Flex>
     </>
-});
+}
 
 export const RuleLineWarpper = function (prop: {
     children: React.ReactNode, index: number, enable: boolean, ruleCount: number,

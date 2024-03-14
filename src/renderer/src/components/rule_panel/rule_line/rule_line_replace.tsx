@@ -1,3 +1,4 @@
+import { Flex } from "antd";
 import { TextField } from "../../common/text_field";
 import { RegexTextField, RuleLineWarpper } from "./wappers";
 
@@ -34,22 +35,21 @@ export const RuleLine_Replace = function ({ index, rules, setRules }: {
         setRules([...rules]);
     }
     const renderReg = () => {
-        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
+        return <Flex flex='1 1 auto' gap={4} align="center" title="根据输入的正则表达式匹配日志条目">
             <RegexTextField fieldName="匹配串" value={rule.reg} placeholder="输入匹配串"
                 regexEnable={rule.regexEnable}
                 onChange={(value) => setRule(index, { ...rule, reg: value })}
                 onEnter={(value) => setRule(index, { ...rule, reg: value })}
                 onRegexEnableChange={(enable) => setRule(index, { ...rule, regexEnable: enable })} />
-        </div>
+        </Flex>
     }
 
     const renderReplace = () => {
         const title = "将根据正则表达式匹配得到的字符串替换显示为对应的字符串。用$1、$2...等分别表示与正则表达式中的第1、2...个子表达式相匹配的文本";
-        return <div className="ruleBlock" title={title}> 替换串
-            <TextField value={rule.replace} placeholder="替换"
-                onChange={(value) => setRule(index, { ...rule, replace: value })}
-                onEnter={(value) => setRule(index, { ...rule, replace: value })} />
-        </div>
+        return <Flex flex='1 1 auto' gap={4} align="center" title={title}>
+            <TextField value={rule.replace} addonBefore="替换"
+                onBlur={(value) => setRule(index, { ...rule, replace: value.target.value })} />
+        </Flex>
     }
 
     const ruleUp = () => switchRules(index, index - 1);

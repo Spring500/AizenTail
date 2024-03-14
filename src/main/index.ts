@@ -13,7 +13,6 @@ const createWindow = () => {
         width: 800, height: 600,
         minWidth: 700, minHeight: 200,
         autoHideMenuBar: true,
-        frame: false,
         movable: true,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),

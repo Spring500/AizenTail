@@ -1,12 +1,11 @@
 import { logManager } from './managers/log_manager';
 import { LogContainer } from './components/log_container';
-import { TitleBar } from './components/title_bar';
 import { MenuBar } from './components/menu_bar';
 import { RulePanel } from './components/rule_panel/rule_panel';
 import { useEffect, useState } from 'react';
 import { TSetting, ruleManager } from './managers/rule_manager';
 import Layout, { Content, Footer, Header } from 'antd/es/layout/layout';
-import { Flex } from 'antd';
+import { ConfigProvider, Input, Typography, theme } from 'antd';
 
 
 export const App = function () {
@@ -81,52 +80,35 @@ export const App = function () {
         }
     }, [ruleInited]);
 
-    const onSwitchRulePanelVisible = () => setRulePanelVisible(!rulePanelVisible);
-
     const OnChangeFile = async (file: File | null) => {
         if (!file) return;
         const filepath = file.path;
         await logManager.openFile(filepath);
     }
     const logContainerStyle: React.CSSProperties = rulePanelVisible
-        ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
+        ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%', flex: 'none' }
         : { resize: 'none', height: 'auto', flex: '1 1 auto' };
-    // return <>
-    //     <TitleBar />
-    //     <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
-    //         isFiltering={isFiltering} setIsFiltering={setIsFiltering}
-    //         isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
-    //         isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
-    //         isShowHoverText={isShowHoverText} setIsShowHoverText={setIsShowHoverText}
-    //         rulePanelVisible={rulePanelVisible}
-    //         loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-    //         saveRule={(filepath) => ruleManager.saveFile(filepath, { color: colorRules, replacing: replaceRules, filter: filterRules })}
-    //         openLogFile={(filepath) => {
-    //             logManager.openFile(filepath);
-    //             setFileUrl(filepath);
-    //         }}
-    //     />
-    //     <LogContainer manager={logManager}
-    //         style={logContainerStyle}
-    //         isFiltering={isFiltering}
-    //         isAutoScroll={isAutoScroll}
-    //         isShowHoverText={isShowHoverText}
-    //         onChangeFile={OnChangeFile}
-    //         replaceRules={replaceRules}
-    //         colorRules={colorRules}
-    //         filterRules={filterRules}
-    //     />
-    //     {rulePanelVisible && <RulePanel
-    //         replaceRules={replaceRules} setReplaceRules={setReplaceRules}
-    //         colorRules={colorRules} setColorRules={setColorRules}
-    //         filterRules={filterRules} setFilterRules={setFilterRules}
-    //     />}
-    //     <div id='hintBar' className='systemInfo'><div>路径: {fileUrl}</div>{hint}</div></>;
-    return <Layout>
-        <Header style={{ padding: 0 }}>
-            <Flex vertical style={{ height: '100%' }}>
-                <TitleBar />
-                <MenuBar switchRulePanelVisible={onSwitchRulePanelVisible}
+    return <ConfigProvider theme={{
+        "token": {
+            "motion": false,
+            "colorPrimary": "#a15880",
+            "colorInfo": "#a15880",
+            "colorBgBase": "#231f1f"
+        },
+        "components": {
+            "Layout": {
+                "headerBg": "rgba(57, 50, 50)"
+            }
+        },
+        'algorithm': [
+            theme.compactAlgorithm,
+            theme.darkAlgorithm,
+        ]
+    }}>
+        <Layout style={{ height: '100%' }}>
+            <Header style={{ display: 'flex', alignItems: 'center' }}>
+                {/* <TitleBar /> */}
+                <MenuBar setRulePanelVisible={setRulePanelVisible}
                     isFiltering={isFiltering} setIsFiltering={setIsFiltering}
                     isAutoScroll={isAutoScroll} setIsAutoScroll={setIsAutoScroll}
                     isAlwaysOnTop={isAlwaysOnTop} setIsAlwaysOnTop={setIsAlwaysOnTop}
@@ -139,10 +121,11 @@ export const App = function () {
                         setFileUrl(filepath);
                     }}
                 />
-            </Flex>
-        </Header>
-        <Content>
-            <Flex vertical style={{ height: '100%' }}>
+                <Input type='text' placeholder='搜索日志' allowClear
+                    onChange={event => logManager.setInputFilter(event.target.value)}
+                />
+            </Header>
+            <Content style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', WebkitAlignItems: 'stretch' }}>
                 <LogContainer manager={logManager}
                     style={logContainerStyle}
                     isFiltering={isFiltering}
@@ -158,10 +141,14 @@ export const App = function () {
                     colorRules={colorRules} setColorRules={setColorRules}
                     filterRules={filterRules} setFilterRules={setFilterRules}
                 />}
-            </Flex>
-        </Content>
-        <Footer style={{ height: '20px', padding: '0px 20px' }}>
-            <div id='hintBar' className='systemInfo'><div>路径: {fileUrl}</div>{hint}</div>
-        </Footer>
-    </Layout>
+            </Content>
+            <Footer style={{
+                height: '24px', padding: '0px 20px', display: 'flex',
+                justifyContent: 'space-between', alignItems: 'center'
+            }}>
+                <Typography.Text type='secondary' italic>路径: {fileUrl}</Typography.Text>
+                <Typography.Text type='secondary' italic>{hint}</Typography.Text>
+            </Footer>
+        </Layout>
+    </ConfigProvider>
 }

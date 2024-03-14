@@ -2,7 +2,7 @@ import { ILogManager } from "../managers/log_manager";
 import { IListView, ListView } from './common/list';
 import { useEffect, useState } from "react";
 import { createRef } from "react";
-import { Dropdown } from "antd";
+import { Dropdown, Flex, Typography } from "antd";
 
 const EXCLUDED_OPACITY = 0.3;
 
@@ -183,18 +183,22 @@ export const LogContainer = function (props: {
             { key: "clear", label: <div onClick={() => manager.clear()}>清空日志</div> }
         ];
         return <Dropdown menu={{ items }} trigger={["contextMenu"]}>
-            <div className="log" style={{ ...props.style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }} onClick={onClick} >
-                <div className="logIndex">{line >= 0 ? line : ''}</div>
-                <div className={`logText${isHighlight ? ' highlightLogText' : ''}`}
-                    title={props.isShowHoverText ? logText : undefined}
-                    style={{ ...getLogColor(logText), whiteSpace: "pre" }}>
-                    {splitLog(logText, manager.inputFilters)}<br /></div>
+            <div style={{ ...props.style, opacity: isExculed ? EXCLUDED_OPACITY : undefined, whiteSpace: 'nowrap' }} onClick={onClick} >
+                <Flex gap='small' style={{ paddingLeft: '12px' }}>
+                    <Typography.Text italic type="secondary" >{line >= 0 ? line : ''}</Typography.Text>
+                    <Typography.Text
+                        title={props.isShowHoverText ? logText : undefined}
+                        className={isHighlight ? ' highlightLogText' : undefined}
+                        style={{ ...getLogColor(logText), whiteSpace: "pre", minWidth: 'calc(100% - 50px - 12px)' }}
+                    >{splitLog(logText, manager.inputFilters)}<br /></Typography.Text>
+                </Flex>
             </div >
         </Dropdown>
     }
-    return <div className="logContainer" ref={mainRef} style={{ ...props.style, position: 'relative' }}>
+
+    return <div ref={mainRef} style={{ ...props.style, position: 'relative', overflow: 'hidden' }}>
         <ListView ref={listRef} style={{ height: "100%", inset: "0%" }}
-            itemRender={LogRowRenderer} count={logCount} itemHeight={17} />
+            itemRender={LogRowRenderer} count={logCount} itemHeight={22} />
         {dragging && <div className='logContainerMask' style={{ zIndex: 100 }}>
             拖曳至此打开日志文件 </div>}
     </div>

@@ -38,13 +38,13 @@ export const RuleLine_Filter = function ({ index, rules, setRules }: {
         setRules([...rules]);
     }
     const renderReg = () => {
-        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
+        return <Flex flex='1 1 auto' gap={4} title="根据输入的正则表达式匹配日志条目" align="center">
             <RegexTextField fieldName={`${rule.exclude ? "排除" : "包含"}匹配串`}
                 value={rule.reg} placeholder="输入匹配串" regexEnable={rule.regexEnable}
                 onChange={(value) => setRule(index, { ...rule, reg: value })}
                 onEnter={(value) => setRule(index, { ...rule, reg: value })}
                 onRegexEnableChange={(enable) => setRule(index, { ...rule, regexEnable: enable })} />
-        </div>
+        </Flex>
     }
 
     const ruleUp = () => switchRules(index, index - 1);

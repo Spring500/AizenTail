@@ -1,9 +1,7 @@
 import { logManager } from '../managers/log_manager';
-import { Button, Dropdown, Flex, MenuProps } from 'antd';
-import { createRef } from 'react';
-
+import { Menu, MenuProps, Switch } from 'antd';
 export const MenuBar = function (props: {
-    switchRulePanelVisible: () => void, rulePanelVisible: boolean,
+    setRulePanelVisible: (visible: boolean) => void, rulePanelVisible: boolean,
     isFiltering: boolean, setIsFiltering: (v: boolean) => void,
     isAutoScroll: boolean, setIsAutoScroll: (v: boolean) => void,
     isAlwaysOnTop: boolean, setIsAlwaysOnTop: (v: boolean) => void,
@@ -12,9 +10,6 @@ export const MenuBar = function (props: {
     loadRule: (filepath: string) => void,
     saveRule: (filepath: string) => void,
 }) {
-    const inputFilterRef = createRef<HTMLInputElement>();
-
-    const onInputFilter = () => inputFilterRef.current && logManager.setInputFilter(inputFilterRef.current.value);
     const onClickToggleAutoScroll = () => props.setIsAutoScroll(!props.isAutoScroll);
     const onClickToggleAlwaysOnTop = () => props.setIsAlwaysOnTop(!props.isAlwaysOnTop);
 
@@ -66,21 +61,44 @@ export const MenuBar = function (props: {
         { key: 'showHoverText', label: `悬浮提示: ${props.isShowHoverText ? "开" : "关"}`, onClick: () => props.setIsShowHoverText(!props.isShowHoverText) },
     ]
 
-    return <Flex align='center' flex='1 1 auto'>
-        <Dropdown menu={{ items: fileMenu }} trigger={['click']}>
-            <Button className='menuButton'>文件(F)</Button>
-        </Dropdown>
-        <Dropdown menu={{ items: viewMenu }} trigger={['click']}>
-            <button className='menuButton'>视图(V)</button>
-        </Dropdown>
-        <button className={props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
-            onClick={props.switchRulePanelVisible}
-            title='开关筛选及高亮规则配置面板'>规则面板
-        </button>
-        <button className={props.isFiltering ? 'menuButton activatedButton' : 'menuButton'}
-            onClick={() => { props.setIsFiltering(!props.isFiltering) }}
-            title='暂时开关日志筛选功能 (ctrl+H)'>{props.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
-        </button>
-        <input type="text" className='menuFilter' placeholder='搜索日志' ref={inputFilterRef} onChange={onInputFilter} />
-    </Flex>
+    const naviItems: MenuProps['items'] = [
+        {
+            label: '文件',
+            key: 'fileMenu',
+            children: fileMenu
+        },
+        {
+            key: 'viewMenu',
+            label: '视图',
+            children: viewMenu
+        },
+        {
+            key: 'rulePanel',
+            label: <>
+                规则面板
+                <Switch
+                    onChange={event => props.setRulePanelVisible(event)}
+                    checked={props.rulePanelVisible}
+                    title='开关筛选及高亮规则配置面板'
+                >
+                </Switch>
+            </>,
+            onClick: () => props.setRulePanelVisible(!props.rulePanelVisible),
+        },
+        {
+            key: 'filter',
+            label: <>
+                日志筛选
+                <Switch
+                    checked={props.isFiltering}
+                    title='暂时开关日志筛选功能 (ctrl+H)'
+                    onChange={event => { props.setIsFiltering(event) }}
+                >
+                </Switch>
+            </>,
+            onClick: () => props.setIsFiltering(!props.isFiltering),
+        },
+    ]
+
+    return <Menu items={naviItems} mode='horizontal' selectable={false} style={{ minWidth: 'auto', flex: "auto" }} />
 }

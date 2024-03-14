@@ -37,7 +37,7 @@ export const RulePanel = function (props: {
         />
     }
 
-    return <Flex style={{ overflowY: "scroll" }} >
+    return <Flex style={{ overflowY: "scroll" }}>
         <Collapse style={{ width: '100%' }} size="small" items={[
             { key: '1', label: "颜色规则", children: renderColorRuleList() },
             { key: '2', label: "替换规则", children: renderReplaceRuleList() },
