@@ -27,27 +27,34 @@ export const ListView = React.forwardRef(function ListViewRef(props: {
             scrollToItem: (index, align, behavior) => {
                 const container = containerRef.current;
                 if (!container) return;
+                let topIndex = index;
                 let top = container.scrollTop;
                 const itemHeight = props.itemHeight;
+                const visibleCount = Math.floor(container.clientHeight / itemHeight);
                 switch (align) {
                     case "smart":
-                        if (index * itemHeight < container.scrollTop)
-                            top = index * itemHeight;
-                        else if ((index + 1) * itemHeight > container.scrollTop + container.clientHeight)
-                            top = (index + 1) * itemHeight - container.clientHeight;
+                        if (index < visibleStart) {
+                            topIndex = index;
+                        } else if (index >= visibleEnd) {
+                            topIndex = index - visibleCount + 1;
+                        }
                         break;
                     case "center":
-                        top = index * itemHeight - container.clientHeight / 2 + itemHeight / 2;
+                        topIndex = index - Math.floor(visibleCount / 2);
                         break;
                     case "end":
-                        top = (index + 1) * itemHeight - container.clientHeight;
+                        topIndex = index - visibleCount + 1;
                         break;
                     case "start":
                     case "auto":
                     default:
-                        top = index * itemHeight;
+                        topIndex = index;
                         break;
                 }
+                if (topIndex < 0) topIndex = 0;
+                top = props.itemHeight * props.count < MAX_DIV_HEIGHT
+                    ? topIndex * itemHeight
+                    : top = topIndex / (props.count - visibleCount) * (container.scrollHeight - container.clientHeight);
                 container.scrollTo({ top, behavior: behavior ?? "instant" });
             },
             startIndex: Math.max(visibleStart, 0),
