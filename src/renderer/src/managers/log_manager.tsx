@@ -115,7 +115,10 @@ class LogManager {
                 data = data.substring(0, data.length - 1);
             }
             const newLogs = data.split('\n');
-            this.logs[this.logs.length - 1].text += newLogs[0];
+            const lastLog = this.logs[this.logs.length - 1];
+            lastLog.text += newLogs[0];
+            lastLog.testResult.clear();
+
             for (let i = 1; i < newLogs.length; i++) {
                 this.logs.push({ offset: 0, index: count++, text: newLogs[i], testResult: new Map() })
             }
