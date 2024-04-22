@@ -17,7 +17,7 @@ const api = {
     windowMinimize: () => ipcRenderer.send("window-minimize"),
     windowMaximize: () => ipcRenderer.send("window-maximize"),
     setAlwaysOnTop: (flag: boolean) => ipcRenderer.send("window-set-always-on-top", flag),
-};
+} satisfies CustomAPI;
 
 if (process.contextIsolated) {
     try {
