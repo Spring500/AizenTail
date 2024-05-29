@@ -1,7 +1,14 @@
 import { logManager } from '../managers/log_manager'
 // import { Dropdown } from './common/dropdown';
-import { Dropdown, MenuProps } from 'antd'
+import { Dropdown, Input, MenuProps } from 'antd'
 import React, { createRef } from 'react'
+import {
+    FolderOpenFilled,
+    LayoutFilled,
+    SearchOutlined,
+    FilterFilled,
+    SettingFilled
+} from '@ant-design/icons'
 
 export const MenuBar: React.FC<{
     switchRulePanelVisible: () => void
@@ -109,16 +116,23 @@ export const MenuBar: React.FC<{
                 {/* <div style={{ position: "relative", height: "100%" }}>
             </div> */}
                 <Dropdown menu={{ items: fileMenuItems }} trigger={['click']}>
-                    <button className="menuButton">文件(F)</button>
+                    <button className="menuButton">
+                        <FolderOpenFilled />
+                        文件(F)
+                    </button>
                 </Dropdown>
                 <Dropdown menu={{ items: viewMenuItems }} trigger={['click']}>
-                    <button className="menuButton">视图(V)</button>
+                    <button className="menuButton">
+                        <LayoutFilled />
+                        视图(V)
+                    </button>
                 </Dropdown>
                 <button
                     className={props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
                     onClick={props.switchRulePanelVisible}
                     title="开关筛选及高亮规则配置面板"
                 >
+                    <SettingFilled />
                     规则面板
                 </button>
                 <button
@@ -128,15 +142,22 @@ export const MenuBar: React.FC<{
                     }}
                     title="暂时开关日志筛选功能 (ctrl+H)"
                 >
+                    <FilterFilled />
                     {props.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
                 </button>
-                <input
+                <Input
+                    type="text"
+                    placeholder="搜索日志"
+                    onChange={onInputFilter}
+                    prefix={<SearchOutlined />}
+                ></Input>
+                {/* <input
                     type="text"
                     className="menuFilter"
                     placeholder="搜索日志"
                     ref={inputFilterRef}
                     onChange={onInputFilter}
-                />
+                /> */}
             </div>
         </>
     )

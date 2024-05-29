@@ -42,7 +42,7 @@ export const App: React.FC = function () {
             if (logManager.onSetHint == setHint) logManager.onSetHint = null
             if (document.onkeyup == onKeyUp) document.onkeyup = null
         }
-    }, [])
+    }, [isFiltering, isAutoScroll, isAlwaysOnTop])
 
     useEffect(() => {
         logManager.setFilterDisabled(!isFiltering)
