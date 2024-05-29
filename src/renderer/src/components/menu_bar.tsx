@@ -26,34 +26,10 @@ export const MenuBar: React.FC<{
     saveRule: (filepath: string) => void
 }> = function (props) {
     const fileMenuItems: MenuProps['items'] = [
-        {
-            key: 'file',
-            label: '打开日志...',
-            onClick: (): void => {
-                openLogFile()
-            }
-        },
-        {
-            key: 'clear',
-            label: '清空日志',
-            onClick: (): void => {
-                logManager.clear()
-            }
-        },
-        {
-            key: 'loadRule',
-            label: '加载规则文件...',
-            onClick: (): void => {
-                openRuleFile()
-            }
-        },
-        {
-            key: 'saveRuleAs',
-            label: '规则文件另存为...',
-            onClick: (): void => {
-                saveRuleFile()
-            }
-        },
+        { key: 'file', label: '打开日志...', onClick: () => openLogFile() },
+        { key: 'clear', label: '清空日志', onClick: () => logManager.clear() },
+        { key: 'loadRule', label: '加载规则文件...', onClick: () => openRuleFile() },
+        { key: 'saveRuleAs', label: '规则文件另存为...', onClick: () => saveRuleFile() },
         { key: 'exit', label: '退出', onClick: () => window.close() }
     ]
 
@@ -117,14 +93,12 @@ export const MenuBar: React.FC<{
             </div> */}
                 <Dropdown menu={{ items: fileMenuItems }} trigger={['click']}>
                     <button className="menuButton">
-                        <FolderOpenFilled />
-                        文件(F)
+                        <FolderOpenFilled /> 文件(F)
                     </button>
                 </Dropdown>
                 <Dropdown menu={{ items: viewMenuItems }} trigger={['click']}>
                     <button className="menuButton">
-                        <LayoutFilled />
-                        视图(V)
+                        <LayoutFilled /> 视图(V)
                     </button>
                 </Dropdown>
                 <button
@@ -137,13 +111,10 @@ export const MenuBar: React.FC<{
                 </button>
                 <button
                     className={props.isFiltering ? 'menuButton activatedButton' : 'menuButton'}
-                    onClick={() => {
-                        props.setIsFiltering(!props.isFiltering)
-                    }}
+                    onClick={() => props.setIsFiltering(!props.isFiltering)}
                     title="暂时开关日志筛选功能 (ctrl+H)"
                 >
-                    <FilterFilled />
-                    {props.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
+                    <FilterFilled /> {props.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
                 </button>
                 <Input
                     type="text"
@@ -151,13 +122,6 @@ export const MenuBar: React.FC<{
                     onChange={onInputFilter}
                     prefix={<SearchOutlined />}
                 ></Input>
-                {/* <input
-                    type="text"
-                    className="menuFilter"
-                    placeholder="搜索日志"
-                    ref={inputFilterRef}
-                    onChange={onInputFilter}
-                /> */}
             </div>
         </>
     )
