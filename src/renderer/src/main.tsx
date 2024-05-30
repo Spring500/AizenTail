@@ -11,7 +11,8 @@ ReactDOM.createRoot(document.getElementById('app')!).render(
             theme={{
                 token: {
                     // borderRadius: 3,
-                    motion: false
+                    motion: false,
+                    fontSize: 13
                 },
                 algorithm: [
                     // theme.compactAlgorithm,

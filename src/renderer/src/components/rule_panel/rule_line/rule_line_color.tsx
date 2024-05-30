@@ -61,7 +61,7 @@ export const RuleLine_Color: React.FC<{
                 title="满足匹配条件的日志将应用选取的背景色"
                 style={{ flex: '0 0 auto' }}
             >
-                <Space.Compact>
+                <Space size={4}>
                     背景色
                     <ColorPicker
                         value={rule.background}
@@ -74,7 +74,7 @@ export const RuleLine_Color: React.FC<{
                             })
                         }
                     />
-                </Space.Compact>
+                </Space>
             </div>
         )
     }
@@ -86,7 +86,7 @@ export const RuleLine_Color: React.FC<{
                 title="满足匹配条件的日志将应用选取的字体色"
                 style={{ flex: '0 0 auto' }}
             >
-                <Space.Compact>
+                <Space size={4}>
                     字体色
                     <ColorPicker
                         value={rule.color}
@@ -99,7 +99,7 @@ export const RuleLine_Color: React.FC<{
                             })
                         }
                     />
-                </Space.Compact>
+                </Space>
             </div>
         )
     }
