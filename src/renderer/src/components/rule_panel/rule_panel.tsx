@@ -1,17 +1,27 @@
 import React, { useState } from 'react'
-import { Collapse, Slider } from 'antd'
+import { Checkbox, Collapse, Divider, Flex, InputNumber, Slider, Space } from 'antd'
 import { RuleLine_Color, RuleLine_Replace } from './rule_line'
+
+type RuleCallbacks = {
+    setReplaceRules: (replaceRules: ReplaceConfig[]) => void
+    setColorRules: (colorRules: ColorConfig[]) => void
+    setIsAlwaysOnTop: (isAlwaysOnTop: boolean) => void
+    setIsShowHoverText: (isShowHoverText: boolean) => void
+}
 
 export const RulePanel: React.FC<{
     replaceRules: ReplaceConfig[]
-    setReplaceRules: (replaceRules: ReplaceConfig[]) => void
     colorRules: ColorConfig[]
-    setColorRules: (colorRules: ColorConfig[]) => void
+    isAlwaysOnTop: boolean
+    isShowHoverText: boolean
+    callbacks: RuleCallbacks
 }> = function (props) {
     const [logLimit, setLogLimit] = useState(0)
-    const addRule = (): void => props.setColorRules([...props.colorRules, { reg: '' }])
+
+    const callbacks = props.callbacks
+    const addRule = (): void => callbacks.setColorRules([...props.colorRules, { reg: '' }])
     const addReplaceRule = (): void =>
-        props.setReplaceRules([...props.replaceRules, { reg: '', replace: '' }])
+        callbacks.setReplaceRules([...props.replaceRules, { reg: '', replace: '' }])
     return (
         <div className="ruleContainer" style={{ padding: '4px' }}>
             <Collapse
@@ -20,28 +30,39 @@ export const RulePanel: React.FC<{
                         key: '0',
                         label: '基础设定',
                         children: (
-                            <div style={{ width: '100%' }}>
-                                <span>日志上限</span>
-                                <div style={{ width: '50%' }}>
-                                    <Slider
+                            <Flex vertical>
+                                <Divider orientation="left">日志设定</Divider>
+                                <Space direction="vertical">
+                                    <InputNumber
                                         min={0}
                                         max={100000}
-                                        defaultValue={30}
-                                        step={10000}
-                                        marks={{
-                                            0: '0',
-                                            50000: '50000',
-                                            100000: '100000'
-                                        }}
-                                        value={typeof logLimit === 'number' ? logLimit : 0}
-                                        onChange={(value) => setLogLimit(value)}
-                                        tooltip={{
-                                            formatter: (value) => (value ? value : '无限制')
-                                        }}
-                                        // style={{ margin: '0 20px' }}
+                                        addonBefore={'日志上限'}
+                                        variant="filled"
+                                        keyboard
+                                        value={logLimit}
+                                        onChange={(value) => setLogLimit(value ?? 0)}
+                                        formatter={(value) =>
+                                            value && value > 0 ? value + '' : '无限制'
+                                        }
                                     />
-                                </div>
-                            </div>
+                                    <Checkbox
+                                        checked={props.isShowHoverText}
+                                        onChange={(e) =>
+                                            callbacks.setIsShowHoverText(e.target.checked)
+                                        }
+                                    >
+                                        日志悬浮提示
+                                    </Checkbox>
+                                </Space>
+
+                                <Divider orientation="left">窗口设定</Divider>
+                                <Checkbox
+                                    checked={props.isAlwaysOnTop}
+                                    onChange={(e) => callbacks.setIsAlwaysOnTop(e.target.checked)}
+                                >
+                                    窗口置顶
+                                </Checkbox>
+                            </Flex>
                         )
                     },
                     {
@@ -54,7 +75,7 @@ export const RulePanel: React.FC<{
                                         key={index}
                                         index={index}
                                         rules={props.colorRules}
-                                        setRules={props.setColorRules}
+                                        setRules={callbacks.setColorRules}
                                     />
                                 ))}
                                 <div className="ruleLine">
@@ -76,12 +97,12 @@ export const RulePanel: React.FC<{
                                         key={index}
                                         index={index}
                                         rules={props.replaceRules}
-                                        setRules={props.setReplaceRules}
+                                        setRules={callbacks.setReplaceRules}
                                     />
                                 ))}
                                 <button className="ruleButton" onClick={addReplaceRule}>
-                                    添加规则{' '}
-                                </button>{' '}
+                                    添加规则
+                                </button>
                             </>
                         )
                     }

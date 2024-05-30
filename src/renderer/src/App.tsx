@@ -133,9 +133,15 @@ export const App: React.FC = function () {
             {rulePanelVisible && (
                 <RulePanel
                     replaceRules={replaceRules}
-                    setReplaceRules={setReplaceRules}
                     colorRules={colorRules}
-                    setColorRules={setColorRules}
+                    isAlwaysOnTop={isAlwaysOnTop}
+                    isShowHoverText={isShowHoverText}
+                    callbacks={{
+                        setReplaceRules,
+                        setColorRules,
+                        setIsAlwaysOnTop,
+                        setIsShowHoverText
+                    }}
                 />
             )}
             <div id="hintBar" className="systemInfo">
