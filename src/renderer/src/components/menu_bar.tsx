@@ -119,7 +119,8 @@ export const MenuBar: React.FC<{
                 <Input
                     type="text"
                     placeholder="搜索日志"
-                    onChange={onInputFilter}
+                    spellCheck={false}
+                    onChange={(e) => logManager.setInputFilter(e.target.value)}
                     prefix={<SearchOutlined />}
                 ></Input>
             </div>
