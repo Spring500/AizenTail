@@ -300,9 +300,10 @@ body,
     display: flex;
     align-items: center;
     width: 100%;
-    height: 22px;
+    height: 28px;
     color: var(--theme-color-info-text);
-    font: var(--theme-font-log);
+    /* font: var(--theme-font-log); */
+
     user-select: none;
 }
 

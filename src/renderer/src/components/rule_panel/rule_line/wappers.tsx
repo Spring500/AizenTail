@@ -1,66 +1,19 @@
 import * as React from 'react'
-import { EditorableTextField } from '../../common/text_field'
-import { ItemType } from '../../common/dropdown'
-import { ContextWarpper } from '../../common/context_wapper'
-import { Checkbox } from 'antd'
+import { Checkbox, Dropdown, Input, Tooltip } from 'antd'
+import { ItemType } from 'antd/es/menu/interface'
 
-const COROR_LIST: [string | undefined, string][] = [
-    [undefined, '默认'],
-    // 红色系
-    ['red', '红色'],
-    ['pink', '粉红'],
-    // 橙色系
-    ['orange', '橙色'],
-    ['tomato', '番茄'],
-    // 黄色系
-    ['yellow', '黄色'],
-    ['gold', '金色'],
-    // 绿色系
-    ['green', '绿色'],
-    // 青色系
-    ['cyan', '青色'],
-    // 蓝色系
-    ['blue', '蓝色'],
-    // 紫色系
-    ['purple', '紫色'],
-    // 灰色系
-    ['gray', '灰色'],
-    ['silver', '银色'],
-    ['black', '黑色'],
-    ['white', '白色']
-]
-
-export const RegexTextField = React.forwardRef(function RegexTextFieldRef(
-    prop: {
-        fieldName: string
-        value: string | undefined
-        regexEnable: boolean | undefined
-        placeholder?: string
-        style?: React.CSSProperties
-        title?: string
-        onChange: (value: string) => void
-        onEnter?: (value: string) => void
-        onRegexEnableChange: (enable: boolean) => void
-    },
-    ref: React.ForwardedRef<HTMLInputElement>
-) {
-    const inputRef = React.useRef<HTMLInputElement>(null)
-    React.useImperativeHandle(ref, () => inputRef.current!)
-
+export const RegexTextField: React.FC<{
+    fieldName: string
+    value: string | undefined
+    regexEnable: boolean | undefined
+    placeholder?: string
+    style?: React.CSSProperties
+    title?: string
+    onChange: (value: string) => void
+    onRegexEnableChange: (enable: boolean) => void
+}> = function (prop) {
     const [isEditing, setIsEditing] = React.useState(false)
     const [errorMsg, setErrorMsg] = React.useState('')
-    React.useEffect(() => {
-        if (!inputRef.current) return
-        const input = inputRef.current
-        const onFocus = () => setIsEditing(true)
-        const onBlur = () => setIsEditing(false)
-        input.addEventListener('focus', onFocus)
-        input.addEventListener('blur', onBlur)
-        return () => {
-            input.removeEventListener('focus', onFocus)
-            input.removeEventListener('blur', onBlur)
-        }
-    }, [inputRef])
 
     React.useEffect(() => {
         try {
@@ -75,33 +28,27 @@ export const RegexTextField = React.forwardRef(function RegexTextFieldRef(
         }
     }, [prop.value])
 
-    const renderHint = () => {
-        if (!errorMsg || !isEditing) return
-        return (
-            <div style={{ position: 'relative', height: '100%' }}>
-                <div
-                    className="fieldHint"
-                    style={{ position: 'absolute', bottom: '100%', left: 0, color: 'red' }}
-                >
-                    {errorMsg}
-                </div>
-            </div>
-        )
-    }
-
     return (
         <>
-            <span style={{ color: errorMsg ? 'red' : undefined }}>{prop.fieldName}</span>
-            {renderHint()}
-            <EditorableTextField
-                value={prop.value}
-                placeholder={prop.placeholder}
-                title={prop.title}
-                onChange={prop.onChange}
-                onEnter={prop.onEnter}
-                ref={inputRef}
-                style={{ ...prop.style, border: errorMsg ? '1px solid red' : undefined }}
-            />
+            <Tooltip title={errorMsg} open={!!errorMsg && !!isEditing} color="red">
+                <Input
+                    addonBefore={
+                        <span style={{ color: errorMsg ? 'red' : undefined }}>
+                            {prop.fieldName}
+                        </span>
+                    }
+                    value={prop.value}
+                    placeholder={prop.placeholder}
+                    style={{ ...prop.style }}
+                    title={prop.title}
+                    status={errorMsg ? 'error' : undefined}
+                    onChange={(e): void => prop.onChange(e.currentTarget.value)}
+                    onFocus={() => setIsEditing(true)}
+                    onBlur={() => setIsEditing(false)}
+                    variant="filled"
+                    size="small"
+                />
+            </Tooltip>
             <Checkbox
                 className={'ruleCheckBox'}
                 checked={prop.regexEnable}
@@ -111,9 +58,9 @@ export const RegexTextField = React.forwardRef(function RegexTextFieldRef(
             </Checkbox>
         </>
     )
-})
+}
 
-export const RuleLineWarpper = function (prop: {
+export const RuleLineWarpper: React.FC<{
     children: React.ReactNode
     index: number
     enable: boolean
@@ -128,62 +75,63 @@ export const RuleLineWarpper = function (prop: {
     onRuleDown: () => void
     onRuleEnable: () => void
     onRuleDelete: () => void
-}) {
+}> = function (prop) {
     const menuItems: ItemType[] = []
     for (const item of prop.menuItems ?? []) {
         menuItems.push({ ...item })
     }
     menuItems.push({
         key: 'up',
-        name: '上移规则',
+        label: '上移规则',
         disabled: prop.index <= 0,
-        callback: prop.onRuleUp
+        onClick: prop.onRuleUp
     })
     menuItems.push({
         key: 'down',
-        name: '下移规则',
+        label: '下移规则',
         disabled: prop.index >= prop.ruleCount - 1,
-        callback: prop.onRuleDown
+        onClick: prop.onRuleDown
     })
     menuItems.push({
         key: 'enable',
-        name: () => (prop.enable ? '禁用规则' : '启用规则'),
-        callback: prop.onRuleEnable
+        label: prop.enable ? '禁用规则' : '启用规则',
+        onClick: prop.onRuleEnable
     })
-    menuItems.push({ key: 'del', name: '删除规则', callback: prop.onRuleDelete })
+    menuItems.push({ key: 'del', label: '删除规则', onClick: prop.onRuleDelete })
 
     return (
-        <ContextWarpper key={prop.index} className="ruleLine" menuItems={menuItems}>
-            <button
-                className={prop.enable ? 'ruleButton activatedButton' : 'ruleButton'}
-                onClick={prop.onRuleEnable}
-                title="是否启用该规则"
-            >
-                {' '}
-                启用
-            </button>
-            {prop.children}
-            <div className="fixedRuleBlock">
-                <button
-                    className="ruleButton"
-                    onClick={prop.onRuleUp}
-                    title="将该条规则上移一行"
-                    disabled={prop.index <= 0}
+        <Dropdown trigger={['contextMenu']} menu={{ items: menuItems }}>
+            <div className="ruleLine">
+                <Checkbox
+                    className="ruleCheckBox"
+                    checked={prop.enable}
+                    onClick={prop.onRuleEnable}
                 >
-                    上移
-                </button>
-                <button
-                    className="ruleButton"
-                    onClick={prop.onRuleDown}
-                    title="将该条规则下移一行"
-                    disabled={prop.index >= prop.ruleCount - 1}
-                >
-                    下移
-                </button>
-                <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">
-                    删除
-                </button>
+                    启用
+                </Checkbox>
+                {prop.children}
+                <div className="fixedRuleBlock">
+                    <button
+                        className="ruleButton"
+                        onClick={prop.onRuleUp}
+                        title="将该条规则上移一行"
+                        disabled={prop.index <= 0}
+                    >
+                        上移
+                    </button>
+                    <button
+                        className="ruleButton"
+                        onClick={prop.onRuleDown}
+                        title="将该条规则下移一行"
+                        disabled={prop.index >= prop.ruleCount - 1}
+                    >
+                        下移
+                    </button>
+                    <button className="ruleButton" onClick={prop.onRuleDelete} title="删除该条规则">
+                        删除
+                    </button>
+                </div>
             </div>
-        </ContextWarpper>
+        </Dropdown>
     )
 }

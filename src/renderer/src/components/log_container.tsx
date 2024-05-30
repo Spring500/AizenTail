@@ -1,8 +1,8 @@
 import { ILogManager } from '../managers/log_manager'
 import { IListView, ListView } from './common/list'
-import { ContextWarpper } from './common/context_wapper'
 import React, { useEffect, useState } from 'react'
 import { createRef } from 'react'
+import { Dropdown } from 'antd'
 
 const EXCLUDED_OPACITY = 0.3
 
@@ -188,15 +188,18 @@ export const LogContainer: React.FC<{
         const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
 
         return (
-            <ContextWarpper
-                menuItems={[
-                    { key: 'select', name: '选择', callback: () => setHighlightLine(line) },
-                    {
-                        key: 'copy',
-                        name: '复制',
-                        callback: () => navigator.clipboard.writeText(logText)
-                    }
-                ]}
+            <Dropdown
+                trigger={['contextMenu']}
+                menu={{
+                    items: [
+                        { key: 'choose', label: '选择', onClick: () => setHighlightLine(line) },
+                        {
+                            key: 'copy',
+                            label: '复制',
+                            onClick: () => navigator.clipboard.writeText(logText)
+                        }
+                    ]
+                }}
             >
                 <div
                     className="log"
@@ -213,7 +216,7 @@ export const LogContainer: React.FC<{
                         <br />
                     </div>
                 </div>
-            </ContextWarpper>
+            </Dropdown>
         )
     }
     return (

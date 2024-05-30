@@ -46,7 +46,6 @@ export const RuleLine_Replace = function ({
                     placeholder="输入匹配串"
                     regexEnable={rule.regexEnable}
                     onChange={(value) => setRule(index, { ...rule, reg: value })}
-                    onEnter={(value) => setRule(index, { ...rule, reg: value })}
                     onRegexEnableChange={(enable) =>
                         setRule(index, { ...rule, regexEnable: enable })
                     }
@@ -66,7 +65,6 @@ export const RuleLine_Replace = function ({
                     value={rule.replace}
                     placeholder="替换"
                     onChange={(value) => setRule(index, { ...rule, replace: value })}
-                    onEnter={(value) => setRule(index, { ...rule, replace: value })}
                 />
             </div>
         )

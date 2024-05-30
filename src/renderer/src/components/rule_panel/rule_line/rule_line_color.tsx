@@ -1,5 +1,5 @@
 import React from 'react'
-import { ColorPicker } from 'antd'
+import { ColorPicker, Space } from 'antd'
 import { Checkbox } from 'antd'
 import { RegexTextField, RuleLineWarpper } from './wappers'
 
@@ -46,7 +46,6 @@ export const RuleLine_Color: React.FC<{
                     regexEnable={rule.regexEnable}
                     style={{ color: rule.color, backgroundColor: rule.background }}
                     onChange={(text) => setRule(index, { ...rule, reg: text })}
-                    onEnter={(text) => setRule(index, { ...rule, reg: text })}
                     onRegexEnableChange={(enable) =>
                         setRule(index, { ...rule, regexEnable: enable })
                     }
@@ -62,18 +61,20 @@ export const RuleLine_Color: React.FC<{
                 title="满足匹配条件的日志将应用选取的背景色"
                 style={{ flex: '0 0 auto' }}
             >
-                背景色
-                <ColorPicker
-                    value={rule.background}
-                    allowClear
-                    disabledAlpha
-                    onChangeComplete={(color) =>
-                        setRule(index, {
-                            ...rule,
-                            background: color.cleared ? undefined : color.toHexString()
-                        })
-                    }
-                />
+                <Space.Compact>
+                    背景色
+                    <ColorPicker
+                        value={rule.background}
+                        allowClear
+                        disabledAlpha
+                        onChangeComplete={(color) =>
+                            setRule(index, {
+                                ...rule,
+                                background: color.cleared ? undefined : color.toHexString()
+                            })
+                        }
+                    />
+                </Space.Compact>
             </div>
         )
     }
@@ -82,21 +83,23 @@ export const RuleLine_Color: React.FC<{
         return (
             <div
                 className="ruleBlock colorRuleBlock"
-                title="足匹配条件的日志将应用选取的字体色"
+                title="满足匹配条件的日志将应用选取的字体色"
                 style={{ flex: '0 0 auto' }}
             >
-                字体色
-                <ColorPicker
-                    value={rule.color}
-                    allowClear
-                    disabledAlpha
-                    onChangeComplete={(color) =>
-                        setRule(index, {
-                            ...rule,
-                            color: color.cleared ? undefined : color.toHexString()
-                        })
-                    }
-                />
+                <Space.Compact>
+                    字体色
+                    <ColorPicker
+                        value={rule.color}
+                        allowClear
+                        disabledAlpha
+                        onChangeComplete={(color) =>
+                            setRule(index, {
+                                ...rule,
+                                color: color.cleared ? undefined : color.toHexString()
+                            })
+                        }
+                    />
+                </Space.Compact>
             </div>
         )
     }
