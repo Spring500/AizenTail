@@ -6,7 +6,7 @@ import { createRef } from 'react'
 
 const EXCLUDED_OPACITY = 0.3
 
-const splitLog = function (text: string, keywords: string[]) {
+const splitLog = function (text: string, keywords: string[]): React.ReactNode {
     let splitedText = text
     for (const keyword of keywords) {
         const plainedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -38,7 +38,7 @@ export const LogContainer: React.FC<{
     const [logCount, setLogCount] = useState(0)
     const [highlightLine, setHighlightLine] = useState(-1)
 
-    const onDrop = (event: DragEvent) => {
+    const onDrop = (event: DragEvent): void => {
         event.preventDefault()
         event.stopPropagation()
         setDragging(false)
@@ -46,17 +46,17 @@ export const LogContainer: React.FC<{
             props.onChangeFile(event.dataTransfer.files[0])
     }
 
-    const onDragOver = (event: DragEvent) => {
+    const onDragOver = (event: DragEvent): void => {
         event.preventDefault()
         event.stopPropagation()
     }
 
-    const inRect = (x: number, y: number) => {
+    const inRect = (x: number, y: number): boolean => {
         const rect = mainRef.current?.getBoundingClientRect()
-        return rect && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+        return !!rect && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
     }
 
-    const onDragEnter = (event: DragEvent) => {
+    const onDragEnter = (event: DragEvent): void => {
         event.preventDefault()
         event.stopPropagation()
         if (dragging) return
@@ -66,7 +66,7 @@ export const LogContainer: React.FC<{
         }
     }
 
-    const onDragLeave = (event: DragEvent) => {
+    const onDragLeave = (event: DragEvent): void => {
         event.preventDefault()
         event.stopPropagation()
         if (!dragging) return
@@ -76,11 +76,11 @@ export const LogContainer: React.FC<{
         }
     }
 
-    const scrollToItem = function (index: number) {
+    const scrollToItem = function (index: number): void {
         listRef.current?.scrollToItem(index, 'center', 'instant')
     }
 
-    const onTick = function () {
+    const onTick = function (): void {
         props.manager.refreshFile()
     }
     // 监听manager的变化
@@ -142,7 +142,7 @@ export const LogContainer: React.FC<{
     }
 
     // 替换日志
-    const replaceLog = function (rawText: string) {
+    const replaceLog = function (rawText: string): string {
         let text = rawText ?? ''
         for (const rule of props.replaceRules) {
             if (!rule.enable) continue
@@ -157,14 +157,18 @@ export const LogContainer: React.FC<{
     }
 
     // 获取日志颜色
-    const getLogColor = function (log: string) {
+    const getLogColor = function (log: string): React.CSSProperties {
         for (const rule of props.colorRules) {
             if (!rule.enable) continue
+            let hitted = false
             if (rule.regexEnable) {
-                if (!getRegExp(rule.reg)?.test(log)) continue
+                hitted = getRegExp(rule.reg)?.test(log) ?? false
             } else {
-                if (!log.includes(rule.reg)) continue
+                hitted = log.includes(rule.reg)
             }
+            if (rule.exclude) hitted = !hitted
+            if (!hitted) continue
+
             return {
                 backgroundColor: rule.background,
                 color: rule.color
@@ -175,13 +179,13 @@ export const LogContainer: React.FC<{
 
     const hasFilter = props.colorRules.length > 0 && props.colorRules.some((rule) => rule.enable)
 
-    const LogRowRenderer = function (index: number) {
+    const LogRowRenderer = function (index: number): React.ReactNode {
         const manager = props.manager
         const logText = replaceLog(manager.getLogText(index))
         const line = props.manager.indexToLine(index)
         const isExculed = !props.isFiltering && hasFilter && !manager.lineToIndexMap.has(index)
         const isHighlight = line >= 0 && line === highlightLine
-        const onClick = () => setHighlightLine(line !== highlightLine ? line : -1)
+        const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
 
         return (
             <ContextWarpper
