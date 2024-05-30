@@ -36,6 +36,8 @@ export const RegexTextField: React.FC<{
         token.colorBgContainer = color
         token.colorFillTertiary = color
         token.colorFillSecondary = color
+        token.colorErrorBg = color
+        token.colorErrorBgHover = color
     }
     return (
         <>
@@ -56,6 +58,7 @@ export const RegexTextField: React.FC<{
                         placeholder={prop.placeholder}
                         style={{ ...prop.style, backgroundColor: undefined }}
                         title={prop.title}
+                        spellCheck={false}
                         status={errorMsg ? 'error' : undefined}
                         onChange={(e): void => prop.onChange(e.currentTarget.value)}
                         onFocus={() => setIsEditing(true)}

@@ -59,6 +59,7 @@ export const RuleLine_Replace: React.FC<{
                 <Input
                     addonBefore={'替换串'}
                     value={rule.replace}
+                    spellCheck={false}
                     placeholder={'替换字符串'}
                     title={title}
                     onChange={(value): void =>
