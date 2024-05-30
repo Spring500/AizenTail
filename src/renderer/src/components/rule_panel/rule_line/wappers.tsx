@@ -27,7 +27,7 @@ export const RegexTextField: React.FC<{
             }
             setErrorMsg(message)
         }
-    }, [prop.value])
+    }, [prop.value, prop.regexEnable])
 
     const token: Partial<AliasToken> = {}
     if (prop.style?.color) token.colorText = prop.style.color
