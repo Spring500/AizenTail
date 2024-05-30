@@ -14,10 +14,3 @@ type ReplaceConfig = {
     enable?: boolean
     regexEnable?: boolean
 }
-
-type FilterConfig = {
-    reg: string
-    exclude: boolean
-    enable?: boolean
-    regexEnable?: boolean
-}

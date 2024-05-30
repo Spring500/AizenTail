@@ -12,7 +12,6 @@ export const App: React.FC = function () {
     const [rulePanelVisible, setRulePanelVisible] = useState(false)
     const [colorRules, setColorRules] = useState<ColorConfig[]>([])
     const [replaceRules, setReplaceRules] = useState<ReplaceConfig[]>([])
-    const [filterRules, setFilterRules] = useState<FilterConfig[]>([])
     const [ruleInited, setRuleInited] = useState(false)
     const [isFiltering, setIsFiltering] = useState(false)
     const [isAutoScroll, setIsAutoScroll] = useState(true)
@@ -56,7 +55,6 @@ export const App: React.FC = function () {
         const onRuleChanged = (setting: TSetting): void => {
             setColorRules([...setting.color])
             setReplaceRules([...setting.replacing])
-            setFilterRules([...setting.filter])
         }
         ruleManager.listen('ruleChanged', onRuleChanged)
 
@@ -67,17 +65,16 @@ export const App: React.FC = function () {
 
     useEffect(() => {
         if (!ruleInited) return
-        ruleManager.saveConfig({ color: colorRules, replacing: replaceRules, filter: filterRules })
+        ruleManager.saveConfig({ color: colorRules, replacing: replaceRules })
         console.log('save config', {
             color: colorRules,
-            replacing: replaceRules,
-            filter: filterRules
+            replacing: replaceRules
         })
-    }, [colorRules, replaceRules, filterRules])
+    }, [colorRules, replaceRules])
 
     useEffect(() => {
-        logManager.setFilterRules(filterRules)
-    }, [filterRules])
+        logManager.setFilterRules(colorRules)
+    }, [colorRules])
 
     // 当ruleInited为false时加载规则
     useEffect(() => {
@@ -115,8 +112,7 @@ export const App: React.FC = function () {
                 saveRule={(filepath) =>
                     ruleManager.saveFile(filepath, {
                         color: colorRules,
-                        replacing: replaceRules,
-                        filter: filterRules
+                        replacing: replaceRules
                     })
                 }
                 openLogFile={(filepath) => {
@@ -133,7 +129,6 @@ export const App: React.FC = function () {
                 onChangeFile={OnChangeFile}
                 replaceRules={replaceRules}
                 colorRules={colorRules}
-                filterRules={filterRules}
             />
             {rulePanelVisible && (
                 <RulePanel
@@ -141,8 +136,6 @@ export const App: React.FC = function () {
                     setReplaceRules={setReplaceRules}
                     colorRules={colorRules}
                     setColorRules={setColorRules}
-                    filterRules={filterRules}
-                    setFilterRules={setFilterRules}
                 />
             )}
             <div id="hintBar" className="systemInfo">

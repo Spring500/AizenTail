@@ -202,8 +202,8 @@ class LogManager {
         )
     }
 
-    private filterRules: FilterConfig[] = []
-    setFilterRules(rules: FilterConfig[]): void {
+    private filterRules: ColorConfig[] = []
+    setFilterRules(rules: ColorConfig[]): void {
         this.filterRules = rules
         this.refreshFilter()
     }
@@ -245,7 +245,7 @@ class LogManager {
         return index
     }
 
-    private getRuleIndex(rule: FilterConfig): number {
+    private getRuleIndex(rule: ColorConfig): number {
         return this.keyToIndex(this.ruleToKey(rule))
     }
 
@@ -253,7 +253,7 @@ class LogManager {
         return this.keyToIndex(this.patternToKey(pattern))
     }
 
-    private ruleToKey(rule: FilterConfig): string {
+    private ruleToKey(rule: ColorConfig): string {
         return `r_${rule.reg}_${!!rule.regexEnable}`
     }
 
@@ -261,7 +261,7 @@ class LogManager {
         return `p_${pattern}`
     }
 
-    private getRuleReg(rule: FilterConfig): RegExp | null | undefined {
+    private getRuleReg(rule: ColorConfig): RegExp | null | undefined {
         const ruleId = this.getRuleIndex(rule)
         const regExp = this.regCache[ruleId]
         if (regExp === null) {
@@ -290,7 +290,7 @@ class LogManager {
         return this.regCache[ruleId]
     }
 
-    private testRule(rule: FilterConfig & { ruleId: number }, log: LogMeta): boolean {
+    private testRule(rule: ColorConfig & { ruleId: number }, log: LogMeta): boolean {
         const ruleId = rule.ruleId
         let result = log.testResult.get(ruleId)
         if (result !== undefined) return result
@@ -313,7 +313,7 @@ class LogManager {
 
     private calculateExcluded(
         line: number,
-        rules: (FilterConfig & { ruleId: number })[],
+        rules: (ColorConfig & { ruleId: number })[],
         patterns: { pattern: string; patternId: number }[]
     ): boolean {
         const log = this.logs[line]

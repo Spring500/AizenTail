@@ -35,7 +35,7 @@ export const RuleLine_Color: React.FC<{
         rules.splice(index, 1)
         setRules([...rules])
     }
-
+    const toggleExclude = (): void => setRule(index, { ...rule, exclude: !rule.exclude })
     const renderReg = (): React.ReactNode => {
         return (
             <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
@@ -118,7 +118,7 @@ export const RuleLine_Color: React.FC<{
             onRuleUp={onRuleUp}
         >
             {renderReg()}
-            <Checkbox className={'ruleCheckBox'} onChange={undefined}>
+            <Checkbox className={'ruleCheckBox'} onChange={toggleExclude} checked={rule.exclude}>
                 反向筛选
             </Checkbox>
             {renderBackColor()} {renderFontColor()}
