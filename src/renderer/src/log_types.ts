@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 type ColorConfig = {
     color?: string
     background?: string

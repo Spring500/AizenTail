@@ -11,6 +11,7 @@ export const RulePanel: React.FC<{
     setFilterRules: (filterRules: FilterConfig[]) => void
 }> = function (props) {
     const [logLimit, setLogLimit] = useState(0)
+    const addRule = (): void => props.setColorRules([...props.colorRules, { reg: '' }])
     return (
         <div className="ruleContainer" style={{ padding: '4px' }}>
             <Collapse
@@ -46,14 +47,24 @@ export const RulePanel: React.FC<{
                     {
                         key: '1',
                         label: '颜色规则',
-                        children: props.colorRules.map((_, index) => (
-                            <RuleLine_Color
-                                key={index}
-                                index={index}
-                                rules={props.colorRules}
-                                setRules={props.setColorRules}
-                            />
-                        ))
+                        children: (
+                            <>
+                                {props.colorRules.map((_, index) => (
+                                    <RuleLine_Color
+                                        key={index}
+                                        index={index}
+                                        rules={props.colorRules}
+                                        setRules={props.setColorRules}
+                                    />
+                                ))}
+                                <div className="ruleLine">
+                                    {' '}
+                                    <button className="ruleButton" onClick={addRule}>
+                                        添加规则{' '}
+                                    </button>{' '}
+                                </div>
+                            </>
+                        )
                     },
                     {
                         key: '2',
@@ -64,18 +75,6 @@ export const RulePanel: React.FC<{
                                 index={index}
                                 rules={props.replaceRules}
                                 setRules={props.setReplaceRules}
-                            />
-                        ))
-                    },
-                    {
-                        key: '3',
-                        label: '过滤规则',
-                        children: props.filterRules.map((_, index) => (
-                            <RuleLine_Filter
-                                key={index}
-                                index={index}
-                                rules={props.filterRules}
-                                setRules={props.setFilterRules}
                             />
                         ))
                     }

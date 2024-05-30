@@ -267,6 +267,15 @@ body,
     flex: 0 0 auto;
 }
 
+.ruleCheckBox{
+    background: var(--theme-color-button);
+    color: var(--theme-color-info-text);
+    width: fit-content;
+    min-width: fit-content;
+    height: 100%;
+    padding: 0 0px 0 4px;
+}
+
 .activatedButton{
     background: var(--theme-color-button-activated);
     color: var(--theme-color-button-text-activated);
@@ -314,10 +323,6 @@ body,
     min-width: 1px;
     height: 100%;
     text-wrap: nowrap;
-}
-
-.colorRuleBlock{
-    max-width: 130px;
 }
 
 .fieldHint{
