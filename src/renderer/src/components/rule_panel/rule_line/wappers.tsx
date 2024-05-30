@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { Checkbox, Dropdown, Input, Tooltip } from 'antd'
+import { Checkbox, ConfigProvider, Dropdown, Input, Tooltip } from 'antd'
 import { ItemType } from 'antd/es/menu/interface'
+import { AliasToken } from 'antd/es/theme/internal'
 
 export const RegexTextField: React.FC<{
     fieldName: string
@@ -28,26 +29,41 @@ export const RegexTextField: React.FC<{
         }
     }, [prop.value])
 
+    const token: Partial<AliasToken> = {}
+    if (prop.style?.color) token.colorText = prop.style.color
+    if (prop.style?.backgroundColor) {
+        const color = prop.style.backgroundColor
+        token.colorBgContainer = color
+        token.colorFillTertiary = color
+        token.colorFillSecondary = color
+    }
     return (
         <>
             <Tooltip title={errorMsg} open={!!errorMsg && !!isEditing} color="red">
-                <Input
-                    addonBefore={
-                        <span style={{ color: errorMsg ? 'red' : undefined }}>
-                            {prop.fieldName}
-                        </span>
-                    }
-                    value={prop.value}
-                    placeholder={prop.placeholder}
-                    style={{ ...prop.style }}
-                    title={prop.title}
-                    status={errorMsg ? 'error' : undefined}
-                    onChange={(e): void => prop.onChange(e.currentTarget.value)}
-                    onFocus={() => setIsEditing(true)}
-                    onBlur={() => setIsEditing(false)}
-                    variant="filled"
-                    size="small"
-                />
+                <ConfigProvider theme={{ token }}>
+                    <Input
+                        addonBefore={
+                            <span
+                                style={{
+                                    color: errorMsg ? 'red' : undefined,
+                                    background: undefined
+                                }}
+                            >
+                                {prop.fieldName}
+                            </span>
+                        }
+                        value={prop.value}
+                        placeholder={prop.placeholder}
+                        style={{ ...prop.style, backgroundColor: undefined }}
+                        title={prop.title}
+                        status={errorMsg ? 'error' : undefined}
+                        onChange={(e): void => prop.onChange(e.currentTarget.value)}
+                        onFocus={() => setIsEditing(true)}
+                        onBlur={() => setIsEditing(false)}
+                        variant="filled"
+                        size="small"
+                    />
+                </ConfigProvider>
             </Tooltip>
             <Checkbox
                 className={'ruleCheckBox'}
