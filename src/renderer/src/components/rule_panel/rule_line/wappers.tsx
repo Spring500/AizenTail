@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Checkbox, ConfigProvider, Dropdown, Input, Tooltip } from 'antd'
 import { ItemType } from 'antd/es/menu/interface'
 import { AliasToken } from 'antd/es/theme/internal'
+import { WarningOutlined } from '@ant-design/icons'
 
 export const RegexTextField: React.FC<{
     fieldName: string
@@ -45,14 +46,10 @@ export const RegexTextField: React.FC<{
                 <ConfigProvider theme={{ token }}>
                     <Input
                         addonBefore={
-                            <span
-                                style={{
-                                    color: errorMsg ? 'red' : undefined,
-                                    background: undefined
-                                }}
-                            >
+                            <div style={{ width: '50px' }}>
+                                {errorMsg ? <WarningOutlined /> : undefined}
                                 {prop.fieldName}
-                            </span>
+                            </div>
                         }
                         value={prop.value}
                         placeholder={prop.placeholder}
