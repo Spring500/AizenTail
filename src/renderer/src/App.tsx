@@ -9,8 +9,10 @@ import { TSetting, ruleManager } from './managers/rule_manager'
 type TRuleContext = {
     rules: TSetting | undefined
     addFilter(ruleSetName: string, rule: FilterConfig): void
+    setFilter(ruleSetName: string, index: number, rule: FilterConfig): void
     delFilter(ruleSetName: string, index: number): void
     addReplace(ruleSetName: string, rule: ReplaceConfig): void
+    setReplace(ruleSetName: string, index: number, rule: ReplaceConfig): void
     delReplace(ruleSetName: string, index: number): void
     resetRules(rules: TSetting): void
     newRuleSet(ruleSetName: string): void
@@ -72,6 +74,19 @@ export const App: React.FC = function () {
             filters.push(rule)
             setRules(newRules)
         },
+        setFilter: (setKey, index, rule) => {
+            if (!rule) return
+            const newRules = { ...rules }
+
+            let ruleSet = newRules[setKey]
+            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
+
+            let filters = ruleSet.filterRules
+            if (!filters) ruleSet.filterRules = filters = []
+            if (index < 0 || index >= filters.length) return
+            filters[index] = rule
+            setRules(newRules)
+        },
         delFilter: (setKey, index) => {
             const newRules = { ...rules }
             const ruleSet = newRules[setKey]
@@ -105,6 +120,19 @@ export const App: React.FC = function () {
             if (!replaces) ruleSet.replaceRules = replaces = []
 
             ruleSet.replaceRules = replaces.slice(index, 1)
+            setRules(newRules)
+        },
+        setReplace: (setKey, index, rule) => {
+            if (!rule) return
+            const newRules = { ...rules }
+
+            let ruleSet = newRules[setKey]
+            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
+
+            let replaces = ruleSet.replaceRules
+            if (!replaces) ruleSet.replaceRules = replaces = []
+            if (index < 0 || index >= replaces.length) return
+            replaces[index] = rule
             setRules(newRules)
         },
         resetRules: (newRules) => {
