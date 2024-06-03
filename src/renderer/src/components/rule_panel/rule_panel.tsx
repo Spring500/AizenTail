@@ -1,26 +1,12 @@
 import React, { useState } from 'react'
-import {
-    Checkbox,
-    Collapse,
-    Divider,
-    Flex,
-    Form,
-    GetRef,
-    Input,
-    InputNumber,
-    Radio,
-    Space
-} from 'antd'
+import { Checkbox, Collapse, Divider, Flex, Input, InputNumber, Radio, Space } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
+import { SettingContext } from '@renderer/App'
 
 type RuleCallbacks = {
     setReplaceRules: (replaceRules: ReplaceConfig[]) => void
     setColorRules: (colorRules: ColorConfig[]) => void
-    setIsAlwaysOnTop: (isAlwaysOnTop: boolean) => void
-    setIsShowHoverText: (isShowHoverText: boolean) => void
 }
-type FormInstance<T> = GetRef<typeof Form<T>>
-const EditableContext = React.createContext<FormInstance<ColorConfig> | null>(null)
 
 export const RuleSubPanel: React.FC<{
     ruleNames: string[]
@@ -28,7 +14,6 @@ export const RuleSubPanel: React.FC<{
     colorRules: ColorConfig[]
 }> = function (props) {
     const [selectedRule, setSelectedRule] = useState(-1)
-    const ruleContext = React.useContext(EditableContext)
 
     const options = props.ruleNames.map((ruleName, index) => {
         return { label: ruleName, value: index }
@@ -87,10 +72,9 @@ export const RuleSubPanel: React.FC<{
 export const RulePanel: React.FC<{
     replaceRules: ReplaceConfig[]
     colorRules: ColorConfig[]
-    isAlwaysOnTop: boolean
-    isShowHoverText: boolean
     callbacks: RuleCallbacks
 }> = function (props) {
+    const settings = React.useContext(SettingContext)
     const [logLimit, setLogLimit] = useState(0)
 
     const callbacks = props.callbacks
@@ -121,9 +105,9 @@ export const RulePanel: React.FC<{
                                         }
                                     />
                                     <Checkbox
-                                        checked={props.isShowHoverText}
+                                        checked={settings?.isShowHoverText}
                                         onChange={(e) =>
-                                            callbacks.setIsShowHoverText(e.target.checked)
+                                            settings?.setIsShowHoverText(e.target.checked)
                                         }
                                     >
                                         日志悬浮提示
@@ -132,8 +116,8 @@ export const RulePanel: React.FC<{
 
                                 <Divider orientation="left">窗口设定</Divider>
                                 <Checkbox
-                                    checked={props.isAlwaysOnTop}
-                                    onChange={(e) => callbacks.setIsAlwaysOnTop(e.target.checked)}
+                                    checked={settings?.isAlwaysOnTop}
+                                    onChange={(e) => settings?.setIsAlwaysOnTop(e.target.checked)}
                                 >
                                     窗口置顶
                                 </Checkbox>

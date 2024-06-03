@@ -5,6 +5,27 @@ import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
 import React, { useEffect, useState } from 'react'
 import { TSetting, ruleManager } from './managers/rule_manager'
+import { GetRef, Form } from 'antd'
+
+type TRules = {
+    name: string
+    replaceRules: ReplaceConfig[]
+    colorRules: ColorConfig[]
+}
+type TSettings = {
+    isAlwaysOnTop: boolean
+    setIsAlwaysOnTop: (value: boolean) => void
+    isShowHoverText: boolean
+    setIsShowHoverText: (value: boolean) => void
+    isFiltering: boolean
+    setIsFiltering: (v: boolean) => void
+    isAutoScroll: boolean
+    setIsAutoScroll: (v: boolean) => void
+}
+
+type FormInstance<T> = GetRef<typeof Form<T>>
+export const RuleContext = React.createContext<FormInstance<TRules> | null>(null)
+export const SettingContext = React.createContext<TSettings | null>(null)
 
 export const App: React.FC = function () {
     const [fileUrl, setFileUrl] = useState('file directory')
@@ -97,57 +118,57 @@ export const App: React.FC = function () {
     return (
         <>
             <TitleBar />
-            <MenuBar
-                switchRulePanelVisible={onSwitchRulePanelVisible}
-                isFiltering={isFiltering}
-                setIsFiltering={setIsFiltering}
-                isAutoScroll={isAutoScroll}
-                setIsAutoScroll={setIsAutoScroll}
-                isAlwaysOnTop={isAlwaysOnTop}
-                setIsAlwaysOnTop={setIsAlwaysOnTop}
-                isShowHoverText={isShowHoverText}
-                setIsShowHoverText={setIsShowHoverText}
-                rulePanelVisible={rulePanelVisible}
-                loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-                saveRule={(filepath) =>
-                    ruleManager.saveFile(filepath, {
-                        color: colorRules,
-                        replacing: replaceRules
-                    })
-                }
-                openLogFile={(filepath) => {
-                    logManager.openFile(filepath)
-                    setFileUrl(filepath)
+            <SettingContext.Provider
+                value={{
+                    isAlwaysOnTop,
+                    setIsAlwaysOnTop,
+                    isShowHoverText,
+                    setIsShowHoverText,
+                    isFiltering,
+                    setIsFiltering,
+                    isAutoScroll,
+                    setIsAutoScroll
                 }}
-            />
-            <LogContainer
-                manager={logManager}
-                style={logContainerStyle}
-                isFiltering={isFiltering}
-                isAutoScroll={isAutoScroll}
-                isShowHoverText={isShowHoverText}
-                onChangeFile={OnChangeFile}
-                replaceRules={replaceRules}
-                colorRules={colorRules}
-            />
-            {rulePanelVisible && (
-                <RulePanel
-                    replaceRules={replaceRules}
-                    colorRules={colorRules}
-                    isAlwaysOnTop={isAlwaysOnTop}
-                    isShowHoverText={isShowHoverText}
-                    callbacks={{
-                        setReplaceRules,
-                        setColorRules,
-                        setIsAlwaysOnTop,
-                        setIsShowHoverText
-                    }}
-                />
-            )}
-            <div id="hintBar" className="systemInfo">
-                <div>路径: {fileUrl}</div>
-                {hint}
-            </div>
+            >
+                <RuleContext.Provider value={null}>
+                    <MenuBar
+                        switchRulePanelVisible={onSwitchRulePanelVisible}
+                        rulePanelVisible={rulePanelVisible}
+                        loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
+                        saveRule={(filepath) =>
+                            ruleManager.saveFile(filepath, {
+                                color: colorRules,
+                                replacing: replaceRules
+                            })
+                        }
+                        openLogFile={(filepath) => {
+                            logManager.openFile(filepath)
+                            setFileUrl(filepath)
+                        }}
+                    />
+                    <LogContainer
+                        manager={logManager}
+                        style={logContainerStyle}
+                        onChangeFile={OnChangeFile}
+                        replaceRules={replaceRules}
+                        colorRules={colorRules}
+                    />
+                    {rulePanelVisible && (
+                        <RulePanel
+                            replaceRules={replaceRules}
+                            colorRules={colorRules}
+                            callbacks={{
+                                setReplaceRules,
+                                setColorRules
+                            }}
+                        />
+                    )}
+                    <div id="hintBar" className="systemInfo">
+                        <div>路径: {fileUrl}</div>
+                        {hint}
+                    </div>
+                </RuleContext.Provider>
+            </SettingContext.Provider>
         </>
     )
 }

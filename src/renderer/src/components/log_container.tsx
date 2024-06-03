@@ -3,6 +3,7 @@ import { IListView, ListView } from './common/list'
 import React, { useEffect, useState } from 'react'
 import { createRef } from 'react'
 import { Dropdown } from 'antd'
+import { SettingContext } from '@renderer/App'
 
 const EXCLUDED_OPACITY = 0.3
 
@@ -25,13 +26,11 @@ const splitLog = function (text: string, keywords: string[]): React.ReactNode {
 export const LogContainer: React.FC<{
     style?: React.CSSProperties
     manager: ILogManager
-    isFiltering: boolean
-    isAutoScroll: boolean
-    isShowHoverText: boolean
     onChangeFile: (file: File | null) => void
     replaceRules: ReplaceConfig[]
     colorRules: ColorConfig[]
 }> = function (props) {
+    const settings = React.useContext(SettingContext)
     const mainRef = createRef<HTMLDivElement>()
     const listRef = createRef<IListView>()
     const [dragging, setDragging] = useState(false)
@@ -113,18 +112,18 @@ export const LogContainer: React.FC<{
     }, [mainRef])
 
     useEffect(() => {
-        if (!props.isAutoScroll) return
+        if (!settings?.isAutoScroll) return
         if (highlightLine !== -1) {
             const index = props.manager.lineToIndex(highlightLine)
             if (index !== -1) scrollToItem(index)
         } else {
             scrollToItem(
-                props.isFiltering
+                settings?.isFiltering
                     ? props.manager.filtedLogIds.length - 1
                     : props.manager.logs.length - 1
             )
         }
-    }, [logCount, props.isFiltering])
+    }, [logCount, settings?.isFiltering])
 
     const rexCache = new Map<string, RegExp | undefined>()
     const getRegExp = function (matchText: string): RegExp | undefined {
@@ -183,7 +182,7 @@ export const LogContainer: React.FC<{
         const manager = props.manager
         const logText = replaceLog(manager.getLogText(index))
         const line = props.manager.indexToLine(index)
-        const isExculed = !props.isFiltering && hasFilter && !manager.lineToIndexMap.has(index)
+        const isExculed = !settings?.isFiltering && hasFilter && !manager.lineToIndexMap.has(index)
         const isHighlight = line >= 0 && line === highlightLine
         const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
 
@@ -209,7 +208,7 @@ export const LogContainer: React.FC<{
                     <div className="logIndex">{line >= 0 ? line : ''}</div>
                     <div
                         className={`logText${isHighlight ? ' highlightLogText' : ''}`}
-                        title={props.isShowHoverText ? logText : undefined}
+                        title={settings?.isShowHoverText ? logText : undefined}
                         style={{ ...getLogColor(logText), whiteSpace: 'pre' }}
                     >
                         {splitLog(logText, manager.inputFilters)}

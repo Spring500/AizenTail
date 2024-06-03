@@ -1,7 +1,7 @@
 import { logManager } from '../managers/log_manager'
 // import { Dropdown } from './common/dropdown';
 import { Dropdown, Input, MenuProps } from 'antd'
-import React, { createRef } from 'react'
+import React from 'react'
 import {
     FolderOpenFilled,
     LayoutFilled,
@@ -9,22 +9,17 @@ import {
     FilterFilled,
     SettingFilled
 } from '@ant-design/icons'
+import { SettingContext } from '@renderer/App'
 
 export const MenuBar: React.FC<{
     switchRulePanelVisible: () => void
     rulePanelVisible: boolean
-    isFiltering: boolean
-    setIsFiltering: (v: boolean) => void
-    isAutoScroll: boolean
-    setIsAutoScroll: (v: boolean) => void
-    isAlwaysOnTop: boolean
-    setIsAlwaysOnTop: (v: boolean) => void
-    isShowHoverText: boolean
-    setIsShowHoverText: (v: boolean) => void
     openLogFile: (filepath: string) => void
     loadRule: (filepath: string) => void
     saveRule: (filepath: string) => void
 }> = function (props) {
+    const setting = React.useContext(SettingContext)
+
     const fileMenuItems: MenuProps['items'] = [
         { key: 'file', label: '打开日志...', onClick: () => openLogFile() },
         { key: 'clear', label: '清空日志', onClick: () => logManager.clear() },
@@ -36,26 +31,20 @@ export const MenuBar: React.FC<{
     const viewMenuItems: MenuProps['items'] = [
         {
             key: 'autoScroll',
-            label: `自动滚动: ${props.isAutoScroll ? '开' : '关'}`,
-            onClick: () => props.setIsAutoScroll(!props.isAutoScroll)
+            label: `自动滚动: ${setting?.isAutoScroll ? '开' : '关'}`,
+            onClick: () => setting?.setIsAutoScroll(!setting?.isAutoScroll)
         },
         {
             key: 'alwaysOnTop',
-            label: `窗口置顶: ${props.isAlwaysOnTop ? '开' : '关'}`,
-            onClick: () => props.setIsAlwaysOnTop(!props.isAlwaysOnTop)
+            label: `窗口置顶: ${setting?.isAlwaysOnTop ? '开' : '关'}`,
+            onClick: () => setting?.setIsAlwaysOnTop(!setting.isAlwaysOnTop)
         },
         {
             key: 'showHoverText',
-            label: `悬浮提示: ${props.isShowHoverText ? '开' : '关'}`,
-            onClick: () => props.setIsShowHoverText(!props.isShowHoverText)
+            label: `悬浮提示: ${setting?.isShowHoverText ? '开' : '关'}`,
+            onClick: () => setting?.setIsShowHoverText(!setting.isShowHoverText)
         }
     ]
-
-    const inputFilterRef = createRef<HTMLInputElement>()
-
-    const onInputFilter = (): void => {
-        if (inputFilterRef.current) logManager.setInputFilter(inputFilterRef.current.value)
-    }
 
     const openLogFile = async (): Promise<void> => {
         const filepath: string = await window.electron.openFileDialog('打开日志文件', undefined, [
@@ -106,15 +95,14 @@ export const MenuBar: React.FC<{
                     onClick={props.switchRulePanelVisible}
                     title="开关筛选及高亮规则配置面板"
                 >
-                    <SettingFilled />
-                    规则面板
+                    <SettingFilled /> 规则面板
                 </button>
                 <button
-                    className={props.isFiltering ? 'menuButton activatedButton' : 'menuButton'}
-                    onClick={() => props.setIsFiltering(!props.isFiltering)}
+                    className={setting?.isFiltering ? 'menuButton activatedButton' : 'menuButton'}
+                    onClick={() => setting?.setIsFiltering(!setting?.isFiltering)}
                     title="暂时开关日志筛选功能 (ctrl+H)"
                 >
-                    <FilterFilled /> {props.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
+                    <FilterFilled /> {setting?.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
                 </button>
                 <Input
                     type="text"
