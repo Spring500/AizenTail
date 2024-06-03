@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import {
     Checkbox,
     Collapse,
-    ColorPicker,
     Divider,
     Flex,
     Form,
@@ -10,13 +9,9 @@ import {
     Input,
     InputNumber,
     Radio,
-    Space,
-    Table,
-    Tooltip,
-    Typography
+    Space
 } from 'antd'
-import { RuleLine_Color, RuleLine_Replace } from './rule_line'
-import { ColumnsType, TableRowSelection } from 'antd/es/table/interface'
+import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 
 type RuleCallbacks = {
     setReplaceRules: (replaceRules: ReplaceConfig[]) => void
@@ -27,135 +22,28 @@ type RuleCallbacks = {
 type FormInstance<T> = GetRef<typeof Form<T>>
 const EditableContext = React.createContext<FormInstance<ColorConfig> | null>(null)
 
-const colorRuleColmuns: ColumnsType<ColorConfig> = [
-    {
-        title: '匹配串',
-        dataIndex: 'reg',
-        key: 'reg',
-        ellipsis: {
-            showTitle: false
-        },
-        render: (text: string, record) => (
-            <Tooltip placement="topLeft" title={text}>
-                <span
-                    style={{
-                        color: record.color,
-                        backgroundColor: record.background,
-                        padding: '1px 8px',
-                        borderRadius: '3px'
-                    }}
-                >
-                    {text}
-                </span>
-            </Tooltip>
-        )
-    },
-    {
-        title: '正则',
-        dataIndex: 'regexEnable',
-        key: 'regexEnable',
-        width: 60,
-        render: (enable: boolean) => <Checkbox checked={enable} />
-    },
-    {
-        title: '反向',
-        dataIndex: 'exclude',
-        key: 'exclude',
-        width: 60,
-        render: (enable: boolean) => <Checkbox checked={enable} />
-    },
-    {
-        title: '字体色',
-        dataIndex: 'color',
-        key: 'color',
-        width: 60,
-        render: (text: string) => <ColorPicker value={text} />
-    },
-    {
-        title: '背景色',
-        dataIndex: 'background',
-        key: 'background',
-        width: 60,
-        render: (text: string) => <ColorPicker value={text} />
-    }
-]
-
-const replaceRuleColmuns: ColumnsType<ReplaceConfig> = [
-    {
-        title: '匹配串',
-        dataIndex: 'reg',
-        key: 'reg',
-        ellipsis: {
-            showTitle: false
-        },
-        render: (text: string) => (
-            <Tooltip placement="topLeft" title={text}>
-                {text}
-            </Tooltip>
-        )
-    },
-    {
-        title: '正则',
-        dataIndex: 'regexEnable',
-        key: 'regexEnable',
-        width: 60,
-        render: (enable: boolean) => <Checkbox checked={enable} />
-    },
-    {
-        title: '替换串',
-        dataIndex: 'replace',
-        key: 'replace',
-        ellipsis: {
-            showTitle: false
-        },
-        render: (text: string) => (
-            <Tooltip placement="topLeft" title={text}>
-                {text}
-            </Tooltip>
-        )
-    }
-]
-
 export const RuleSubPanel: React.FC<{
     ruleNames: string[]
     replaceRules: ReplaceConfig[]
     colorRules: ColorConfig[]
 }> = function (props) {
     const [selectedRule, setSelectedRule] = useState(-1)
+    const ruleContext = React.useContext(EditableContext)
 
     const options = props.ruleNames.map((ruleName, index) => {
         return { label: ruleName, value: index }
     })
     options.push({ label: '默认', value: options.length })
 
-    const colorDatas = props.colorRules.map((rule, index) => {
-        return { ...rule, key: index }
-    })
     const replaceDatas = props.replaceRules.map((rule, index) => {
         return { ...rule, key: index }
     })
 
-    const selectedColorRowKeys: React.Key[] = []
-    for (let i = 0; i < colorDatas.length; i++) {
-        if (colorDatas[i].enable) selectedColorRowKeys.push(i)
-    }
     const selectedReplaceRowKeys: React.Key[] = []
     for (let i = 0; i < replaceDatas.length; i++) {
         if (replaceDatas[i].enable) selectedReplaceRowKeys.push(i)
     }
 
-    const colorRowSelection: TableRowSelection<ColorConfig> = {
-        selectedRowKeys: selectedColorRowKeys,
-        onChange: (selectedRowKeys: React.Key[]): void => {
-            console.log(selectedRowKeys)
-        }
-    }
-    const replaceRowSelection: TableRowSelection<ReplaceConfig> = {
-        selectedRowKeys: selectedReplaceRowKeys,
-        onChange: (selectedRowKeys: React.Key[]): void => {
-            console.log(selectedRowKeys)
-        }
-    }
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
             <Radio.Group
@@ -182,28 +70,12 @@ export const RuleSubPanel: React.FC<{
                     {
                         key: '1',
                         label: '筛选规则',
-                        children: (
-                            <Table
-                                size="small"
-                                dataSource={colorDatas}
-                                columns={colorRuleColmuns}
-                                rowSelection={colorRowSelection}
-                                pagination={false}
-                            />
-                        )
+                        children: <FilterRulePanel rules={props.colorRules} />
                     },
                     {
                         key: '2',
                         label: '替换规则',
-                        children: (
-                            <Table
-                                size="small"
-                                dataSource={replaceDatas}
-                                columns={replaceRuleColmuns}
-                                rowSelection={replaceRowSelection}
-                                pagination={false}
-                            />
-                        )
+                        children: <ReplaceRulePanel rules={props.replaceRules} />
                     }
                 ]}
                 defaultActiveKey={['0']}
@@ -266,47 +138,6 @@ export const RulePanel: React.FC<{
                                     窗口置顶
                                 </Checkbox>
                             </Flex>
-                        )
-                    },
-                    {
-                        key: '1',
-                        label: '颜色规则',
-                        children: (
-                            <>
-                                {props.colorRules.map((_, index) => (
-                                    <RuleLine_Color
-                                        key={index}
-                                        index={index}
-                                        rules={props.colorRules}
-                                        setRules={callbacks.setColorRules}
-                                    />
-                                ))}
-                                <div className="ruleLine">
-                                    {' '}
-                                    <button className="ruleButton" onClick={addRule}>
-                                        添加规则{' '}
-                                    </button>{' '}
-                                </div>
-                            </>
-                        )
-                    },
-                    {
-                        key: '2',
-                        label: '替换规则',
-                        children: (
-                            <>
-                                {props.replaceRules.map((_, index) => (
-                                    <RuleLine_Replace
-                                        key={index}
-                                        index={index}
-                                        rules={props.replaceRules}
-                                        setRules={callbacks.setReplaceRules}
-                                    />
-                                ))}
-                                <button className="ruleButton" onClick={addReplaceRule}>
-                                    添加规则
-                                </button>
-                            </>
                         )
                     },
                     {
