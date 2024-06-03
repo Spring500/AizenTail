@@ -1,43 +1,38 @@
 import React, { useState } from 'react'
-import { Checkbox, Collapse, Divider, Flex, Input, InputNumber, Radio, Space } from 'antd'
+import { Button, Checkbox, Collapse, Divider, Flex, Input, InputNumber, Radio, Space } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
-import { SettingContext } from '@renderer/App'
+import { RuleContext, SettingContext } from '@renderer/App'
+import { logManager } from '@renderer/managers/log_manager'
 
-type RuleCallbacks = {
-    setReplaceRules: (replaceRules: ReplaceConfig[]) => void
-    setColorRules: (colorRules: ColorConfig[]) => void
-}
+export const RuleSubPanel: React.FC = function () {
+    const ruleContext = React.useContext(RuleContext)
+    const settingContext = React.useContext(SettingContext)
+    const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0', '1'])
+    const selectedRule = settingContext?.currentRuleSet
 
-export const RuleSubPanel: React.FC<{
-    ruleNames: string[]
-    replaceRules: ReplaceConfig[]
-    colorRules: ColorConfig[]
-}> = function (props) {
-    const [selectedRule, setSelectedRule] = useState(-1)
-
-    const options = props.ruleNames.map((ruleName, index) => {
-        return { label: ruleName, value: index }
-    })
-    options.push({ label: '默认', value: options.length })
-
-    const replaceDatas = props.replaceRules.map((rule, index) => {
-        return { ...rule, key: index }
-    })
-
-    const selectedReplaceRowKeys: React.Key[] = []
-    for (let i = 0; i < replaceDatas.length; i++) {
-        if (replaceDatas[i].enable) selectedReplaceRowKeys.push(i)
+    const options: string[] = ['default']
+    for (const ruleName in ruleContext?.rules ?? {}) {
+        if (!options.includes(ruleName)) options.push(ruleName)
     }
 
+    const genNewSetName = function (): string {
+        let i = 0
+        while (options.includes(`rule${i}`)) i++
+        return `rule${i}`
+    }
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
-            <Radio.Group
-                value={selectedRule}
-                onChange={(e) => setSelectedRule(e.target.value)}
-                optionType="button"
-                buttonStyle="solid"
-                options={options}
-            />
+            <Space>
+                规则集
+                <Radio.Group
+                    value={selectedRule}
+                    onChange={(e) => settingContext?.setCurrentRuleSet(e.target.value)}
+                    optionType="button"
+                    buttonStyle="solid"
+                    options={options}
+                />
+                <Button onClick={() => ruleContext?.newRuleSet(genNewSetName())}>添加规则集</Button>
+            </Space>
             <Collapse
                 items={[
                     {
@@ -47,40 +42,37 @@ export const RuleSubPanel: React.FC<{
                             <Input
                                 addonBefore="规则名"
                                 variant="filled"
-                                value={props.ruleNames[selectedRule]}
-                                contentEditable={selectedRule === options.length - 1}
+                                value={selectedRule}
+                                disabled={selectedRule === 'default'}
                             ></Input>
                         )
                     },
-                    {
-                        key: '1',
-                        label: '筛选规则',
-                        children: <FilterRulePanel rules={props.colorRules} />
-                    },
+                    { key: '1', label: '筛选规则', children: <FilterRulePanel /> },
                     {
                         key: '2',
                         label: '替换规则',
-                        children: <ReplaceRulePanel rules={props.replaceRules} />
+                        children: <ReplaceRulePanel />
                     }
                 ]}
-                defaultActiveKey={['0']}
+                onChange={(keys) => setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)}
+                activeKey={activeCollapseKeys}
             ></Collapse>
         </Space>
     )
 }
 
-export const RulePanel: React.FC<{
-    replaceRules: ReplaceConfig[]
-    colorRules: ColorConfig[]
-    callbacks: RuleCallbacks
-}> = function (props) {
-    const settings = React.useContext(SettingContext)
+export const RulePanel: React.FC = function () {
+    const settingContext = React.useContext(SettingContext)
     const [logLimit, setLogLimit] = useState(0)
+    const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0', '1'])
+    React.useEffect(() => {
+        logManager.setFilterDisabled(!settingContext?.isFiltering)
+    }, [settingContext?.isFiltering])
 
-    const callbacks = props.callbacks
-    const addRule = (): void => callbacks.setColorRules([...props.colorRules, { reg: '' }])
-    const addReplaceRule = (): void =>
-        callbacks.setReplaceRules([...props.replaceRules, { reg: '', replace: '' }])
+    React.useEffect(() => {
+        window.electron.setAlwaysOnTop(!!settingContext?.isAlwaysOnTop)
+    }, [settingContext?.isAlwaysOnTop])
+
     return (
         <div className="ruleContainer" style={{ padding: '4px' }}>
             <Collapse
@@ -105,9 +97,9 @@ export const RulePanel: React.FC<{
                                         }
                                     />
                                     <Checkbox
-                                        checked={settings?.isShowHoverText}
+                                        checked={settingContext?.isShowHoverText}
                                         onChange={(e) =>
-                                            settings?.setIsShowHoverText(e.target.checked)
+                                            settingContext?.setIsShowHoverText(e.target.checked)
                                         }
                                     >
                                         日志悬浮提示
@@ -116,27 +108,20 @@ export const RulePanel: React.FC<{
 
                                 <Divider orientation="left">窗口设定</Divider>
                                 <Checkbox
-                                    checked={settings?.isAlwaysOnTop}
-                                    onChange={(e) => settings?.setIsAlwaysOnTop(e.target.checked)}
+                                    checked={settingContext?.isAlwaysOnTop}
+                                    onChange={(e) =>
+                                        settingContext?.setIsAlwaysOnTop(e.target.checked)
+                                    }
                                 >
                                     窗口置顶
                                 </Checkbox>
                             </Flex>
                         )
                     },
-                    {
-                        key: '3',
-                        label: '规则模板配置',
-                        children: (
-                            <RuleSubPanel
-                                ruleNames={['配置1 战斗专用配置', '配置2']}
-                                colorRules={props.colorRules}
-                                replaceRules={props.replaceRules}
-                            />
-                        )
-                    }
+                    { key: '1', label: '规则模板配置', children: <RuleSubPanel /> }
                 ]}
-                defaultActiveKey={['1', '2']}
+                onChange={(keys) => setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)}
+                activeKey={activeCollapseKeys}
             ></Collapse>
         </div>
     )

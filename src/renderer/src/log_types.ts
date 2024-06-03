@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-type ColorConfig = {
+type FilterConfig = {
     color?: string
     background?: string
-    reg: string
+    reg?: string
     enable?: boolean
     exclude?: boolean
     regexEnable?: boolean
 }
 
 type ReplaceConfig = {
-    reg: string
-    replace: string
+    reg?: string
+    replace?: string
     enable?: boolean
     regexEnable?: boolean
 }

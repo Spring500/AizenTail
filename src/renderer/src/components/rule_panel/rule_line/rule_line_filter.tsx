@@ -1,9 +1,10 @@
 import React from 'react'
-import { Checkbox, ColorPicker, Table, Tooltip } from 'antd'
+import { Button, Checkbox, ColorPicker, Space, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { TableRowSelection } from 'antd/es/table/interface'
+import { RuleContext, SettingContext } from '@renderer/App'
 
-const colmuns: ColumnsType<ColorConfig> = [
+const colmuns: ColumnsType<FilterConfig> = [
     {
         title: '匹配串',
         dataIndex: 'reg',
@@ -56,30 +57,37 @@ const colmuns: ColumnsType<ColorConfig> = [
     }
 ]
 
-export const FilterRulePanel: React.FC<{
-    rules: ColorConfig[]
-}> = function (props) {
-    const datas = props.rules.map((rule, index) => {
-        return { ...rule, key: index }
-    })
+export const FilterRulePanel: React.FC = function () {
+    const ruleContext = React.useContext(RuleContext)
+    const settingContext = React.useContext(SettingContext)
+    const currentRuleSet = settingContext?.currentRuleSet ?? ''
+    const datas =
+        ruleContext?.rules?.[currentRuleSet]?.filterRules?.map((rule, index) => {
+            return { ...rule, key: index }
+        }) ?? []
 
-    const selectedColorRowKeys: React.Key[] = []
+    const selectedIndices: React.Key[] = []
     for (let i = 0; i < datas.length; i++) {
-        if (datas[i].enable) selectedColorRowKeys.push(i)
+        if (datas[i].enable) selectedIndices.push(i)
     }
 
-    const rowSelection: TableRowSelection<ColorConfig> = {
-        selectedRowKeys: selectedColorRowKeys,
+    const rowSelection: TableRowSelection<FilterConfig> = {
+        selectedRowKeys: selectedIndices,
         onChange: (selectedRowKeys: React.Key[]): void => {
             console.log(selectedRowKeys)
         }
     }
     return (
-        <Table
-            dataSource={datas}
-            columns={colmuns}
-            rowSelection={rowSelection}
-            pagination={false}
-        />
+        <Space direction="vertical" style={{ width: '100%' }}>
+            <Button onClick={() => ruleContext?.addFilter(currentRuleSet, { reg: '' })}>
+                添加规则
+            </Button>
+            <Table
+                dataSource={datas}
+                columns={colmuns}
+                rowSelection={rowSelection}
+                pagination={false}
+            />
+        </Space>
     )
 }

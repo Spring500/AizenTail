@@ -3,7 +3,7 @@ import { IListView, ListView } from './common/list'
 import React, { useEffect, useState } from 'react'
 import { createRef } from 'react'
 import { Dropdown } from 'antd'
-import { SettingContext } from '@renderer/App'
+import { RuleContext, SettingContext } from '@renderer/App'
 
 const EXCLUDED_OPACITY = 0.3
 
@@ -27,15 +27,18 @@ export const LogContainer: React.FC<{
     style?: React.CSSProperties
     manager: ILogManager
     onChangeFile: (file: File | null) => void
-    replaceRules: ReplaceConfig[]
-    colorRules: ColorConfig[]
 }> = function (props) {
-    const settings = React.useContext(SettingContext)
+    const settingContext = React.useContext(SettingContext)
+    const ruleContext = React.useContext(RuleContext)
     const mainRef = createRef<HTMLDivElement>()
     const listRef = createRef<IListView>()
     const [dragging, setDragging] = useState(false)
     const [logCount, setLogCount] = useState(0)
     const [highlightLine, setHighlightLine] = useState(-1)
+
+    const currentRuleSet = ruleContext?.rules?.[settingContext?.currentRuleSet ?? '']
+    const replaceRules = currentRuleSet?.replaceRules ?? []
+    const filterRules = currentRuleSet?.filterRules ?? []
 
     const onDrop = (event: DragEvent): void => {
         event.preventDefault()
@@ -112,18 +115,18 @@ export const LogContainer: React.FC<{
     }, [mainRef])
 
     useEffect(() => {
-        if (!settings?.isAutoScroll) return
+        if (!settingContext?.isAutoScroll) return
         if (highlightLine !== -1) {
             const index = props.manager.lineToIndex(highlightLine)
             if (index !== -1) scrollToItem(index)
         } else {
             scrollToItem(
-                settings?.isFiltering
+                settingContext?.isFiltering
                     ? props.manager.filtedLogIds.length - 1
                     : props.manager.logs.length - 1
             )
         }
-    }, [logCount, settings?.isFiltering])
+    }, [logCount, settingContext?.isFiltering])
 
     const rexCache = new Map<string, RegExp | undefined>()
     const getRegExp = function (matchText: string): RegExp | undefined {
@@ -143,13 +146,14 @@ export const LogContainer: React.FC<{
     // 替换日志
     const replaceLog = function (rawText: string): string {
         let text = rawText ?? ''
-        for (const rule of props.replaceRules) {
+        for (const rule of replaceRules) {
             if (!rule.enable) continue
+            if (!rule.reg || rule.reg === '') continue
             if (rule.regexEnable) {
                 const reg = getRegExp(rule.reg)
-                if (reg) text = text.replace(reg, rule.replace)
+                if (reg) text = text.replace(reg, rule.replace ?? '')
             } else {
-                if (text.includes(rule.reg)) text = text.replace(rule.reg, rule.replace)
+                if (text.includes(rule.reg)) text = text.replace(rule.reg, rule.replace ?? '')
             }
         }
         return text
@@ -157,13 +161,13 @@ export const LogContainer: React.FC<{
 
     // 获取日志颜色
     const getLogColor = function (log: string): React.CSSProperties {
-        for (const rule of props.colorRules) {
+        for (const rule of filterRules) {
             if (!rule.enable) continue
             let hitted = false
             if (rule.regexEnable) {
-                hitted = getRegExp(rule.reg)?.test(log) ?? false
+                hitted = getRegExp(rule.reg ?? '')?.test(log) ?? false
             } else {
-                hitted = log.includes(rule.reg)
+                hitted = log.includes(rule.reg ?? '')
             }
             if (rule.exclude) hitted = !hitted
             if (!hitted) continue
@@ -176,13 +180,14 @@ export const LogContainer: React.FC<{
         return {}
     }
 
-    const hasFilter = props.colorRules.length > 0 && props.colorRules.some((rule) => rule.enable)
+    const hasFilter = filterRules.length > 0 && filterRules.some((rule) => rule.enable)
 
     const LogRowRenderer = function (index: number): React.ReactNode {
         const manager = props.manager
         const logText = replaceLog(manager.getLogText(index))
         const line = props.manager.indexToLine(index)
-        const isExculed = !settings?.isFiltering && hasFilter && !manager.lineToIndexMap.has(index)
+        const isExculed =
+            !settingContext?.isFiltering && hasFilter && !manager.lineToIndexMap.has(index)
         const isHighlight = line >= 0 && line === highlightLine
         const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
 
@@ -208,7 +213,7 @@ export const LogContainer: React.FC<{
                     <div className="logIndex">{line >= 0 ? line : ''}</div>
                     <div
                         className={`logText${isHighlight ? ' highlightLogText' : ''}`}
-                        title={settings?.isShowHoverText ? logText : undefined}
+                        title={settingContext?.isShowHoverText ? logText : undefined}
                         style={{ ...getLogColor(logText), whiteSpace: 'pre' }}
                     >
                         {splitLog(logText, manager.inputFilters)}

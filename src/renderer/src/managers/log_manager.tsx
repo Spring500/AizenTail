@@ -15,8 +15,6 @@ const RULE_CACHE_MIN = 2
 // TODO：已经计算好的日志行号和日志行号对应的索引，可以直接使用，不需要每次都计算
 class LogManager {
     readonly logs = new Array<LogMeta>()
-    autoScroll = true
-    alwaysOnTop = false
     filtedLogIds = new Array<number>()
     /**当开启筛选时，获取显示行数对应的日志行 */ lineToIndexMap = new Map<number, number>()
 
@@ -67,7 +65,9 @@ class LogManager {
     }
 
     hasFilter(): boolean {
-        return this.inputFilters.length > 0 || this.filterRules.some((rule) => rule.enable)
+        return (
+            this.inputFilters.length > 0 || this.GetCurrentFilterRules().some((rule) => rule.enable)
+        )
     }
 
     private disableFilter: boolean = false
@@ -86,6 +86,10 @@ class LogManager {
         if (filter === '') this.inputFilters.length = 0
         else this.inputFilters = filter.split(/\s+/)
         this.refreshFilter()
+    }
+
+    public GetCurrentFilterRules(): FilterConfig[] {
+        return this.filterRules ?? []
     }
 
     updateCache: { data: string; type: 'add' | 'replace' } | undefined = undefined
@@ -160,7 +164,9 @@ class LogManager {
         // 检查并去除无效的正则表达式
         for (const rulePair of this.ruleIndexMap.entries()) {
             if (
-                !this.filterRules.some((rule) => this.getRuleIndex(rule) === rulePair[1]) &&
+                !this.GetCurrentFilterRules().some(
+                    (rule) => this.getRuleIndex(rule) === rulePair[1]
+                ) &&
                 !this.inputFilters.some((pattern) => this.getPatternIndex(pattern) === rulePair[1])
             ) {
                 invalidRuleKeys.push(rulePair[0])
@@ -183,7 +189,10 @@ class LogManager {
 
         this.filtedLogIds.length = 0
         this.lineToIndexMap.clear()
-        const rules = this.filterRules.map((rule) => ({ ...rule, ruleId: this.getRuleIndex(rule) }))
+        const rules = this.GetCurrentFilterRules().map((rule) => ({
+            ...rule,
+            ruleId: this.getRuleIndex(rule)
+        }))
         const patterns = this.inputFilters.map((pattern) => ({
             pattern,
             patternId: this.getPatternIndex(pattern)
@@ -202,9 +211,9 @@ class LogManager {
         )
     }
 
-    private filterRules: ColorConfig[] = []
-    setFilterRules(rules: ColorConfig[]): void {
-        this.filterRules = rules
+    private filterRules: FilterConfig[] = []
+    setFilterRules(rules: FilterConfig[] | undefined): void {
+        this.filterRules = rules ?? []
         this.refreshFilter()
     }
     private ruleIndexMap = new Map<string, number>()
@@ -245,7 +254,7 @@ class LogManager {
         return index
     }
 
-    private getRuleIndex(rule: ColorConfig): number {
+    private getRuleIndex(rule: FilterConfig): number {
         return this.keyToIndex(this.ruleToKey(rule))
     }
 
@@ -253,7 +262,7 @@ class LogManager {
         return this.keyToIndex(this.patternToKey(pattern))
     }
 
-    private ruleToKey(rule: ColorConfig): string {
+    private ruleToKey(rule: FilterConfig): string {
         return `r_${rule.reg}_${!!rule.regexEnable}`
     }
 
@@ -261,12 +270,12 @@ class LogManager {
         return `p_${pattern}`
     }
 
-    private getRuleReg(rule: ColorConfig): RegExp | null | undefined {
+    private getRuleReg(rule: FilterConfig): RegExp | null | undefined {
         const ruleId = this.getRuleIndex(rule)
         const regExp = this.regCache[ruleId]
         if (regExp === null) {
             try {
-                this.regCache[ruleId] = new RegExp(rule.reg)
+                this.regCache[ruleId] = new RegExp(rule.reg ?? '')
             } catch (e) {
                 this.regCache[ruleId] = undefined
             }
@@ -290,14 +299,14 @@ class LogManager {
         return this.regCache[ruleId]
     }
 
-    private testRule(rule: ColorConfig & { ruleId: number }, log: LogMeta): boolean {
+    private testRule(rule: FilterConfig & { ruleId: number }, log: LogMeta): boolean {
         const ruleId = rule.ruleId
         let result = log.testResult.get(ruleId)
         if (result !== undefined) return result
         if (rule.regexEnable) {
             result = !!this.getRuleReg(rule)?.test(log.text)
         } else {
-            result = log.text.includes(rule.reg)
+            result = log.text.includes(rule.reg ?? '')
         }
         log.testResult.set(ruleId, result)
         return result
@@ -313,7 +322,7 @@ class LogManager {
 
     private calculateExcluded(
         line: number,
-        rules: (ColorConfig & { ruleId: number })[],
+        rules: (FilterConfig & { ruleId: number })[],
         patterns: { pattern: string; patternId: number }[]
     ): boolean {
         const log = this.logs[line]

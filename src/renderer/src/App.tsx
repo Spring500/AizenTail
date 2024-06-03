@@ -5,13 +5,17 @@ import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
 import React, { useEffect, useState } from 'react'
 import { TSetting, ruleManager } from './managers/rule_manager'
-import { GetRef, Form } from 'antd'
 
-type TRules = {
-    name: string
-    replaceRules: ReplaceConfig[]
-    colorRules: ColorConfig[]
+type TRuleContext = {
+    rules: TSetting | undefined
+    addFilter(ruleSetName: string, rule: FilterConfig): void
+    delFilter(ruleSetName: string, index: number): void
+    addReplace(ruleSetName: string, rule: ReplaceConfig): void
+    delReplace(ruleSetName: string, index: number): void
+    resetRules(rules: TSetting): void
+    newRuleSet(ruleSetName: string): void
 }
+
 type TSettings = {
     isAlwaysOnTop: boolean
     setIsAlwaysOnTop: (value: boolean) => void
@@ -21,61 +25,108 @@ type TSettings = {
     setIsFiltering: (v: boolean) => void
     isAutoScroll: boolean
     setIsAutoScroll: (v: boolean) => void
+    currentRuleSet: string
+    setCurrentRuleSet: (v: string) => void
 }
 
-type FormInstance<T> = GetRef<typeof Form<T>>
-export const RuleContext = React.createContext<FormInstance<TRules> | null>(null)
+export const RuleContext = React.createContext<TRuleContext | null>(null)
 export const SettingContext = React.createContext<TSettings | null>(null)
 
 export const App: React.FC = function () {
     const [fileUrl, setFileUrl] = useState('file directory')
     const [hint, setHint] = useState('')
     const [rulePanelVisible, setRulePanelVisible] = useState(false)
-    const [colorRules, setColorRules] = useState<ColorConfig[]>([])
-    const [replaceRules, setReplaceRules] = useState<ReplaceConfig[]>([])
+    const [rules, setRules] = useState<TSetting>()
     const [ruleInited, setRuleInited] = useState(false)
     const [isFiltering, setIsFiltering] = useState(false)
     const [isAutoScroll, setIsAutoScroll] = useState(true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false)
     const [isShowHoverText, setIsShowHoverText] = useState(false)
+    const [currentRuleSet, setCurrentRuleSet] = useState('default')
 
-    const onKeyUp = (e: KeyboardEvent): void => {
-        switch (e.key) {
-            case 'r':
-                e.altKey && setIsAutoScroll(!isAutoScroll)
+    const settingContextValue = {
+        isAlwaysOnTop,
+        setIsAlwaysOnTop,
+        isShowHoverText,
+        setIsShowHoverText,
+        isFiltering,
+        setIsFiltering,
+        isAutoScroll,
+        setIsAutoScroll,
+        currentRuleSet,
+        setCurrentRuleSet
+    }
+
+    const ruleContext: TRuleContext = {
+        rules,
+        addFilter: (setKey, rule) => {
+            if (!rule) return
+            const newRules: TSetting = { ...rules }
+
+            let ruleSet = newRules[setKey]
+            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
+
+            let filters = ruleSet.filterRules
+            if (!filters) ruleSet.filterRules = filters = []
+
+            filters.push(rule)
+            setRules(newRules)
+        },
+        delFilter: (setKey, index) => {
+            const newRules = { ...rules }
+            const ruleSet = newRules[setKey]
+            if (!ruleSet) return
+
+            let filters = ruleSet.filterRules
+            if (!filters) ruleSet.filterRules = filters = []
+
+            ruleSet.filterRules = filters.slice(index, 1)
+            setRules(newRules)
+        },
+        addReplace: (setKey, rule) => {
+            if (!rule) return
+            const newRules = { ...rules }
+
+            let ruleSet = newRules[setKey]
+            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
+
+            let replaces = ruleSet.replaceRules
+            if (!replaces) ruleSet.replaceRules = replaces = []
+
+            replaces.push(rule)
+            setRules(newRules)
+        },
+        delReplace: (setKey, index) => {
+            const newRules = { ...rules }
+            const ruleSet = newRules[setKey]
+            if (!ruleSet) return
+
+            let replaces = ruleSet.replaceRules
+            if (!replaces) ruleSet.replaceRules = replaces = []
+
+            ruleSet.replaceRules = replaces.slice(index, 1)
+            setRules(newRules)
+        },
+        resetRules: (newRules) => {
+            setRules(newRules)
+        },
+        newRuleSet: (ruleSetName) => {
+            if (rules && rules[ruleSetName]) {
+                console.warn('规则集已存在', ruleSetName)
                 return
-            case 'h':
-                e.ctrlKey && setIsFiltering(!isFiltering)
-                return
-            case 't':
-                e.altKey && setIsAlwaysOnTop(!isAlwaysOnTop)
-                return
-            case 'F12':
-                window.electron.openDevTools()
-                return
+            }
+            const newRules = { ...rules }
+            newRules[ruleSetName] = { filterRules: [], replaceRules: [] }
+            setRules(newRules)
         }
     }
-    useEffect(() => {
-        logManager.onSetHint = setHint
-        document.onkeyup = onKeyUp
-        return () => {
-            if (logManager.onSetHint == setHint) logManager.onSetHint = null
-            if (document.onkeyup == onKeyUp) document.onkeyup = null
-        }
-    }, [isFiltering, isAutoScroll, isAlwaysOnTop])
+    React.useEffect(() => {
+        logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
+    }, [rules, currentRuleSet])
 
-    useEffect(() => {
-        logManager.setFilterDisabled(!isFiltering)
-    }, [isFiltering])
-
-    useEffect(() => {
-        window.electron.setAlwaysOnTop(isAlwaysOnTop)
-    }, [isAlwaysOnTop])
-
-    useEffect(() => {
-        const onRuleChanged = (setting: TSetting): void => {
-            setColorRules([...setting.color])
-            setReplaceRules([...setting.replacing])
+    React.useEffect(() => {
+        const onRuleChanged = (newRules: TSetting): void => {
+            setRules(newRules)
         }
         ruleManager.listen('ruleChanged', onRuleChanged)
 
@@ -85,17 +136,35 @@ export const App: React.FC = function () {
     }, [])
 
     useEffect(() => {
-        if (!ruleInited) return
-        ruleManager.saveConfig({ color: colorRules, replacing: replaceRules })
-        console.log('save config', {
-            color: colorRules,
-            replacing: replaceRules
-        })
-    }, [colorRules, replaceRules])
+        const onKeyUp = (e: KeyboardEvent): void => {
+            switch (e.key) {
+                case 'r':
+                    e.altKey && setIsAutoScroll(!isAutoScroll)
+                    return
+                case 'h':
+                    e.ctrlKey && setIsFiltering(!isFiltering)
+                    return
+                case 't':
+                    e.altKey && setIsAlwaysOnTop(!isAlwaysOnTop)
+                    return
+                case 'F12':
+                    window.electron.openDevTools()
+                    return
+            }
+        }
+        logManager.onSetHint = setHint
+        document.onkeyup = onKeyUp
+        return () => {
+            if (logManager.onSetHint == setHint) logManager.onSetHint = null
+            if (document.onkeyup == onKeyUp) document.onkeyup = null
+        }
+    }, [isFiltering, isAutoScroll, isAlwaysOnTop])
 
     useEffect(() => {
-        logManager.setFilterRules(colorRules)
-    }, [colorRules])
+        if (!ruleInited) return
+        ruleManager.saveConfig(rules)
+        console.log('save config', rules)
+    }, [rules])
 
     // 当ruleInited为false时加载规则
     useEffect(() => {
@@ -118,29 +187,13 @@ export const App: React.FC = function () {
     return (
         <>
             <TitleBar />
-            <SettingContext.Provider
-                value={{
-                    isAlwaysOnTop,
-                    setIsAlwaysOnTop,
-                    isShowHoverText,
-                    setIsShowHoverText,
-                    isFiltering,
-                    setIsFiltering,
-                    isAutoScroll,
-                    setIsAutoScroll
-                }}
-            >
-                <RuleContext.Provider value={null}>
+            <SettingContext.Provider value={settingContextValue}>
+                <RuleContext.Provider value={ruleContext}>
                     <MenuBar
                         switchRulePanelVisible={onSwitchRulePanelVisible}
                         rulePanelVisible={rulePanelVisible}
                         loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-                        saveRule={(filepath) =>
-                            ruleManager.saveFile(filepath, {
-                                color: colorRules,
-                                replacing: replaceRules
-                            })
-                        }
+                        saveRule={(filepath) => ruleManager.saveFile(filepath, rules)}
                         openLogFile={(filepath) => {
                             logManager.openFile(filepath)
                             setFileUrl(filepath)
@@ -150,19 +203,8 @@ export const App: React.FC = function () {
                         manager={logManager}
                         style={logContainerStyle}
                         onChangeFile={OnChangeFile}
-                        replaceRules={replaceRules}
-                        colorRules={colorRules}
                     />
-                    {rulePanelVisible && (
-                        <RulePanel
-                            replaceRules={replaceRules}
-                            colorRules={colorRules}
-                            callbacks={{
-                                setReplaceRules,
-                                setColorRules
-                            }}
-                        />
-                    )}
+                    {rulePanelVisible && <RulePanel />}
                     <div id="hintBar" className="systemInfo">
                         <div>路径: {fileUrl}</div>
                         {hint}
