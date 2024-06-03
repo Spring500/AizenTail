@@ -29,7 +29,7 @@ class RuleManager {
         }
         setting = setting ?? { rules: {} }
         if (!setting.rules) setting.rules = {}
-        if (Object.keys(setting.rules).length === 0) setting = { default: {} }
+        if (Object.keys(setting).length === 0) setting = { default: {} }
         console.log('规则初始化完毕', setting)
         this.dispatch('ruleChanged', setting)
     }
