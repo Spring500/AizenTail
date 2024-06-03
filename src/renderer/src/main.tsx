@@ -14,6 +14,11 @@ ReactDOM.createRoot(document.getElementById('app')!).render(
                     motion: false,
                     fontSize: 13
                 },
+                components: {
+                    Table: {
+                        cellPaddingBlockSM: 0
+                    }
+                },
                 algorithm: [
                     // theme.compactAlgorithm,
                     theme.darkAlgorithm

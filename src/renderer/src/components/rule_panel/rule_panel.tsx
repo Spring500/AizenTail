@@ -1,12 +1,215 @@
 import React, { useState } from 'react'
-import { Checkbox, Collapse, Divider, Flex, InputNumber, Slider, Space } from 'antd'
+import {
+    Checkbox,
+    Collapse,
+    ColorPicker,
+    Divider,
+    Flex,
+    Form,
+    GetRef,
+    Input,
+    InputNumber,
+    Radio,
+    Space,
+    Table,
+    Tooltip,
+    Typography
+} from 'antd'
 import { RuleLine_Color, RuleLine_Replace } from './rule_line'
+import { ColumnsType, TableRowSelection } from 'antd/es/table/interface'
 
 type RuleCallbacks = {
     setReplaceRules: (replaceRules: ReplaceConfig[]) => void
     setColorRules: (colorRules: ColorConfig[]) => void
     setIsAlwaysOnTop: (isAlwaysOnTop: boolean) => void
     setIsShowHoverText: (isShowHoverText: boolean) => void
+}
+type FormInstance<T> = GetRef<typeof Form<T>>
+const EditableContext = React.createContext<FormInstance<ColorConfig> | null>(null)
+
+const colorRuleColmuns: ColumnsType<ColorConfig> = [
+    {
+        title: '匹配串',
+        dataIndex: 'reg',
+        key: 'reg',
+        ellipsis: {
+            showTitle: false
+        },
+        render: (text: string, record) => (
+            <Tooltip placement="topLeft" title={text}>
+                <span
+                    style={{
+                        color: record.color,
+                        backgroundColor: record.background,
+                        padding: '1px 8px',
+                        borderRadius: '3px'
+                    }}
+                >
+                    {text}
+                </span>
+            </Tooltip>
+        )
+    },
+    {
+        title: '正则',
+        dataIndex: 'regexEnable',
+        key: 'regexEnable',
+        width: 60,
+        render: (enable: boolean) => <Checkbox checked={enable} />
+    },
+    {
+        title: '反向',
+        dataIndex: 'exclude',
+        key: 'exclude',
+        width: 60,
+        render: (enable: boolean) => <Checkbox checked={enable} />
+    },
+    {
+        title: '字体色',
+        dataIndex: 'color',
+        key: 'color',
+        width: 60,
+        render: (text: string) => <ColorPicker value={text} />
+    },
+    {
+        title: '背景色',
+        dataIndex: 'background',
+        key: 'background',
+        width: 60,
+        render: (text: string) => <ColorPicker value={text} />
+    }
+]
+
+const replaceRuleColmuns: ColumnsType<ReplaceConfig> = [
+    {
+        title: '匹配串',
+        dataIndex: 'reg',
+        key: 'reg',
+        ellipsis: {
+            showTitle: false
+        },
+        render: (text: string) => (
+            <Tooltip placement="topLeft" title={text}>
+                {text}
+            </Tooltip>
+        )
+    },
+    {
+        title: '正则',
+        dataIndex: 'regexEnable',
+        key: 'regexEnable',
+        width: 60,
+        render: (enable: boolean) => <Checkbox checked={enable} />
+    },
+    {
+        title: '替换串',
+        dataIndex: 'replace',
+        key: 'replace',
+        ellipsis: {
+            showTitle: false
+        },
+        render: (text: string) => (
+            <Tooltip placement="topLeft" title={text}>
+                {text}
+            </Tooltip>
+        )
+    }
+]
+
+export const RuleSubPanel: React.FC<{
+    ruleNames: string[]
+    replaceRules: ReplaceConfig[]
+    colorRules: ColorConfig[]
+}> = function (props) {
+    const [selectedRule, setSelectedRule] = useState(-1)
+
+    const options = props.ruleNames.map((ruleName, index) => {
+        return { label: ruleName, value: index }
+    })
+    options.push({ label: '默认', value: options.length })
+
+    const colorDatas = props.colorRules.map((rule, index) => {
+        return { ...rule, key: index }
+    })
+    const replaceDatas = props.replaceRules.map((rule, index) => {
+        return { ...rule, key: index }
+    })
+
+    const selectedColorRowKeys: React.Key[] = []
+    for (let i = 0; i < colorDatas.length; i++) {
+        if (colorDatas[i].enable) selectedColorRowKeys.push(i)
+    }
+    const selectedReplaceRowKeys: React.Key[] = []
+    for (let i = 0; i < replaceDatas.length; i++) {
+        if (replaceDatas[i].enable) selectedReplaceRowKeys.push(i)
+    }
+
+    const colorRowSelection: TableRowSelection<ColorConfig> = {
+        selectedRowKeys: selectedColorRowKeys,
+        onChange: (selectedRowKeys: React.Key[]): void => {
+            console.log(selectedRowKeys)
+        }
+    }
+    const replaceRowSelection: TableRowSelection<ReplaceConfig> = {
+        selectedRowKeys: selectedReplaceRowKeys,
+        onChange: (selectedRowKeys: React.Key[]): void => {
+            console.log(selectedRowKeys)
+        }
+    }
+    return (
+        <Space direction="vertical" style={{ width: '100%' }}>
+            <Radio.Group
+                value={selectedRule}
+                onChange={(e) => setSelectedRule(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+                options={options}
+            />
+            <Collapse
+                items={[
+                    {
+                        key: '0',
+                        label: '基础设置',
+                        children: (
+                            <Input
+                                addonBefore="规则名"
+                                variant="filled"
+                                value={props.ruleNames[selectedRule]}
+                                contentEditable={selectedRule === options.length - 1}
+                            ></Input>
+                        )
+                    },
+                    {
+                        key: '1',
+                        label: '筛选规则',
+                        children: (
+                            <Table
+                                size="small"
+                                dataSource={colorDatas}
+                                columns={colorRuleColmuns}
+                                rowSelection={colorRowSelection}
+                                pagination={false}
+                            />
+                        )
+                    },
+                    {
+                        key: '2',
+                        label: '替换规则',
+                        children: (
+                            <Table
+                                size="small"
+                                dataSource={replaceDatas}
+                                columns={replaceRuleColmuns}
+                                rowSelection={replaceRowSelection}
+                                pagination={false}
+                            />
+                        )
+                    }
+                ]}
+                defaultActiveKey={['0']}
+            ></Collapse>
+        </Space>
+    )
 }
 
 export const RulePanel: React.FC<{
@@ -104,6 +307,17 @@ export const RulePanel: React.FC<{
                                     添加规则
                                 </button>
                             </>
+                        )
+                    },
+                    {
+                        key: '3',
+                        label: '规则模板配置',
+                        children: (
+                            <RuleSubPanel
+                                ruleNames={['配置1 战斗专用配置', '配置2']}
+                                colorRules={props.colorRules}
+                                replaceRules={props.replaceRules}
+                            />
                         )
                     }
                 ]}
