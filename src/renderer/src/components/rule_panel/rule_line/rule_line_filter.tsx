@@ -137,8 +137,10 @@ export const FilterRulePanel: React.FC = function () {
         newColorColmun('background', '背景色'),
         newDelOperationColumn()
     ]
-
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+    const pointerSensor = useSensor(PointerSensor, {
+        activationConstraint: { distance: { y: 20 } }
+    })
+    const sensors = useSensors(pointerSensor)
     const onDragEnd = ({ active, over }: DragEndEvent): void => {
         if (over === null) return
         const old = parseInt(active.id as string),

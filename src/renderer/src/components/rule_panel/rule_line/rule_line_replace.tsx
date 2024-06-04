@@ -131,7 +131,10 @@ export const ReplaceRulePanel: React.FC = function () {
         newInputColumn('replace', '替换串'),
         newDelOperationColumn()
     ]
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+    const pointerSensor = useSensor(PointerSensor, {
+        activationConstraint: { distance: { y: 20 } }
+    })
+    const sensors = useSensors(pointerSensor)
     const onDragEnd = ({ active, over }: DragEndEvent): void => {
         if (over === null) return
         const old = parseInt(active.id as string),
