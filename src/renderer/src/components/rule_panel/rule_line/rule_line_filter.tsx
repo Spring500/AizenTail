@@ -5,6 +5,7 @@ import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { Color } from 'antd/es/color-picker'
 import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
+import { FilterRegInput } from './rule_line_filter_reg'
 
 const getColorStr = (color: Color | undefined): string | undefined => {
     if (!color) return undefined
@@ -101,23 +102,7 @@ export const FilterRulePanel: React.FC = function () {
             ellipsis: {
                 showTitle: false
             },
-            render: (text: string, record, index) => (
-                <Tooltip placement="topLeft" title={text}>
-                    <Input
-                        style={{
-                            color: record.color,
-                            backgroundColor: record.background
-                        }}
-                        value={text}
-                        onChange={(value) =>
-                            ruleContext?.setFilter(ruleSetKey, index, {
-                                ...record,
-                                reg: value.target.value
-                            })
-                        }
-                    />
-                </Tooltip>
-            )
+            render: (text: string, _, index) => <FilterRegInput value={text} index={index} />
         },
         newCheckboxColumn('regexEnable', '正则'),
         newCheckboxColumn('exclude', '反向'),

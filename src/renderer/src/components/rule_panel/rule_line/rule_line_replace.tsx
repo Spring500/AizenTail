@@ -4,14 +4,14 @@ import { ColumnsType } from 'antd/es/table'
 import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
+import { ReplaceRegInput } from './rule_line_replace_reg'
 
 export const ReplaceRulePanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
-    const currentRuleSet = settingContext?.currentRuleSet ?? ''
     const datas =
-        ruleContext?.rules?.[currentRuleSet]?.replaceRules?.map((rule, index) => {
+        ruleContext?.rules?.[ruleSetKey]?.replaceRules?.map((rule, index) => {
             return { ...rule, key: index }
         }) ?? []
 
@@ -97,16 +97,22 @@ export const ReplaceRulePanel: React.FC = function () {
         }
     }
     const colmuns: ColumnsType<ReplaceConfig> = [
-        newInputColumn('reg', '匹配串'),
+        {
+            title: '匹配串',
+            dataIndex: 'reg',
+            key: 'reg',
+            ellipsis: {
+                showTitle: false
+            },
+            render: (text: string, _, index) => <ReplaceRegInput value={text} index={index} />
+        },
         newCheckboxColumn('regexEnable', '正则'),
         newInputColumn('replace', '替换串'),
         newDelOperationColumn()
     ]
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
-            <Button
-                onClick={() => ruleContext?.addReplace(currentRuleSet, { reg: '', replace: '' })}
-            >
+            <Button onClick={() => ruleContext?.addReplace(ruleSetKey, { reg: '', replace: '' })}>
                 <PlusCircleFilled /> 添加规则
             </Button>
             <Table
