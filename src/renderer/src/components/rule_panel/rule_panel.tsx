@@ -4,10 +4,8 @@ import {
     Checkbox,
     Collapse,
     Divider,
-    Empty,
     Flex,
     Input,
-    InputNumber,
     Popconfirm,
     Popover,
     Radio,
@@ -16,7 +14,7 @@ import {
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { logManager } from '@renderer/managers/log_manager'
-import { PlusCircleFilled, DeleteFilled, EditFilled } from '@ant-design/icons'
+import { PlusCircleFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-design/icons'
 
 export const RuleSubPanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
@@ -30,10 +28,9 @@ export const RuleSubPanel: React.FC = function () {
         if (!options.includes(ruleName) && ruleName !== 'default') options.push(ruleName)
     }
     options = ['default', ...options.sort()]
-    const ruleSetExists = !!selectedRule && selectedRule in (ruleContext?.rules ?? {})
     const genNewSetName = function (): string {
-        let i = 0
-        while (options.includes(`rule${i}`)) i++
+        let i = 1
+        while (options.includes(`rule_${i}`)) i++
         return `rule${i}`
     }
 
@@ -65,7 +62,7 @@ export const RuleSubPanel: React.FC = function () {
                         ruleContext?.copyRuleSet(selectedRule, genCopySetName(selectedRule))
                     }
                 >
-                    复制规则集
+                    <CopyFilled /> 复制规则集
                 </Button>
                 <Popconfirm
                     title={`确定删除规则集${selectedRule}？`}
@@ -100,32 +97,24 @@ export const RuleSubPanel: React.FC = function () {
                     </Button>
                 </Popover>
             </Space>
-            {
-                // 如果规则集不存在则不显示规则
-                !ruleSetExists ? (
-                    <Empty />
-                ) : (
-                    <Collapse
-                        size="small"
-                        items={[
-                            { key: '0', label: '筛选规则', children: <FilterRulePanel /> },
-                            { key: '1', label: '替换规则', children: <ReplaceRulePanel /> }
-                        ]}
-                        onChange={(keys) =>
-                            setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)
-                        }
-                        activeKey={activeCollapseKeys}
-                    ></Collapse>
-                )
-            }
+            <Collapse
+                size="small"
+                bordered={false}
+                items={[
+                    { key: '0', label: '筛选规则', children: <FilterRulePanel /> },
+                    { key: '1', label: '替换规则', children: <ReplaceRulePanel /> }
+                ]}
+                onChange={(keys) => setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)}
+                activeKey={activeCollapseKeys}
+            />
         </Space>
     )
 }
 
 export const RulePanel: React.FC = function () {
     const settingContext = React.useContext(SettingContext)
-    const [logLimit, setLogLimit] = useState(0)
-    const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0', '1'])
+    // const [logLimit, setLogLimit] = useState(0)
+    const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0'])
     React.useEffect(() => {
         logManager.setFilterDisabled(!settingContext?.isFiltering)
     }, [settingContext?.isFiltering])
@@ -138,14 +127,14 @@ export const RulePanel: React.FC = function () {
         <div className="ruleContainer" style={{ padding: '4px' }}>
             <Collapse
                 items={[
+                    { key: '0', label: '规则模板配置', children: <RuleSubPanel /> },
                     {
-                        key: '0',
-                        label: '基础设定',
+                        key: '1',
+                        label: '其它设置',
                         children: (
-                            <Flex vertical>
-                                <Divider orientation="left">日志设定</Divider>
+                            <Space direction="vertical">
                                 <Space direction="vertical">
-                                    <InputNumber
+                                    {/* <InputNumber
                                         min={0}
                                         max={100000}
                                         addonBefore={'日志上限'}
@@ -156,7 +145,7 @@ export const RulePanel: React.FC = function () {
                                         formatter={(value) =>
                                             value && value > 0 ? value + '' : '无限制'
                                         }
-                                    />
+                                    /> */}
                                     <Checkbox
                                         checked={settingContext?.isShowHoverText}
                                         onChange={(e) =>
@@ -166,8 +155,6 @@ export const RulePanel: React.FC = function () {
                                         日志悬浮提示
                                     </Checkbox>
                                 </Space>
-
-                                <Divider orientation="left">窗口设定</Divider>
                                 <Checkbox
                                     checked={settingContext?.isAlwaysOnTop}
                                     onChange={(e) =>
@@ -176,10 +163,9 @@ export const RulePanel: React.FC = function () {
                                 >
                                     窗口置顶
                                 </Checkbox>
-                            </Flex>
+                            </Space>
                         )
-                    },
-                    { key: '1', label: '规则模板配置', children: <RuleSubPanel /> }
+                    }
                 ]}
                 onChange={(keys) => setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)}
                 activeKey={activeCollapseKeys}

@@ -46,8 +46,6 @@ class LogManager {
     async openFile(filepath: string): Promise<void> {
         console.log('打开文件', filepath)
         if (!filepath) return
-
-        this.onSetHint?.(`正在打开文件...`)
         const start = Date.now()
 
         window.electron.unwatchFile()

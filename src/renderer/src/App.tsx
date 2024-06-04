@@ -5,6 +5,7 @@ import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
 import React, { useEffect, useState } from 'react'
 import { TSetting, ruleManager } from './managers/rule_manager'
+import { message } from 'antd'
 
 type TRuleContext = {
     rules: TSetting | undefined
@@ -38,6 +39,7 @@ export const RuleContext = React.createContext<TRuleContext | null>(null)
 export const SettingContext = React.createContext<TSettings | null>(null)
 
 export const App: React.FC = function () {
+    const [messageApi, contextHolder] = message.useMessage()
     const [fileUrl, setFileUrl] = useState('file directory')
     const [hint, setHint] = useState('')
     const [rulePanelVisible, setRulePanelVisible] = useState(false)
@@ -118,7 +120,7 @@ export const App: React.FC = function () {
             if (!oldName || !newName || !rules || !rules[oldName]) return
             if (oldName === newName) return
             if (rules[newName]) {
-                console.warn('规则集已存在', newName)
+                messageApi.error(`规则集 ${newName} 已存在`)
                 return
             }
             const newRules = { ...rules }
@@ -154,7 +156,7 @@ export const App: React.FC = function () {
         },
         newRuleSet: (ruleSetName) => {
             if (rules && rules[ruleSetName]) {
-                console.warn('规则集已存在', ruleSetName)
+                messageApi.error(`规则集 ${ruleSetName} 已存在`)
                 return
             }
             const newRules = { ...rules }
@@ -172,7 +174,7 @@ export const App: React.FC = function () {
             if (!oldName || !newName || !rules || !rules[oldName]) return
             if (oldName === newName) return
             if (rules[newName]) {
-                console.warn('规则集已存在', newName)
+                messageApi.error(`规则集 ${newName} 已存在`)
                 return
             }
             const newRules = { ...rules }
@@ -196,6 +198,10 @@ export const App: React.FC = function () {
             ruleManager.unlisten('ruleChanged', onRuleChanged)
         }
     }, [])
+
+    React.useEffect(() => {
+        if (hint && hint.length > 0) messageApi.info(hint)
+    }, [hint])
 
     useEffect(() => {
         const onKeyUp = (e: KeyboardEvent): void => {
@@ -248,6 +254,7 @@ export const App: React.FC = function () {
         : { resize: 'none', height: 'auto', flex: '1 1 auto' }
     return (
         <>
+            {contextHolder}
             <TitleBar />
             <SettingContext.Provider value={settingContextValue}>
                 <RuleContext.Provider value={ruleContext}>
