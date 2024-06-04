@@ -20,7 +20,7 @@ export const RuleSubPanel: React.FC = function () {
     const genNewSetName = function (): string {
         let i = 1
         while (options.includes(`rule_${i}`)) i++
-        return `rule${i}`
+        return `rule_${i}`
     }
 
     const genCopySetName = function (oldName: string | undefined): string {
