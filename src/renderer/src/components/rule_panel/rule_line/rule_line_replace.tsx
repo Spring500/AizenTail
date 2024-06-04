@@ -1,10 +1,31 @@
 import React from 'react'
-import { Button, Checkbox, Input, Popconfirm, Space, Table, Tooltip } from 'antd'
+import { Button, Checkbox, Input, Popconfirm, RowProps, Space, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
 import { ReplaceRegInput } from './rule_line_replace_reg'
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+const Row: React.FC<RowProps> = (props) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        transition: null,
+        id: props['data-row-key']
+    })
+
+    const style: React.CSSProperties = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        cursor: 'move',
+        ...(isDragging ? { position: 'relative', zIndex: 9999 } : undefined)
+    }
+
+    return <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
+}
 
 export const ReplaceRulePanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
@@ -12,12 +33,12 @@ export const ReplaceRulePanel: React.FC = function () {
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
     const datas =
         ruleContext?.rules?.[ruleSetKey]?.replaceRules?.map((rule, index) => {
-            return { ...rule, key: index }
+            return { ...rule, key: index + '' }
         }) ?? []
 
     const selectedIndices: React.Key[] = []
     for (let i = 0; i < datas.length; i++) {
-        if (datas[i].enable) selectedIndices.push(i)
+        if (datas[i].enable) selectedIndices.push(i + '')
     }
 
     const rowSelection: TableRowSelection<ReplaceConfig> = {
@@ -110,17 +131,38 @@ export const ReplaceRulePanel: React.FC = function () {
         newInputColumn('replace', '替换串'),
         newDelOperationColumn()
     ]
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+    const onDragEnd = ({ active, over }: DragEndEvent): void => {
+        if (over === null) return
+        const old = parseInt(active.id as string),
+            now = parseInt(over.id as string)
+        if (old !== now) {
+            ruleContext?.swapReplace(ruleSetKey, old, now)
+        }
+    }
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
             <Button onClick={() => ruleContext?.addReplace(ruleSetKey, { reg: '', replace: '' })}>
                 <PlusCircleFilled /> 添加规则
             </Button>
-            <Table
-                dataSource={datas}
-                columns={colmuns}
-                rowSelection={rowSelection}
-                pagination={false}
-            />
+            <DndContext
+                sensors={sensors}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={onDragEnd}
+            >
+                <SortableContext
+                    items={datas.map((_, index) => index + '')}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <Table
+                        components={{ body: { row: Row } }}
+                        dataSource={datas}
+                        columns={colmuns}
+                        rowSelection={rowSelection}
+                        pagination={false}
+                    />
+                </SortableContext>
+            </DndContext>
         </Space>
     )
 }

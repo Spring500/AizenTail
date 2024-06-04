@@ -16,6 +16,7 @@ type TRuleContext = {
     addReplace(ruleSetName: string, rule: ReplaceConfig): void
     setReplace(ruleSetName: string, index: number, rule: ReplaceConfig): void
     delReplace(ruleSetName: string, index: number): void
+    swapReplace(ruleSetName: string, index1: number, index2: number): void
     resetRules(rules: TSetting): void
     newRuleSet(ruleSetName: string): void
     copyRuleSet(oldName: string | undefined, newName: string | undefined): void
@@ -150,6 +151,22 @@ export const App: React.FC = function () {
             if (!replaces) ruleSet.replaceRules = replaces = []
 
             ruleSet.replaceRules = replaces.filter((_, i) => i !== index)
+            setRules(newRules)
+        },
+        swapReplace: (setKey, index1, index2) => {
+            const newRules = { ...rules }
+            const ruleSet = newRules[setKey]
+            if (!ruleSet) return
+
+            let replaces = ruleSet.replaceRules
+            if (!replaces) ruleSet.replaceRules = replaces = []
+
+            if (index1 < 0 || index1 >= replaces.length || index2 < 0 || index2 >= replaces.length)
+                return
+            ;[replaces[index1], replaces[index2]] = [
+                { ...replaces[index2] },
+                { ...replaces[index1] }
+            ]
             setRules(newRules)
         },
         setReplace: (setKey, index, rule) => {
