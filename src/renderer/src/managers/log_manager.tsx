@@ -202,7 +202,7 @@ class LogManager {
                 this.lineToIndexMap.set(line, index)
                 this.filtedLogIds.push(line)
             }
-            this.onSetHint?.(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`)
+            console.log(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`)
         }
         this.onSetLogCount?.(
             this.isFiltering() ? this.filtedLogIds.length + 1 : logManager.logs.length + 1
