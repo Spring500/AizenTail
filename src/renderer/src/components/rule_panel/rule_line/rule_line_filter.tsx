@@ -6,10 +6,34 @@ import { RuleContext, SettingContext } from '@renderer/App'
 import { Color } from 'antd/es/color-picker'
 import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
 import { FilterRegInput } from './rule_line_filter_reg'
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const getColorStr = (color: Color | undefined): string | undefined => {
     if (!color) return undefined
     return color.cleared ? undefined : color.toHexString()
+}
+interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+    'data-row-key': string
+}
+
+const Row: React.FC<RowProps> = (props) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        transition: null,
+        id: props['data-row-key']
+    })
+
+    const style: React.CSSProperties = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        cursor: 'move',
+        ...(isDragging ? { position: 'relative', zIndex: 9999 } : undefined)
+    }
+
+    return <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
 }
 
 export const FilterRulePanel: React.FC = function () {
@@ -18,15 +42,15 @@ export const FilterRulePanel: React.FC = function () {
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
     const datas =
         ruleContext?.rules?.[ruleSetKey]?.filterRules?.map((rule, index) => {
-            return { ...rule, key: index }
+            return { ...rule, key: index + '' }
         }) ?? []
-    const selectedIndices: React.Key[] = []
-    for (let i = 0; i < datas.length; i++) {
-        if (datas[i].enable) selectedIndices.push(i)
+    const selectedRowKeys: React.Key[] = []
+    for (let index = 0; index < datas.length; index++) {
+        if (datas[index].enable) selectedRowKeys.push(index + '')
     }
 
     const rowSelection: TableRowSelection<FilterConfig> = {
-        selectedRowKeys: selectedIndices,
+        selectedRowKeys,
         onChange: (selectedRowKeys: React.Key[]): void => {
             const newRules = { ...ruleContext?.rules }
             const ruleSet = newRules[ruleSetKey]
@@ -55,7 +79,12 @@ export const FilterRulePanel: React.FC = function () {
             )
         }
     }
-
+    const RuleColorPicker: React.FC<{
+        color: string | undefined
+        onChange: (color: Color) => void
+    }> = function ({ color, onChange }) {
+        return <ColorPicker allowClear disabledAlpha value={color} onChangeComplete={onChange} />
+    }
     const newColorColmun = function <T>(key: keyof T, title: string): ColumnType<T> {
         return {
             title: title,
@@ -64,11 +93,9 @@ export const FilterRulePanel: React.FC = function () {
             width: 60,
             align: 'center',
             render: (color: string, record, index) => (
-                <ColorPicker
-                    allowClear
-                    disabledAlpha
-                    value={color ?? null}
-                    onChangeComplete={(color) => {
+                <RuleColorPicker
+                    color={color}
+                    onChange={(color) => {
                         const newRule = { ...record, [key]: getColorStr(color) }
                         ruleContext?.setFilter(ruleSetKey, index, newRule)
                     }}
@@ -110,17 +137,39 @@ export const FilterRulePanel: React.FC = function () {
         newColorColmun('background', '背景色'),
         newDelOperationColumn()
     ]
+
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+    const onDragEnd = ({ active, over }: DragEndEvent): void => {
+        if (over === null) return
+        const old = parseInt(active.id as string),
+            now = parseInt(over.id as string)
+        if (old !== now) {
+            ruleContext?.swapFilter(ruleSetKey, old, now)
+        }
+    }
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
             <Button onClick={() => ruleContext?.addFilter(ruleSetKey, { reg: '' })}>
                 <PlusCircleFilled /> 添加规则
             </Button>
-            <Table
-                dataSource={datas}
-                columns={colmuns}
-                rowSelection={rowSelection}
-                pagination={false}
-            />
+            <DndContext
+                sensors={sensors}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={onDragEnd}
+            >
+                <SortableContext
+                    items={datas.map((_, index) => index + '')}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <Table
+                        components={{ body: { row: Row } }}
+                        dataSource={datas}
+                        columns={colmuns}
+                        rowSelection={rowSelection}
+                        pagination={false}
+                    />
+                </SortableContext>
+            </DndContext>
         </Space>
     )
 }

@@ -12,6 +12,7 @@ type TRuleContext = {
     addFilter(ruleSetName: string, rule: FilterConfig): void
     setFilter(ruleSetName: string, index: number, rule: FilterConfig): void
     delFilter(ruleSetName: string, index: number): void
+    swapFilter(ruleSetName: string, index1: number, index2: number): void
     addReplace(ruleSetName: string, rule: ReplaceConfig): void
     setReplace(ruleSetName: string, index: number, rule: ReplaceConfig): void
     delReplace(ruleSetName: string, index: number): void
@@ -101,6 +102,19 @@ export const App: React.FC = function () {
             if (!filters) ruleSet.filterRules = filters = []
 
             ruleSet.filterRules = filters.filter((_, i) => i !== index)
+            setRules(newRules)
+        },
+        swapFilter: (setKey, index1, index2) => {
+            const newRules = { ...rules }
+            const ruleSet = newRules[setKey]
+            if (!ruleSet) return
+
+            let filters = ruleSet.filterRules
+            if (!filters) ruleSet.filterRules = filters = []
+
+            if (index1 < 0 || index1 >= filters.length || index2 < 0 || index2 >= filters.length)
+                return
+            ;[filters[index1], filters[index2]] = [{ ...filters[index2] }, { ...filters[index1] }]
             setRules(newRules)
         },
         addReplace: (setKey, rule) => {
