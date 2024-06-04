@@ -9,30 +9,43 @@ import {
     Input,
     InputNumber,
     Popconfirm,
+    Popover,
     Radio,
     Space
 } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { logManager } from '@renderer/managers/log_manager'
-import { PlusCircleFilled, DeleteFilled } from '@ant-design/icons'
+import { PlusCircleFilled, DeleteFilled, EditFilled } from '@ant-design/icons'
 
 export const RuleSubPanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
     const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0', '1'])
+    const [newName, setNewName] = useState('')
     const selectedRule = settingContext?.currentRuleSet
 
-    const options: string[] = ['default']
+    let options: string[] = []
     for (const ruleName in ruleContext?.rules ?? {}) {
-        if (!options.includes(ruleName)) options.push(ruleName)
+        if (!options.includes(ruleName) && ruleName !== 'default') options.push(ruleName)
     }
+    options = ['default', ...options.sort()]
     const ruleSetExists = !!selectedRule && selectedRule in (ruleContext?.rules ?? {})
     const genNewSetName = function (): string {
         let i = 0
         while (options.includes(`rule${i}`)) i++
         return `rule${i}`
     }
+
+    const genCopySetName = function (oldName: string | undefined): string {
+        if (!oldName) return ''
+        const matchNum = oldName.match(/_\d+$/)
+        let i = matchNum ? parseInt(matchNum[0].slice(1)) : 0
+        const realOldName = oldName.replace(/_\d+$/, '')
+        while (options.includes(`${realOldName}_${i}`)) i++
+        return `${realOldName}_${i}`
+    }
+
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
             <Space>
@@ -47,6 +60,13 @@ export const RuleSubPanel: React.FC = function () {
                 <Button onClick={() => ruleContext?.newRuleSet(genNewSetName())}>
                     <PlusCircleFilled /> 添加规则集
                 </Button>
+                <Button
+                    onClick={() =>
+                        ruleContext?.copyRuleSet(selectedRule, genCopySetName(selectedRule))
+                    }
+                >
+                    复制规则集
+                </Button>
                 <Popconfirm
                     title={`确定删除规则集${selectedRule}？`}
                     onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
@@ -55,6 +75,30 @@ export const RuleSubPanel: React.FC = function () {
                         <DeleteFilled /> 删除规则集
                     </Button>
                 </Popconfirm>
+                <Popover
+                    content={
+                        <Space>
+                            <Input
+                                addonBefore={<EditFilled />}
+                                onChange={(v) => setNewName(v.target.value)}
+                            />
+                            <Button
+                                disabled={!newName}
+                                onClick={() => ruleContext?.renameRuleSet(selectedRule, newName)}
+                            >
+                                确认
+                            </Button>
+                        </Space>
+                    }
+                    title="重命名规则集"
+                    trigger="click"
+                    // open={open}
+                    // onOpenChange={handleOpenChange}
+                >
+                    <Button disabled={selectedRule === 'default'}>
+                        <EditFilled /> 重命名规则集
+                    </Button>
+                </Popover>
             </Space>
             {
                 // 如果规则集不存在则不显示规则
@@ -62,21 +106,10 @@ export const RuleSubPanel: React.FC = function () {
                     <Empty />
                 ) : (
                     <Collapse
+                        size="small"
                         items={[
-                            {
-                                key: '0',
-                                label: '基础设置',
-                                children: (
-                                    <Input
-                                        addonBefore="规则名"
-                                        variant="filled"
-                                        value={selectedRule}
-                                        disabled={selectedRule === 'default'}
-                                    ></Input>
-                                )
-                            },
-                            { key: '1', label: '筛选规则', children: <FilterRulePanel /> },
-                            { key: '2', label: '替换规则', children: <ReplaceRulePanel /> }
+                            { key: '0', label: '筛选规则', children: <FilterRulePanel /> },
+                            { key: '1', label: '替换规则', children: <ReplaceRulePanel /> }
                         ]}
                         onChange={(keys) =>
                             setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)

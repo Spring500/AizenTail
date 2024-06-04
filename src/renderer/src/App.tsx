@@ -16,7 +16,9 @@ type TRuleContext = {
     delReplace(ruleSetName: string, index: number): void
     resetRules(rules: TSetting): void
     newRuleSet(ruleSetName: string): void
+    copyRuleSet(oldName: string | undefined, newName: string | undefined): void
     deleteRuleSet(ruleSetName: string | undefined): void
+    renameRuleSet(oldName: string | undefined, newName: string | undefined): void
 }
 
 type TSettings = {
@@ -112,6 +114,17 @@ export const App: React.FC = function () {
             replaces.push(rule)
             setRules(newRules)
         },
+        copyRuleSet: (oldName, newName) => {
+            if (!oldName || !newName || !rules || !rules[oldName]) return
+            if (oldName === newName) return
+            if (rules[newName]) {
+                console.warn('规则集已存在', newName)
+                return
+            }
+            const newRules = { ...rules }
+            newRules[newName] = JSON.parse(JSON.stringify(newRules[oldName]))
+            setRules(newRules)
+        },
         delReplace: (setKey, index) => {
             const newRules = { ...rules }
             const ruleSet = newRules[setKey]
@@ -153,6 +166,20 @@ export const App: React.FC = function () {
             const newRules = { ...rules }
             delete newRules[ruleSetName]
             setRules(newRules)
+            setCurrentRuleSet('default')
+        },
+        renameRuleSet: (oldName, newName) => {
+            if (!oldName || !newName || !rules || !rules[oldName]) return
+            if (oldName === newName) return
+            if (rules[newName]) {
+                console.warn('规则集已存在', newName)
+                return
+            }
+            const newRules = { ...rules }
+            newRules[newName] = newRules[oldName]
+            delete newRules[oldName]
+            setRules(newRules)
+            setCurrentRuleSet(newName)
         }
     }
     React.useEffect(() => {
