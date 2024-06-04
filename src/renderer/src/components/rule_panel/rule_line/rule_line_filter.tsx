@@ -4,7 +4,7 @@ import { ColumnsType } from 'antd/es/table'
 import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { Color } from 'antd/es/color-picker'
-import { DeleteFilled } from '@ant-design/icons'
+import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
 
 const getColorStr = (color: Color | undefined): string | undefined => {
     if (!color) return undefined
@@ -128,7 +128,7 @@ export const FilterRulePanel: React.FC = function () {
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
             <Button onClick={() => ruleContext?.addFilter(ruleSetKey, { reg: '' })}>
-                添加规则
+                <PlusCircleFilled /> 添加规则
             </Button>
             <Table
                 dataSource={datas}

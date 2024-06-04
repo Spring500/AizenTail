@@ -3,7 +3,7 @@ import { Button, Checkbox, Input, Popconfirm, Space, Table, Tooltip } from 'antd
 import { ColumnsType } from 'antd/es/table'
 import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'
-import { DeleteFilled } from '@ant-design/icons'
+import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
 
 export const ReplaceRulePanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
@@ -107,7 +107,7 @@ export const ReplaceRulePanel: React.FC = function () {
             <Button
                 onClick={() => ruleContext?.addReplace(currentRuleSet, { reg: '', replace: '' })}
             >
-                添加规则
+                <PlusCircleFilled /> 添加规则
             </Button>
             <Table
                 dataSource={datas}
