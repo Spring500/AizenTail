@@ -95,7 +95,7 @@ export const App: React.FC = function () {
             let filters = ruleSet.filterRules
             if (!filters) ruleSet.filterRules = filters = []
 
-            ruleSet.filterRules = filters.slice(index, 1)
+            ruleSet.filterRules = filters.filter((_, i) => i !== index)
             setRules(newRules)
         },
         addReplace: (setKey, rule) => {
@@ -119,7 +119,7 @@ export const App: React.FC = function () {
             let replaces = ruleSet.replaceRules
             if (!replaces) ruleSet.replaceRules = replaces = []
 
-            ruleSet.replaceRules = replaces.slice(index, 1)
+            ruleSet.replaceRules = replaces.filter((_, i) => i !== index)
             setRules(newRules)
         },
         setReplace: (setKey, index, rule) => {
