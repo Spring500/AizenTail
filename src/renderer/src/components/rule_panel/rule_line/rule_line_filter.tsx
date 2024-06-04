@@ -1,65 +1,175 @@
-import { RegexTextField, RuleLineWarpper } from "./wappers";
+import React from 'react'
+import { Button, Checkbox, ColorPicker, Popconfirm, Space, Table } from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
+import { RuleContext, SettingContext } from '@renderer/App'
+import { Color } from 'antd/es/color-picker'
+import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
+import { FilterRegInput } from './rule_line_filter_reg'
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-const isObjectEqual = (a: object, b: object) => {
-    for (let key in a) {
-        if (a[key] !== b[key]) return false;
-    }
-    for (let key in b) {
-        if (a[key] !== b[key]) return false;
-    }
-    return true;
+const getColorStr = (color: Color | undefined): string | undefined => {
+    if (!color) return undefined
+    return color.cleared ? undefined : color.toHexString()
+}
+interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+    'data-row-key': string
 }
 
-export const RuleLine_Filter = function ({ index, rules, setRules }: {
-    index: number, rules: FilterConfig[],
-    setRules: (rules: FilterConfig[]) => void,
-}) {
-    const rule = rules[index];
-    if (!rule) {
-        console.warn('rule is undefined', rules);
-        return null;
-    }
-    const setRule = (index: number, rule: FilterConfig) => {
-        if (index < 0 || index >= rules.length) return;
-        if (isObjectEqual(rules[index], rule)) return;
-        setRules(rules.map((r, i) => i === index ? rule : r));
-    }
-    const switchRules = (index: number, newIndex: number) => {
-        if (newIndex < 0 || newIndex >= rules.length
-            || index < 0 || index >= rules.length) return;
-        if (isObjectEqual(rules[index], rules[newIndex])) return;
-        [rules[index], rules[newIndex]] = [rules[newIndex], rules[index]];
-        setRules([...rules]);
-    }
-    const deleteRule = (index: number) => {
-        if (index < 0 || index >= rules.length) return;
-        rules.splice(index, 1);
-        setRules([...rules]);
-    }
-    const renderReg = () => {
-        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
-            <RegexTextField fieldName={`${rule.exclude ? "排除" : "包含"}匹配串`}
-                value={rule.reg} placeholder="输入匹配串" regexEnable={rule.regexEnable}
-                onChange={(value) => setRule(index, { ...rule, reg: value })}
-                onEnter={(value) => setRule(index, { ...rule, reg: value })}
-                onRegexEnableChange={(enable) => setRule(index, { ...rule, regexEnable: enable })} />
-        </div>
+const Row: React.FC<RowProps> = (props) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        transition: null,
+        id: props['data-row-key']
+    })
+
+    const style: React.CSSProperties = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        cursor: 'move',
+        ...(isDragging ? { position: 'relative', zIndex: 9999 } : undefined)
     }
 
-    const ruleUp = () => switchRules(index, index - 1);
-    const ruleDown = () => switchRules(index, index + 1);
-    const enableRule = () => setRule(index, { ...rule, enable: !rule.enable });
-    const onRuleDelete = () => deleteRule(index);
-    const toggleExclude = () => setRule(index, { ...rule, exclude: !rule.exclude });
+    return <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
+}
 
-    return <RuleLineWarpper key={index} index={index} enable={!!rule.enable} ruleCount={rules.length}
-        onRuleDelete={onRuleDelete} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}
-        menuItems={[{ key: "exclude", name: () => rule.exclude ? "包含匹配串" : "排除匹配串", callback: toggleExclude }]}>
-        {renderReg()}
-        <div className="fixedRuleBlock">
-            <button className={rule.exclude ? "ruleButton activatedButton" : "ruleButton"}
-                onClick={toggleExclude} title="满足该条匹配规则的日志将被筛除还是保留">
-                反向筛选</button>
-        </div>
-    </RuleLineWarpper >
+export const FilterRulePanel: React.FC = function () {
+    const ruleContext = React.useContext(RuleContext)
+    const settingContext = React.useContext(SettingContext)
+    const ruleSetKey = settingContext?.currentRuleSet ?? ''
+    const datas =
+        ruleContext?.rules?.[ruleSetKey]?.filterRules?.map((rule, index) => {
+            return { ...rule, key: index + '' }
+        }) ?? []
+    const selectedRowKeys: React.Key[] = []
+    for (let index = 0; index < datas.length; index++) {
+        if (datas[index].enable) selectedRowKeys.push(index + '')
+    }
+
+    const rowSelection: TableRowSelection<FilterConfig> = {
+        selectedRowKeys,
+        onChange: (selectedRowKeys: React.Key[]): void => {
+            const newRules = { ...ruleContext?.rules }
+            const ruleSet = newRules[ruleSetKey]
+            ruleSet.filterRules = ruleSet.filterRules?.map((rule, index) => {
+                return { ...rule, enable: selectedRowKeys.includes(index) }
+            })
+            ruleContext?.resetRules(newRules)
+        }
+    }
+
+    const newCheckboxColumn = function <T>(key: keyof T, title: string): ColumnType<T> {
+        return {
+            title: title,
+            dataIndex: key as string,
+            key: key as string,
+            width: 60,
+            align: 'center',
+            render: (enable: boolean, _, index) => (
+                <Checkbox
+                    checked={enable}
+                    onChange={(e) => {
+                        const newRule = { ...datas[index], [key]: e.target.checked }
+                        ruleContext?.setFilter(ruleSetKey, index, newRule)
+                    }}
+                />
+            )
+        }
+    }
+    const RuleColorPicker: React.FC<{
+        color: string | undefined
+        onChange: (color: Color) => void
+    }> = function ({ color, onChange }) {
+        return <ColorPicker allowClear disabledAlpha value={color} onChangeComplete={onChange} />
+    }
+    const newColorColmun = function <T>(key: keyof T, title: string): ColumnType<T> {
+        return {
+            title: title,
+            dataIndex: key as string,
+            key: key as string,
+            width: 60,
+            align: 'center',
+            render: (color: string, record, index) => (
+                <RuleColorPicker
+                    color={color}
+                    onChange={(color) => {
+                        const newRule = { ...record, [key]: getColorStr(color) }
+                        ruleContext?.setFilter(ruleSetKey, index, newRule)
+                    }}
+                />
+            )
+        }
+    }
+    const newDelOperationColumn = function <T>(): ColumnType<T> {
+        return {
+            key: 'operation',
+            width: 80,
+            align: 'center',
+            render: (_, _2, index) => (
+                <Popconfirm
+                    title={`确认删除规则?`}
+                    onConfirm={() => ruleContext?.delFilter(ruleSetKey, index)}
+                >
+                    <Button>
+                        <DeleteFilled />
+                        删除
+                    </Button>
+                </Popconfirm>
+            )
+        }
+    }
+    const colmuns: ColumnsType<FilterConfig> = [
+        {
+            title: '匹配串',
+            dataIndex: 'reg',
+            key: 'reg',
+            ellipsis: {
+                showTitle: false
+            },
+            render: (text: string, _, index) => <FilterRegInput value={text} index={index} />
+        },
+        newCheckboxColumn('regexEnable', '正则'),
+        newCheckboxColumn('exclude', '反向'),
+        newColorColmun('color', '字体色'),
+        newColorColmun('background', '背景色'),
+        newDelOperationColumn()
+    ]
+
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+    const onDragEnd = ({ active, over }: DragEndEvent): void => {
+        if (over === null) return
+        const old = parseInt(active.id as string),
+            now = parseInt(over.id as string)
+        if (old !== now) {
+            ruleContext?.insertFilter(ruleSetKey, old, now)
+        }
+    }
+    return (
+        <Space direction="vertical" style={{ width: '100%' }}>
+            <Button onClick={() => ruleContext?.addFilter(ruleSetKey, { reg: '' })}>
+                <PlusCircleFilled /> 添加规则
+            </Button>
+            <DndContext
+                sensors={sensors}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={onDragEnd}
+            >
+                <SortableContext
+                    items={datas.map((_, index) => index + '')}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <Table
+                        components={{ body: { row: Row } }}
+                        dataSource={datas}
+                        columns={colmuns}
+                        rowSelection={rowSelection}
+                        pagination={false}
+                    />
+                </SortableContext>
+            </DndContext>
+        </Space>
+    )
 }

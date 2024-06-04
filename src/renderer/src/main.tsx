@@ -3,10 +3,30 @@ import './assets/main.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './App'
+import { ConfigProvider, theme } from 'antd'
 
 ReactDOM.createRoot(document.getElementById('app')!).render(
     <React.StrictMode>
-        <App />
+        <ConfigProvider
+            theme={{
+                token: {
+                    // borderRadius: 3,
+                    motion: false,
+                    fontSize: 13
+                },
+                components: {
+                    Table: {
+                        cellPaddingBlockSM: 0
+                    }
+                },
+                algorithm: [
+                    // theme.compactAlgorithm,
+                    theme.darkAlgorithm
+                ]
+            }}
+            componentSize="small"
+        >
+            <App />
+        </ConfigProvider>
     </React.StrictMode>
 )
-

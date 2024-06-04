@@ -1,64 +1,168 @@
-import { EditorableTextField } from "../../common/text_field";
-import { RegexTextField, RuleLineWarpper } from "./wappers";
+import React from 'react'
+import { Button, Checkbox, Input, Popconfirm, RowProps, Space, Table, Tooltip } from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
+import { RuleContext, SettingContext } from '@renderer/App'
+import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
+import { ReplaceRegInput } from './rule_line_replace_reg'
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-const isObjectEqual = (a: object, b: object) => {
-    for (let key in a) {
-        if (a[key] !== b[key]) return false;
+const Row: React.FC<RowProps> = (props) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        transition: null,
+        id: props['data-row-key']
+    })
+
+    const style: React.CSSProperties = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        cursor: 'move',
+        ...(isDragging ? { position: 'relative', zIndex: 9999 } : undefined)
     }
-    for (let key in b) {
-        if (a[key] !== b[key]) return false;
-    }
-    return true;
+
+    return <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
 }
 
-export const RuleLine_Replace = function ({ index, rules, setRules }: {
-    index: number, rules: ReplaceConfig[],
-    setRules: (rules: ReplaceConfig[]) => void,
-}) {
-    const rule = rules[index];
-    const setRule = (index: number, rule: ReplaceConfig) => {
-        if (index < 0 || index >= rules.length) return;
-        if (isObjectEqual(rules[index], rule)) return;
-        setRules(rules.map((r, i) => i === index ? rule : r));
-    }
-    const switchRules = (index: number, newIndex: number) => {
-        if (newIndex < 0 || newIndex >= rules.length
-            || index < 0 || index >= rules.length) return;
-        if (isObjectEqual(rules[index], rules[newIndex])) return;
-        [rules[index], rules[newIndex]] = [rules[newIndex], rules[index]];
-        setRules([...rules]);
-    }
-    const deleteRule = (index: number) => {
-        if (index < 0 || index >= rules.length) return;
-        rules.splice(index, 1);
-        setRules([...rules]);
-    }
-    const renderReg = () => {
-        return <div className="ruleBlock" title="根据输入的正则表达式匹配日志条目">
-            <RegexTextField fieldName="匹配串" value={rule.reg} placeholder="输入匹配串"
-                regexEnable={rule.regexEnable}
-                onChange={(value) => setRule(index, { ...rule, reg: value })}
-                onEnter={(value) => setRule(index, { ...rule, reg: value })}
-                onRegexEnableChange={(enable) => setRule(index, { ...rule, regexEnable: enable })} />
-        </div>
+export const ReplaceRulePanel: React.FC = function () {
+    const ruleContext = React.useContext(RuleContext)
+    const settingContext = React.useContext(SettingContext)
+    const ruleSetKey = settingContext?.currentRuleSet ?? ''
+    const datas =
+        ruleContext?.rules?.[ruleSetKey]?.replaceRules?.map((rule, index) => {
+            return { ...rule, key: index + '' }
+        }) ?? []
+
+    const selectedIndices: React.Key[] = []
+    for (let i = 0; i < datas.length; i++) {
+        if (datas[i].enable) selectedIndices.push(i + '')
     }
 
-    const renderReplace = () => {
-        const title = "将根据正则表达式匹配得到的字符串替换显示为对应的字符串。用$1、$2...等分别表示与正则表达式中的第1、2...个子表达式相匹配的文本";
-        return <div className="ruleBlock" title={title}> 替换串
-            <EditorableTextField value={rule.replace} placeholder="替换"
-                onChange={(value) => setRule(index, { ...rule, replace: value })}
-                onEnter={(value) => setRule(index, { ...rule, replace: value })} />
-        </div>
+    const rowSelection: TableRowSelection<ReplaceConfig> = {
+        selectedRowKeys: selectedIndices,
+        onChange: (selectedRowKeys: React.Key[]): void => {
+            const newRules = { ...ruleContext?.rules }
+            const ruleSet = newRules[ruleSetKey]
+            ruleSet.replaceRules = ruleSet.replaceRules?.map((rule, index) => {
+                return { ...rule, enable: selectedRowKeys.includes(index) }
+            })
+            ruleContext?.resetRules(newRules)
+        }
     }
 
-    const ruleUp = () => switchRules(index, index - 1);
-    const ruleDown = () => switchRules(index, index + 1);
-    const enableRule = () => setRule(index, { ...rule, enable: !rule.enable });
-    const onRuleDelete = () => deleteRule(index);
-
-    return <RuleLineWarpper key={index} index={index} enable={!!rule.enable} ruleCount={rules.length}
-        onRuleDelete={onRuleDelete} onRuleDown={ruleDown} onRuleEnable={enableRule} onRuleUp={ruleUp}>
-        {renderReg()} {renderReplace()}
-    </RuleLineWarpper>
+    const newCheckboxColumn = function <T>(key: keyof T, title: string): ColumnType<T> {
+        return {
+            title: title,
+            dataIndex: key as string,
+            key: key as string,
+            width: 60,
+            align: 'center',
+            render: (enable: boolean, _, index) => (
+                <Checkbox
+                    checked={enable}
+                    onChange={(e) => {
+                        const newRule = { ...datas[index], [key]: e.target.checked }
+                        ruleContext?.setReplace(ruleSetKey, index, newRule)
+                    }}
+                />
+            )
+        }
+    }
+    const newDelOperationColumn = function <T>(): ColumnType<T> {
+        return {
+            key: 'operation',
+            width: 80,
+            align: 'center',
+            render: (_, _2, index) => (
+                <Popconfirm
+                    title={`确认删除规则?`}
+                    onConfirm={() => ruleContext?.delReplace(ruleSetKey, index)}
+                >
+                    <Button>
+                        <DeleteFilled />
+                        删除
+                    </Button>
+                </Popconfirm>
+            )
+        }
+    }
+    const newInputColumn = function <T>(
+        key: keyof T,
+        title: string,
+        style: React.CSSProperties = {}
+    ): ColumnType<T> {
+        return {
+            title: title,
+            dataIndex: key as string,
+            key: key as string,
+            ellipsis: {
+                showTitle: false
+            },
+            render: (text: string, record, index) => (
+                <Tooltip placement="topLeft" title={text}>
+                    <Input
+                        style={style}
+                        value={text}
+                        onChange={(value) =>
+                            ruleContext?.setReplace(ruleSetKey, index, {
+                                ...record,
+                                [key]: value.target.value
+                            })
+                        }
+                    />
+                </Tooltip>
+            )
+        }
+    }
+    const colmuns: ColumnsType<ReplaceConfig> = [
+        {
+            title: '匹配串',
+            dataIndex: 'reg',
+            key: 'reg',
+            ellipsis: {
+                showTitle: false
+            },
+            render: (text: string, _, index) => <ReplaceRegInput value={text} index={index} />
+        },
+        newCheckboxColumn('regexEnable', '正则'),
+        newInputColumn('replace', '替换串'),
+        newDelOperationColumn()
+    ]
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+    const onDragEnd = ({ active, over }: DragEndEvent): void => {
+        if (over === null) return
+        const old = parseInt(active.id as string),
+            now = parseInt(over.id as string)
+        if (old !== now) {
+            ruleContext?.insertReplace(ruleSetKey, old, now)
+        }
+    }
+    return (
+        <Space direction="vertical" style={{ width: '100%' }}>
+            <Button onClick={() => ruleContext?.addReplace(ruleSetKey, { reg: '', replace: '' })}>
+                <PlusCircleFilled /> 添加规则
+            </Button>
+            <DndContext
+                sensors={sensors}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={onDragEnd}
+            >
+                <SortableContext
+                    items={datas.map((_, index) => index + '')}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <Table
+                        components={{ body: { row: Row } }}
+                        dataSource={datas}
+                        columns={colmuns}
+                        rowSelection={rowSelection}
+                        pagination={false}
+                    />
+                </SortableContext>
+            </DndContext>
+        </Space>
+    )
 }
