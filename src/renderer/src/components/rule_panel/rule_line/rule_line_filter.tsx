@@ -1,18 +1,25 @@
 import React from 'react'
-import { Button, Checkbox, ColorPicker, Input, Space, Table, Tooltip } from 'antd'
+import { Button, Checkbox, ColorPicker, Input, Popconfirm, Space, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { TableRowSelection } from 'antd/es/table/interface'
+import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'
+import { Color } from 'antd/es/color-picker'
+import { DeleteFilled } from '@ant-design/icons'
+
+const getColorStr = (color: Color | undefined): string | undefined => {
+    if (!color) return undefined
+    return color.cleared ? undefined : color.toHexString()
+}
 
 export const FilterRulePanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
-    const currentRuleSet = settingContext?.currentRuleSet ?? ''
+    const ruleSetKey = settingContext?.currentRuleSet ?? ''
     const datas =
-        ruleContext?.rules?.[currentRuleSet]?.filterRules?.map((rule, index) => {
+        ruleContext?.rules?.[ruleSetKey]?.filterRules?.map((rule, index) => {
             return { ...rule, key: index }
         }) ?? []
-
+    console.log('刷新datas', datas)
     const selectedIndices: React.Key[] = []
     for (let i = 0; i < datas.length; i++) {
         if (datas[i].enable) selectedIndices.push(i)
@@ -22,18 +29,68 @@ export const FilterRulePanel: React.FC = function () {
         selectedRowKeys: selectedIndices,
         onChange: (selectedRowKeys: React.Key[]): void => {
             const newRules = { ...ruleContext?.rules }
-            newRules[currentRuleSet].filterRules = newRules[currentRuleSet].filterRules?.map(
-                (rule, index) => {
-                    return {
-                        ...rule,
-                        enable: selectedRowKeys.includes(index)
-                    }
-                }
-            )
+            const ruleSet = newRules[ruleSetKey]
+            ruleSet.filterRules = ruleSet.filterRules?.map((rule, index) => {
+                return { ...rule, enable: selectedRowKeys.includes(index) }
+            })
             ruleContext?.resetRules(newRules)
         }
     }
 
+    const newCheckboxColumn = function <T>(key: keyof T, title: string): ColumnType<T> {
+        return {
+            title: title,
+            dataIndex: key as string,
+            key: key as string,
+            width: 60,
+            render: (enable: boolean, _, index) => (
+                <Checkbox
+                    checked={enable}
+                    onChange={(e) => {
+                        const newRule = { ...datas[index], [key]: e.target.checked }
+                        ruleContext?.setFilter(ruleSetKey, index, newRule)
+                    }}
+                />
+            )
+        }
+    }
+
+    const newColorColmun = function <T>(key: keyof T, title: string): ColumnType<T> {
+        return {
+            title: title,
+            dataIndex: key as string,
+            key: key as string,
+            width: 60,
+            render: (color: string, record, index) => (
+                <ColorPicker
+                    allowClear
+                    disabledAlpha
+                    value={color ?? null}
+                    onChangeComplete={(color) => {
+                        const newRule = { ...record, [key]: getColorStr(color) }
+                        ruleContext?.setFilter(ruleSetKey, index, newRule)
+                    }}
+                />
+            )
+        }
+    }
+    const newDelOperationColumn = function <T>(): ColumnType<T> {
+        return {
+            key: 'operation',
+            width: 80,
+            render: (_, _2, index) => (
+                <Popconfirm
+                    title={`确认删除?${index}`}
+                    onConfirm={() => ruleContext?.delFilter(ruleSetKey, index)}
+                >
+                    <Button>
+                        <DeleteFilled />
+                        删除
+                    </Button>
+                </Popconfirm>
+            )
+        }
+    }
     const colmuns: ColumnsType<FilterConfig> = [
         {
             title: '匹配串',
@@ -50,92 +107,25 @@ export const FilterRulePanel: React.FC = function () {
                             backgroundColor: record.background
                         }}
                         value={text}
-                        onChange={(value) => {
-                            ruleContext?.setFilter(currentRuleSet, index, {
+                        onChange={(value) =>
+                            ruleContext?.setFilter(ruleSetKey, index, {
                                 ...record,
                                 reg: value.target.value
                             })
-                        }}
+                        }
                     />
                 </Tooltip>
             )
         },
-        {
-            title: '正则',
-            dataIndex: 'regexEnable',
-            key: 'regexEnable',
-            width: 60,
-            render: (enable: boolean, record, index) => (
-                <Checkbox
-                    checked={enable}
-                    onChange={(e) => {
-                        ruleContext?.setFilter(currentRuleSet, index, {
-                            ...record,
-                            regexEnable: e.target.checked
-                        })
-                    }}
-                />
-            )
-        },
-        {
-            title: '反向',
-            dataIndex: 'exclude',
-            key: 'exclude',
-            width: 60,
-            render: (enable: boolean, record, index) => (
-                <Checkbox
-                    checked={enable}
-                    onChange={(e) => {
-                        ruleContext?.setFilter(currentRuleSet, index, {
-                            ...record,
-                            exclude: e.target.checked
-                        })
-                    }}
-                />
-            )
-        },
-        {
-            title: '字体色',
-            dataIndex: 'color',
-            key: 'color',
-            width: 60,
-            render: (text: string, _, index) => (
-                <ColorPicker
-                    allowClear
-                    disabledAlpha
-                    value={text}
-                    onChangeComplete={(color) => {
-                        ruleContext?.setFilter(currentRuleSet, index, {
-                            ...datas[index],
-                            color: color.cleared ? undefined : color.toHexString()
-                        })
-                    }}
-                />
-            )
-        },
-        {
-            title: '背景色',
-            dataIndex: 'background',
-            key: 'background',
-            width: 60,
-            render: (text: string, _, index) => (
-                <ColorPicker
-                    allowClear
-                    disabledAlpha
-                    value={text}
-                    onChangeComplete={(color) => {
-                        ruleContext?.setFilter(currentRuleSet, index, {
-                            ...datas[0],
-                            background: color.cleared ? undefined : color.toHexString()
-                        })
-                    }}
-                />
-            )
-        }
+        newCheckboxColumn('regexEnable', '正则'),
+        newCheckboxColumn('exclude', '反向'),
+        newColorColmun('color', '字体色'),
+        newColorColmun('background', '背景色'),
+        newDelOperationColumn()
     ]
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
-            <Button onClick={() => ruleContext?.addFilter(currentRuleSet, { reg: '' })}>
+            <Button onClick={() => ruleContext?.addFilter(ruleSetKey, { reg: '' })}>
                 添加规则
             </Button>
             <Table
