@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Checkbox, ColorPicker, Input, Popconfirm, Space, Table, Tooltip } from 'antd'
+import { Button, Checkbox, ColorPicker, Popconfirm, Space, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { ColumnType, TableRowSelection } from 'antd/es/table/interface'
 import { RuleContext, SettingContext } from '@renderer/App'

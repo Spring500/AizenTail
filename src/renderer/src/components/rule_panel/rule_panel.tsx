@@ -1,16 +1,5 @@
 import React, { useState } from 'react'
-import {
-    Button,
-    Checkbox,
-    Collapse,
-    Divider,
-    Flex,
-    Input,
-    Popconfirm,
-    Popover,
-    Radio,
-    Space
-} from 'antd'
+import { Button, Checkbox, Collapse, Input, Popconfirm, Popover, Radio, Space } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { logManager } from '@renderer/managers/log_manager'
