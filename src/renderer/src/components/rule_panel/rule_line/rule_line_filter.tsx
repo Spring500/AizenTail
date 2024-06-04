@@ -19,7 +19,6 @@ export const FilterRulePanel: React.FC = function () {
         ruleContext?.rules?.[ruleSetKey]?.filterRules?.map((rule, index) => {
             return { ...rule, key: index }
         }) ?? []
-    console.log('刷新datas', datas)
     const selectedIndices: React.Key[] = []
     for (let i = 0; i < datas.length; i++) {
         if (datas[i].enable) selectedIndices.push(i)
@@ -43,6 +42,7 @@ export const FilterRulePanel: React.FC = function () {
             dataIndex: key as string,
             key: key as string,
             width: 60,
+            align: 'center',
             render: (enable: boolean, _, index) => (
                 <Checkbox
                     checked={enable}
@@ -61,6 +61,7 @@ export const FilterRulePanel: React.FC = function () {
             dataIndex: key as string,
             key: key as string,
             width: 60,
+            align: 'center',
             render: (color: string, record, index) => (
                 <ColorPicker
                     allowClear
@@ -78,6 +79,7 @@ export const FilterRulePanel: React.FC = function () {
         return {
             key: 'operation',
             width: 80,
+            align: 'center',
             render: (_, _2, index) => (
                 <Popconfirm
                     title={`确认删除规则?`}

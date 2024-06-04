@@ -38,6 +38,7 @@ export const ReplaceRulePanel: React.FC = function () {
             dataIndex: key as string,
             key: key as string,
             width: 60,
+            align: 'center',
             render: (enable: boolean, _, index) => (
                 <Checkbox
                     checked={enable}
@@ -53,6 +54,7 @@ export const ReplaceRulePanel: React.FC = function () {
         return {
             key: 'operation',
             width: 80,
+            align: 'center',
             render: (_, _2, index) => (
                 <Popconfirm
                     title={`确认删除规则?`}
