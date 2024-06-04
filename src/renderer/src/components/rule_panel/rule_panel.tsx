@@ -1,8 +1,21 @@
 import React, { useState } from 'react'
-import { Button, Checkbox, Collapse, Divider, Flex, Input, InputNumber, Radio, Space } from 'antd'
+import {
+    Button,
+    Checkbox,
+    Collapse,
+    Divider,
+    Empty,
+    Flex,
+    Input,
+    InputNumber,
+    Popconfirm,
+    Radio,
+    Space
+} from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { logManager } from '@renderer/managers/log_manager'
+import { PlusCircleFilled, DeleteFilled } from '@ant-design/icons'
 
 export const RuleSubPanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
@@ -14,7 +27,7 @@ export const RuleSubPanel: React.FC = function () {
     for (const ruleName in ruleContext?.rules ?? {}) {
         if (!options.includes(ruleName)) options.push(ruleName)
     }
-
+    const ruleSetExists = !!selectedRule && selectedRule in (ruleContext?.rules ?? {})
     const genNewSetName = function (): string {
         let i = 0
         while (options.includes(`rule${i}`)) i++
@@ -31,32 +44,47 @@ export const RuleSubPanel: React.FC = function () {
                     buttonStyle="solid"
                     options={options}
                 />
-                <Button onClick={() => ruleContext?.newRuleSet(genNewSetName())}>添加规则集</Button>
+                <Button onClick={() => ruleContext?.newRuleSet(genNewSetName())}>
+                    <PlusCircleFilled /> 添加规则集
+                </Button>
+                <Popconfirm
+                    title={`确定删除规则集${selectedRule}？`}
+                    onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
+                >
+                    <Button disabled={selectedRule === 'default'}>
+                        <DeleteFilled /> 删除规则集
+                    </Button>
+                </Popconfirm>
             </Space>
-            <Collapse
-                items={[
-                    {
-                        key: '0',
-                        label: '基础设置',
-                        children: (
-                            <Input
-                                addonBefore="规则名"
-                                variant="filled"
-                                value={selectedRule}
-                                disabled={selectedRule === 'default'}
-                            ></Input>
-                        )
-                    },
-                    { key: '1', label: '筛选规则', children: <FilterRulePanel /> },
-                    {
-                        key: '2',
-                        label: '替换规则',
-                        children: <ReplaceRulePanel />
-                    }
-                ]}
-                onChange={(keys) => setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)}
-                activeKey={activeCollapseKeys}
-            ></Collapse>
+            {
+                // 如果规则集不存在则不显示规则
+                !ruleSetExists ? (
+                    <Empty />
+                ) : (
+                    <Collapse
+                        items={[
+                            {
+                                key: '0',
+                                label: '基础设置',
+                                children: (
+                                    <Input
+                                        addonBefore="规则名"
+                                        variant="filled"
+                                        value={selectedRule}
+                                        disabled={selectedRule === 'default'}
+                                    ></Input>
+                                )
+                            },
+                            { key: '1', label: '筛选规则', children: <FilterRulePanel /> },
+                            { key: '2', label: '替换规则', children: <ReplaceRulePanel /> }
+                        ]}
+                        onChange={(keys) =>
+                            setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)
+                        }
+                        activeKey={activeCollapseKeys}
+                    ></Collapse>
+                )
+            }
         </Space>
     )
 }

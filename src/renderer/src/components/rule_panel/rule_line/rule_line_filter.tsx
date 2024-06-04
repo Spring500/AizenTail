@@ -80,7 +80,7 @@ export const FilterRulePanel: React.FC = function () {
             width: 80,
             render: (_, _2, index) => (
                 <Popconfirm
-                    title={`确认删除?${index}`}
+                    title={`确认删除规则?`}
                     onConfirm={() => ruleContext?.delFilter(ruleSetKey, index)}
                 >
                     <Button>

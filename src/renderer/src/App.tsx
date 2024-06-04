@@ -16,6 +16,7 @@ type TRuleContext = {
     delReplace(ruleSetName: string, index: number): void
     resetRules(rules: TSetting): void
     newRuleSet(ruleSetName: string): void
+    deleteRuleSet(ruleSetName: string | undefined): void
 }
 
 type TSettings = {
@@ -145,6 +146,12 @@ export const App: React.FC = function () {
             }
             const newRules = { ...rules }
             newRules[ruleSetName] = { filterRules: [], replaceRules: [] }
+            setRules(newRules)
+        },
+        deleteRuleSet: (ruleSetName) => {
+            if (!ruleSetName) return
+            const newRules = { ...rules }
+            delete newRules[ruleSetName]
             setRules(newRules)
         }
     }
