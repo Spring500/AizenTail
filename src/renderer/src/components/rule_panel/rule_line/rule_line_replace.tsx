@@ -137,7 +137,7 @@ export const ReplaceRulePanel: React.FC = function () {
         const old = parseInt(active.id as string),
             now = parseInt(over.id as string)
         if (old !== now) {
-            ruleContext?.swapReplace(ruleSetKey, old, now)
+            ruleContext?.insertReplace(ruleSetKey, old, now)
         }
     }
     return (

@@ -144,7 +144,7 @@ export const FilterRulePanel: React.FC = function () {
         const old = parseInt(active.id as string),
             now = parseInt(over.id as string)
         if (old !== now) {
-            ruleContext?.swapFilter(ruleSetKey, old, now)
+            ruleContext?.insertFilter(ruleSetKey, old, now)
         }
     }
     return (
