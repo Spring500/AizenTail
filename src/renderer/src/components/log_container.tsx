@@ -192,6 +192,7 @@ export const LogContainer: React.FC<{
         const isHighlight = line >= 0 && line === highlightLine
         const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
 
+        const opacity = isExculed ? EXCLUDED_OPACITY : undefined
         return (
             <Dropdown
                 trigger={['contextMenu']}
@@ -206,30 +207,24 @@ export const LogContainer: React.FC<{
                     ]
                 }}
             >
-                <div
-                    className="log"
-                    style={{ ...props.style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }}
-                    onClick={onClick}
-                >
+                <div className="log" style={{ opacity }} onClick={onClick}>
                     <Typography.Text className="logIndex" italic type="secondary">
                         {line >= 0 ? line : ''}
                     </Typography.Text>
-                    <Typography
+                    <Typography.Text
                         className={`logText${isHighlight ? ' highlightLogText' : ''}`}
                         title={settingContext?.isShowHoverText ? logText : undefined}
                         style={{ ...getLogColor(logText), whiteSpace: 'pre' }}
                     >
                         {splitLog(logText, manager.inputFilters)}
                         <br />
-                    </Typography>
+                    </Typography.Text>
                 </div>
             </Dropdown>
         )
     }
     const lineHeight = Math.max(Math.ceil(token.fontSize * token.lineHeight), 10)
-    useEffect(() => {
-        console.log('行高变化', lineHeight, token.fontSize, token.lineHeight)
-    }, [lineHeight, token.fontSize, token.lineHeight])
+
     return (
         <div
             className="logContainer"
