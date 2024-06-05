@@ -23,6 +23,7 @@ export const FilterRulePanel: React.FC = function () {
 
     return (
         <RuleTable
+            tableName="过滤规则"
             datas={datas}
             keyDesc={[
                 {

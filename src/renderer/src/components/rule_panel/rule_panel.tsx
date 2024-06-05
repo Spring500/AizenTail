@@ -8,7 +8,6 @@ import { PlusCircleFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-des
 export const RuleSubPanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
-    const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0', '1'])
     const [newName, setNewName] = useState('')
     const selectedRule = settingContext?.currentRuleSet
 
@@ -53,14 +52,6 @@ export const RuleSubPanel: React.FC = function () {
                 >
                     <CopyFilled /> 复制规则集
                 </Button>
-                <Popconfirm
-                    title={`确定删除规则集${selectedRule}？`}
-                    onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
-                >
-                    <Button disabled={selectedRule === 'default'}>
-                        <DeleteFilled /> 删除规则集
-                    </Button>
-                </Popconfirm>
                 <Popover
                     content={
                         <Space>
@@ -85,17 +76,17 @@ export const RuleSubPanel: React.FC = function () {
                         <EditFilled /> 重命名规则集
                     </Button>
                 </Popover>
+                <Popconfirm
+                    title={`确定删除规则集${selectedRule}？`}
+                    onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
+                >
+                    <Button disabled={selectedRule === 'default'} icon={<DeleteFilled />} danger>
+                        删除规则集
+                    </Button>
+                </Popconfirm>
             </Space>
-            <Collapse
-                size="small"
-                bordered={false}
-                items={[
-                    { key: '0', label: '筛选规则', children: <FilterRulePanel /> },
-                    { key: '1', label: '替换规则', children: <ReplaceRulePanel /> }
-                ]}
-                onChange={(keys) => setActiveCollapseKeys(typeof keys === 'string' ? [keys] : keys)}
-                activeKey={activeCollapseKeys}
-            />
+            <FilterRulePanel />
+            <ReplaceRulePanel />
         </Space>
     )
 }

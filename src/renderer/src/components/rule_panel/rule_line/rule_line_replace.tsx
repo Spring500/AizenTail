@@ -27,6 +27,7 @@ export const ReplaceRulePanel: React.FC = function () {
 
     return (
         <RuleTable
+            tableName="替换规则"
             datas={datas}
             keyDesc={[
                 {
@@ -41,11 +42,11 @@ export const ReplaceRulePanel: React.FC = function () {
             ]}
             selectedRowKeys={enabledRules}
             onSelectionChanged={onEnabledChanged}
-            onAddRule={(rule) => ruleContext?.addFilter(ruleSetKey, rule)}
-            onChangeRule={(index, rule) => ruleContext?.setFilter(ruleSetKey, index, rule)}
-            onDeleteRule={(index) => ruleContext?.delFilter(ruleSetKey, index)}
+            onAddRule={(rule) => ruleContext?.addReplace(ruleSetKey, rule)}
+            onChangeRule={(index, rule) => ruleContext?.setReplace(ruleSetKey, index, rule)}
+            onDeleteRule={(index) => ruleContext?.delReplace(ruleSetKey, index)}
             onInsertRule={(oldIndex, newIndex) =>
-                ruleContext?.insertFilter(ruleSetKey, oldIndex, newIndex)
+                ruleContext?.insertReplace(ruleSetKey, oldIndex, newIndex)
             }
         />
     )

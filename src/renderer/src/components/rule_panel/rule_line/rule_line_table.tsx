@@ -1,8 +1,19 @@
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Space, Button, Table, Input, ColorPicker, Checkbox, RowProps, Popconfirm } from 'antd'
+import {
+    Space,
+    Button,
+    Table,
+    Input,
+    ColorPicker,
+    Checkbox,
+    RowProps,
+    Popconfirm,
+    Typography,
+    ConfigProvider
+} from 'antd'
 import React from 'react'
 
 type TKeyDesc<TKeyType> =
@@ -17,10 +28,11 @@ type TKeyDesc<TKeyType> =
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           render: (value: any, record: TKeyType, index: number) => React.ReactNode
       }
-import { DeleteFilled, PlusCircleFilled } from '@ant-design/icons'
+import { DeleteFilled, PlusCircleFilled, HolderOutlined } from '@ant-design/icons'
 import { ColumnsType } from 'antd/es/table'
 import { TableRowSelection } from 'antd/es/table/interface'
 import { Color } from 'antd/es/color-picker'
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 
 const getColorStr = (color: Color | undefined): string | undefined => {
     if (!color) return undefined
@@ -33,24 +45,61 @@ const RuleColorPicker: React.FC<{
     return <ColorPicker allowClear disabledAlpha value={color} onChangeComplete={onChange} />
 }
 
+const RowContext = React.createContext<{
+    setActivatorNodeRef?: (element: HTMLElement | null) => void
+    listeners?: SyntheticListenerMap
+}>({})
+const DragHandle: React.FC = () => {
+    const { setActivatorNodeRef, listeners } = React.useContext(RowContext)
+    return (
+        <Button
+            type="text"
+            icon={<HolderOutlined />}
+            style={{ cursor: 'move' }}
+            ref={setActivatorNodeRef}
+            {...listeners}
+        />
+    )
+}
+
 const Row: React.FC<RowProps> = (props) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-        transition: null,
-        id: props['data-row-key']
-    })
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        setActivatorNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ transition: null, id: props['data-row-key'] })
 
     const style: React.CSSProperties = {
         ...props.style,
         transform: CSS.Translate.toString(transform),
         transition,
-        cursor: 'move',
         ...(isDragging ? { position: 'relative', zIndex: 9999 } : undefined)
     }
 
-    return <tr {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />
+    const contextValue = { setActivatorNodeRef, listeners }
+    return (
+        <RowContext.Provider value={contextValue}>
+            <tr {...props} ref={setNodeRef} style={style} {...attributes} />
+        </RowContext.Provider>
+    )
+}
+
+const renderEmptyTable = function (): React.ReactNode {
+    return (
+        <Space direction="vertical" style={{ width: '100%' }}>
+            <Typography.Text disabled italic>
+                暂无数组
+            </Typography.Text>
+        </Space>
+    )
 }
 
 export const RuleTable = function <TDataType extends object>(props: {
+    tableName?: string
     datas: TDataType[] | undefined
     keyDesc: TKeyDesc<TDataType>[]
 
@@ -62,11 +111,12 @@ export const RuleTable = function <TDataType extends object>(props: {
     onDeleteRule: (index: number) => void
     onInsertRule: (oldIndex: number, newIndex: number) => void
 }): React.ReactNode {
-    const datas = props.datas?.map((rule, index) => {
-        return { ...rule, key: String(index) }
-    })
+    const datas =
+        props.datas?.map((rule, index) => {
+            return { ...rule, key: String(index) }
+        }) ?? []
 
-    const colmuns: ColumnsType<TDataType> = props.keyDesc.map((desc) => {
+    let colmuns: ColumnsType<TDataType> = props.keyDesc.map((desc) => {
         if ('render' in desc) {
             return {
                 title: desc.title,
@@ -135,30 +185,29 @@ export const RuleTable = function <TDataType extends object>(props: {
                 }
         }
     })
-    colmuns.push({
-        title: '操作',
-        key: 'action',
-        width: 80,
-        align: 'center',
-        render: (_, _1, index) => (
-            <Popconfirm title={`确认删除规则?`} onConfirm={() => props.onDeleteRule(index)}>
-                <Button icon={<DeleteFilled />} danger>
-                    删除
-                </Button>
-            </Popconfirm>
-        )
-    })
+    colmuns = [
+        { key: 'sort', align: 'center', width: 40, render: () => <DragHandle /> },
+        ...colmuns,
+        {
+            title: '',
+            key: 'action',
+            width: 80,
+            align: 'center',
+            render: (_, _1, index) => (
+                <Popconfirm title={`确认删除规则?`} onConfirm={() => props.onDeleteRule(index)}>
+                    <Button icon={<DeleteFilled />} danger>
+                        删除
+                    </Button>
+                </Popconfirm>
+            )
+        }
+    ]
 
     const rowSelection: TableRowSelection<TDataType> = {
         selectedRowKeys: props.selectedRowKeys.map((key) => String(key)),
         onChange: (keys) => props.onSelectionChanged(keys.map((key) => parseInt(key as string)))
     }
 
-    // --------拖动相关----------------------------------------------------------
-    const pointerSensor = useSensor(PointerSensor, {
-        activationConstraint: { distance: { y: 20 } }
-    })
-    const sensors = useSensors(pointerSensor)
     const onDragEnd = ({ active, over }: DragEndEvent): void => {
         if (over === null) return
         const old = parseInt(active.id as string)
@@ -168,25 +217,28 @@ export const RuleTable = function <TDataType extends object>(props: {
 
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
-            <Button onClick={() => props.onAddRule({} as TDataType)}>
-                <PlusCircleFilled /> 添加规则
-            </Button>
-            <DndContext
-                sensors={sensors}
-                modifiers={[restrictToVerticalAxis]}
-                onDragEnd={onDragEnd}
-            >
+            <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
                 <SortableContext
-                    items={datas?.map((data) => data.key) ?? []}
+                    items={datas.map((data) => data.key) ?? []}
                     strategy={verticalListSortingStrategy}
                 >
-                    <Table
-                        components={{ body: { row: Row } }}
-                        dataSource={datas}
-                        columns={colmuns}
-                        rowSelection={rowSelection}
-                        pagination={false}
-                    />
+                    <ConfigProvider renderEmpty={renderEmptyTable}>
+                        <Table
+                            title={(): React.ReactNode => (
+                                <Typography>{props.tableName ?? ''}</Typography>
+                            )}
+                            components={{ body: { row: Row } }}
+                            dataSource={datas}
+                            columns={colmuns}
+                            rowSelection={rowSelection}
+                            pagination={false}
+                            footer={() => (
+                                <Button onClick={() => props.onAddRule({} as TDataType)}>
+                                    <PlusCircleFilled /> 添加规则
+                                </Button>
+                            )}
+                        />
+                    </ConfigProvider>
                 </SortableContext>
             </DndContext>
         </Space>
