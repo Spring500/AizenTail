@@ -5,7 +5,17 @@ import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
 import React from 'react'
 import { TSetting, ruleManager } from './managers/rule_manager'
-import { ConfigProvider, Flex, MappingAlgorithm, Typography, message, theme } from 'antd'
+import {
+    Button,
+    ConfigProvider,
+    Flex,
+    MappingAlgorithm,
+    Space,
+    Typography,
+    message,
+    theme
+} from 'antd'
+import { SettingFilled } from '@ant-design/icons'
 
 type TRuleContext = {
     rules: TSetting | undefined
@@ -124,9 +134,16 @@ const App: React.FC = function () {
                 onChangeFile={OnChangeFile}
             />
             {rulePanelVisible && <RulePanel />}
-            <Flex justify="space-between" align="center" style={{ margin: '0 4px' }}>
-                <Typography.Text type="secondary">路径: {fileUrl}</Typography.Text>
-                <Typography.Text type="secondary">{hint}</Typography.Text>
+            <Flex justify="space-between" align="center" style={{ margin: '2px 4px' }}>
+                <Space>
+                    <Button
+                        type={rulePanelVisible ? 'primary' : 'text'}
+                        icon={<SettingFilled />}
+                        onClick={onSwitchRulePanelVisible}
+                    />
+                    <Typography.Text type="secondary">路径: {fileUrl}</Typography.Text>
+                </Space>
+                <Typography.Text type="secondary">提示{hint}</Typography.Text>
             </Flex>
         </Flex>
     )
