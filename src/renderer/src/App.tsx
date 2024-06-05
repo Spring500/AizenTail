@@ -137,7 +137,7 @@ export const AppWarpper: React.FC = function () {
 
     const [rules, setRules] = React.useState<TSetting>()
     const [ruleInited, setRuleInited] = React.useState(false)
-    const [isFiltering, setIsFiltering] = React.useState(false)
+    const [isFiltering, setIsFiltering] = React.useState(true)
     const [isAutoScroll, setIsAutoScroll] = React.useState(true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(false)
     const [isShowHoverText, setIsShowHoverText] = React.useState(false)
