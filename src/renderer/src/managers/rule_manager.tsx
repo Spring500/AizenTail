@@ -27,9 +27,7 @@ class RuleManager {
         } catch (e) {
             console.error('initSetting error', e)
         }
-        setting = setting ?? { rules: {} }
-        if (!setting.rules) setting.rules = {}
-        if (Object.keys(setting).length === 0) setting = { default: {} }
+        setting = setting ?? {}
         console.log('规则初始化完毕', setting)
         this.dispatch('ruleChanged', setting)
     }
