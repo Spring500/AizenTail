@@ -3,7 +3,7 @@ import { LogContainer } from './components/log_container'
 import { TitleBar } from './components/title_bar'
 import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { TSetting, ruleManager } from './managers/rule_manager'
 import { ConfigProvider, Flex, MappingAlgorithm, Typography, message, theme } from 'antd'
 
@@ -49,14 +49,21 @@ const App: React.FC = function () {
     const { token } = theme.useToken()
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
-    const [hint, setHint] = useState('')
-    const [fileUrl, setFileUrl] = useState('file directory')
-    const [rulePanelVisible, setRulePanelVisible] = useState(false)
+    const [hint, setHint] = React.useState('')
+    const [fileUrl, setFileUrl] = React.useState('file directory')
+    const [rulePanelVisible, setRulePanelVisible] = React.useState(false)
 
     React.useEffect(() => {
         if (hint && hint.length > 0) messageApi.info(hint)
     }, [hint])
-    useEffect(() => {
+    React.useEffect(() => {
+        logManager.setFilterDisabled(!settingContext?.isFiltering)
+    }, [settingContext?.isFiltering])
+
+    React.useEffect(() => {
+        window.electron.setAlwaysOnTop(!!settingContext?.isAlwaysOnTop)
+    }, [settingContext?.isAlwaysOnTop])
+    React.useEffect(() => {
         const onKeyUp = (e: KeyboardEvent): void => {
             switch (e.key) {
                 case 'r':
@@ -128,15 +135,15 @@ const App: React.FC = function () {
 export const AppWarpper: React.FC = function () {
     const [messageApi, contextHolder] = message.useMessage()
 
-    const [rules, setRules] = useState<TSetting>()
-    const [ruleInited, setRuleInited] = useState(false)
-    const [isFiltering, setIsFiltering] = useState(false)
-    const [isAutoScroll, setIsAutoScroll] = useState(true)
-    const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false)
-    const [isShowHoverText, setIsShowHoverText] = useState(false)
-    const [colorTheme, setColorTheme] = useState<'light' | 'dark'>('dark')
-    const [isCompactMode, setIsCompactMode] = useState(false)
-    const [currentRuleSet, setCurrentRuleSet] = useState('default')
+    const [rules, setRules] = React.useState<TSetting>()
+    const [ruleInited, setRuleInited] = React.useState(false)
+    const [isFiltering, setIsFiltering] = React.useState(false)
+    const [isAutoScroll, setIsAutoScroll] = React.useState(true)
+    const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(false)
+    const [isShowHoverText, setIsShowHoverText] = React.useState(false)
+    const [colorTheme, setColorTheme] = React.useState<'light' | 'dark'>('dark')
+    const [isCompactMode, setIsCompactMode] = React.useState(false)
+    const [currentRuleSet, setCurrentRuleSet] = React.useState('default')
 
     const settingContextValue: TSettings = {
         isAlwaysOnTop,
@@ -319,14 +326,14 @@ export const AppWarpper: React.FC = function () {
         }
     }, [])
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!ruleInited) return
         ruleManager.saveConfig(rules)
         console.log('save config', rules)
     }, [rules])
 
     // 当ruleInited为false时加载规则
-    useEffect(() => {
+    React.useEffect(() => {
         if (!ruleInited) {
             ruleManager.reloadConfig()
             setRuleInited(true)

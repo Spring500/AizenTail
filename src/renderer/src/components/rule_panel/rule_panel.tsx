@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Button, Checkbox, Collapse, Input, Popconfirm, Popover, Radio, Space } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/App'
-import { logManager } from '@renderer/managers/log_manager'
 import { PlusCircleFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-design/icons'
 
 export const RuleSubPanel: React.FC = function () {
@@ -95,13 +94,6 @@ export const RulePanel: React.FC = function () {
     const settingContext = React.useContext(SettingContext)
     // const [logLimit, setLogLimit] = useState(0)
     const [activeCollapseKeys, setActiveCollapseKeys] = React.useState(['0', '1'])
-    React.useEffect(() => {
-        logManager.setFilterDisabled(!settingContext?.isFiltering)
-    }, [settingContext?.isFiltering])
-
-    React.useEffect(() => {
-        window.electron.setAlwaysOnTop(!!settingContext?.isAlwaysOnTop)
-    }, [settingContext?.isAlwaysOnTop])
 
     return (
         <div className="ruleContainer" style={{ padding: '4px' }}>
