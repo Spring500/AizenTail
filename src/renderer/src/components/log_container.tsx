@@ -2,7 +2,7 @@ import { ILogManager } from '../managers/log_manager'
 import { IListView, ListView } from './common/list'
 import React, { useEffect, useState } from 'react'
 import { createRef } from 'react'
-import { Dropdown } from 'antd'
+import { Dropdown, Typography, theme } from 'antd'
 import { RuleContext, SettingContext } from '@renderer/App'
 
 const EXCLUDED_OPACITY = 0.3
@@ -28,6 +28,7 @@ export const LogContainer: React.FC<{
     manager: ILogManager
     onChangeFile: (file: File | null) => void
 }> = function (props) {
+    const { token } = theme.useToken()
     const settingContext = React.useContext(SettingContext)
     const ruleContext = React.useContext(RuleContext)
     const mainRef = createRef<HTMLDivElement>()
@@ -210,19 +211,25 @@ export const LogContainer: React.FC<{
                     style={{ ...props.style, opacity: isExculed ? EXCLUDED_OPACITY : undefined }}
                     onClick={onClick}
                 >
-                    <div className="logIndex">{line >= 0 ? line : ''}</div>
-                    <div
+                    <Typography.Text className="logIndex" italic type="secondary">
+                        {line >= 0 ? line : ''}
+                    </Typography.Text>
+                    <Typography
                         className={`logText${isHighlight ? ' highlightLogText' : ''}`}
                         title={settingContext?.isShowHoverText ? logText : undefined}
                         style={{ ...getLogColor(logText), whiteSpace: 'pre' }}
                     >
                         {splitLog(logText, manager.inputFilters)}
                         <br />
-                    </div>
+                    </Typography>
                 </div>
             </Dropdown>
         )
     }
+    const lineHeight = Math.max(Math.ceil(token.fontSize * token.lineHeight), 10)
+    useEffect(() => {
+        console.log('行高变化', lineHeight, token.fontSize, token.lineHeight)
+    }, [lineHeight, token.fontSize, token.lineHeight])
     return (
         <div
             className="logContainer"
@@ -234,7 +241,7 @@ export const LogContainer: React.FC<{
                 style={{ height: '100%', inset: '0%' }}
                 itemRender={LogRowRenderer}
                 count={logCount}
-                itemHeight={17}
+                itemHeight={lineHeight}
             />
             {dragging && (
                 <div className="logContainerMask" style={{ zIndex: 100 }}>

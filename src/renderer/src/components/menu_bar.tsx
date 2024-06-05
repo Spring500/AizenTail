@@ -1,6 +1,6 @@
 import { logManager } from '../managers/log_manager'
 // import { Dropdown } from './common/dropdown';
-import { Dropdown, Input, MenuProps } from 'antd'
+import { Button, Dropdown, Input, MenuProps } from 'antd'
 import React from 'react'
 import {
     FolderOpenFilled,
@@ -81,29 +81,31 @@ export const MenuBar: React.FC<{
                 {/* <div style={{ position: "relative", height: "100%" }}>
             </div> */}
                 <Dropdown menu={{ items: fileMenuItems }} trigger={['click']}>
-                    <button className="menuButton">
-                        <FolderOpenFilled /> 文件(F)
-                    </button>
+                    <Button type="text" icon={<FolderOpenFilled />}>
+                        文件(F)
+                    </Button>
                 </Dropdown>
                 <Dropdown menu={{ items: viewMenuItems }} trigger={['click']}>
-                    <button className="menuButton">
-                        <LayoutFilled /> 视图(V)
-                    </button>
+                    <Button type="text" icon={<LayoutFilled />}>
+                        视图(V)
+                    </Button>
                 </Dropdown>
-                <button
-                    className={props.rulePanelVisible ? 'menuButton activatedButton' : 'menuButton'}
+                <Button
+                    type={props.rulePanelVisible ? 'primary' : 'text'}
                     onClick={props.switchRulePanelVisible}
                     title="开关筛选及高亮规则配置面板"
+                    icon={<SettingFilled />}
                 >
-                    <SettingFilled /> 规则面板
-                </button>
-                <button
-                    className={setting?.isFiltering ? 'menuButton activatedButton' : 'menuButton'}
+                    规则面板
+                </Button>
+                <Button
+                    type={setting?.isFiltering ? 'primary' : 'text'}
                     onClick={() => setting?.setIsFiltering(!setting?.isFiltering)}
                     title="暂时开关日志筛选功能 (ctrl+H)"
+                    icon={<FilterFilled />}
                 >
-                    <FilterFilled /> {setting?.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
-                </button>
+                    {setting?.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
+                </Button>
                 <Input
                     type="text"
                     placeholder="搜索日志"

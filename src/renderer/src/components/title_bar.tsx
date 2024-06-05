@@ -1,26 +1,30 @@
+import { Button, Typography } from 'antd'
 import React from 'react'
+import { MinusOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons'
 
 export const TitleBar: React.FC = function () {
     return (
         <div className="titleBar">
-            <div className="titleBarText">AizenTail</div>
-            <button
+            <Typography.Text className="titleBarText">AizenTail</Typography.Text>
+            <Button
+                type="text"
                 className="titleBarButton"
-                id="minimizeButton"
+                icon={<MinusOutlined />}
                 onClick={() => window.electron.windowMinimize()}
-            >
-                ▁
-            </button>
-            <button
+            ></Button>
+            <Button
+                type="text"
                 className="titleBarButton"
-                id="maximizeButton"
+                icon={<BorderOutlined />}
                 onClick={() => window.electron.windowMaximize()}
-            >
-                ▢
-            </button>
-            <button className="titleBarButton" id="closeButton" onClick={() => window.close()}>
-                ╳
-            </button>
+            ></Button>
+            <Button
+                danger
+                type="text"
+                className="titleBarButton"
+                icon={<CloseOutlined />}
+                onClick={() => window.close()}
+            ></Button>
         </div>
     )
 }

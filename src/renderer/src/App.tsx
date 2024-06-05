@@ -5,7 +5,7 @@ import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
 import React, { useEffect, useState } from 'react'
 import { TSetting, ruleManager } from './managers/rule_manager'
-import { message } from 'antd'
+import { ConfigProvider, Flex, MappingAlgorithm, Typography, message, theme } from 'antd'
 
 type TRuleContext = {
     rules: TSetting | undefined
@@ -35,25 +35,110 @@ type TSettings = {
     setIsAutoScroll: (v: boolean) => void
     currentRuleSet: string
     setCurrentRuleSet: (v: string) => void
+    colorTheme: 'light' | 'dark'
+    setColorTheme: (v: 'light' | 'dark') => void
+    isCompactMode: boolean
+    setIsCompactMode: (v: boolean) => void
 }
 
 export const RuleContext = React.createContext<TRuleContext | null>(null)
 export const SettingContext = React.createContext<TSettings | null>(null)
 
-export const App: React.FC = function () {
-    const [messageApi, contextHolder] = message.useMessage()
-    const [fileUrl, setFileUrl] = useState('file directory')
+const App: React.FC = function () {
+    const [messageApi] = message.useMessage()
+    const { token } = theme.useToken()
+    const ruleContext = React.useContext(RuleContext)
+    const settingContext = React.useContext(SettingContext)
     const [hint, setHint] = useState('')
+    const [fileUrl, setFileUrl] = useState('file directory')
     const [rulePanelVisible, setRulePanelVisible] = useState(false)
+
+    React.useEffect(() => {
+        if (hint && hint.length > 0) messageApi.info(hint)
+    }, [hint])
+    useEffect(() => {
+        const onKeyUp = (e: KeyboardEvent): void => {
+            switch (e.key) {
+                case 'r':
+                    e.altKey && settingContext?.setIsAutoScroll(!settingContext?.isAutoScroll)
+                    return
+                case 'h':
+                    e.ctrlKey && settingContext?.setIsFiltering(!settingContext?.isFiltering)
+                    return
+                case 't':
+                    e.altKey && settingContext?.setIsAlwaysOnTop(!settingContext?.isAlwaysOnTop)
+                    return
+                case 'F12':
+                    window.electron.openDevTools()
+                    return
+            }
+        }
+        logManager.onSetHint = setHint
+        document.onkeyup = onKeyUp
+        return () => {
+            if (logManager.onSetHint == setHint) logManager.onSetHint = null
+            if (document.onkeyup == onKeyUp) document.onkeyup = null
+        }
+    }, [settingContext?.isFiltering, settingContext?.isAutoScroll, settingContext?.isAlwaysOnTop])
+    const onSwitchRulePanelVisible = (): void => setRulePanelVisible(!rulePanelVisible)
+    const OnChangeFile = async (file: File | null): Promise<void> => {
+        if (!file) return
+        const filepath = file.path
+        await logManager.openFile(filepath)
+    }
+    const logContainerStyle: React.CSSProperties = rulePanelVisible
+        ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
+        : { resize: 'none', height: 'auto', flex: '1 1 auto' }
+    const style = {
+        width: '100%',
+        height: '100%',
+        backgroundColor: token.colorBgLayout,
+        '--theme-color-scrollbar-track': token.colorFillSecondary,
+        '--theme-color-scrollbar-thumb': token.colorTextQuaternary,
+        '--theme-color-scrollbar-thumb-hover': token.colorTextTertiary,
+        '--theme-border-radius': Math.floor(token.borderRadius / 2)
+    }
+    return (
+        <Flex style={style} vertical>
+            <TitleBar />
+            <MenuBar
+                switchRulePanelVisible={onSwitchRulePanelVisible}
+                rulePanelVisible={rulePanelVisible}
+                loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
+                saveRule={(filepath) => ruleManager.saveFile(filepath, ruleContext?.rules)}
+                openLogFile={(filepath) => {
+                    logManager.openFile(filepath)
+                    setFileUrl(filepath)
+                }}
+            />
+            <LogContainer
+                manager={logManager}
+                style={logContainerStyle}
+                onChangeFile={OnChangeFile}
+            />
+            {rulePanelVisible && <RulePanel />}
+            <Flex justify="space-between" align="center" style={{ margin: '0 4px' }}>
+                <Typography.Text type="secondary">路径: {fileUrl}</Typography.Text>
+                <Typography.Text type="secondary">{hint}</Typography.Text>
+            </Flex>
+        </Flex>
+    )
+}
+
+export const AppWarpper: React.FC = function () {
+    const [messageApi, contextHolder] = message.useMessage()
+
     const [rules, setRules] = useState<TSetting>()
     const [ruleInited, setRuleInited] = useState(false)
     const [isFiltering, setIsFiltering] = useState(false)
     const [isAutoScroll, setIsAutoScroll] = useState(true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false)
     const [isShowHoverText, setIsShowHoverText] = useState(false)
+    const [colorTheme, setColorTheme] = useState<'light' | 'dark'>('dark')
+    const [isCompactMode, setIsCompactMode] = useState(false)
     const [currentRuleSet, setCurrentRuleSet] = useState('default')
 
-    const settingContextValue = {
+    const settingContextValue: TSettings = {
         isAlwaysOnTop,
         setIsAlwaysOnTop,
         isShowHoverText,
@@ -63,7 +148,11 @@ export const App: React.FC = function () {
         isAutoScroll,
         setIsAutoScroll,
         currentRuleSet,
-        setCurrentRuleSet
+        setCurrentRuleSet,
+        colorTheme,
+        setColorTheme,
+        isCompactMode,
+        setIsCompactMode
     }
 
     const ruleContext: TRuleContext = {
@@ -230,35 +319,6 @@ export const App: React.FC = function () {
         }
     }, [])
 
-    React.useEffect(() => {
-        if (hint && hint.length > 0) messageApi.info(hint)
-    }, [hint])
-
-    useEffect(() => {
-        const onKeyUp = (e: KeyboardEvent): void => {
-            switch (e.key) {
-                case 'r':
-                    e.altKey && setIsAutoScroll(!isAutoScroll)
-                    return
-                case 'h':
-                    e.ctrlKey && setIsFiltering(!isFiltering)
-                    return
-                case 't':
-                    e.altKey && setIsAlwaysOnTop(!isAlwaysOnTop)
-                    return
-                case 'F12':
-                    window.electron.openDevTools()
-                    return
-            }
-        }
-        logManager.onSetHint = setHint
-        document.onkeyup = onKeyUp
-        return () => {
-            if (logManager.onSetHint == setHint) logManager.onSetHint = null
-            if (document.onkeyup == onKeyUp) document.onkeyup = null
-        }
-    }, [isFiltering, isAutoScroll, isAlwaysOnTop])
-
     useEffect(() => {
         if (!ruleInited) return
         ruleManager.saveConfig(rules)
@@ -273,44 +333,26 @@ export const App: React.FC = function () {
         }
     }, [ruleInited])
 
-    const onSwitchRulePanelVisible = (): void => setRulePanelVisible(!rulePanelVisible)
-
-    const OnChangeFile = async (file: File | null): Promise<void> => {
-        if (!file) return
-        const filepath = file.path
-        await logManager.openFile(filepath)
-    }
-    const logContainerStyle: React.CSSProperties = rulePanelVisible
-        ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
-        : { resize: 'none', height: 'auto', flex: '1 1 auto' }
+    const algorithm: MappingAlgorithm[] = []
+    if (colorTheme === 'dark') algorithm.push(theme.darkAlgorithm)
+    if (isCompactMode) algorithm.push(theme.compactAlgorithm)
     return (
         <>
-            {contextHolder}
-            <TitleBar />
-            <SettingContext.Provider value={settingContextValue}>
-                <RuleContext.Provider value={ruleContext}>
-                    <MenuBar
-                        switchRulePanelVisible={onSwitchRulePanelVisible}
-                        rulePanelVisible={rulePanelVisible}
-                        loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-                        saveRule={(filepath) => ruleManager.saveFile(filepath, rules)}
-                        openLogFile={(filepath) => {
-                            logManager.openFile(filepath)
-                            setFileUrl(filepath)
-                        }}
-                    />
-                    <LogContainer
-                        manager={logManager}
-                        style={logContainerStyle}
-                        onChangeFile={OnChangeFile}
-                    />
-                    {rulePanelVisible && <RulePanel />}
-                    <div id="hintBar" className="systemInfo">
-                        <div>路径: {fileUrl}</div>
-                        {hint}
-                    </div>
-                </RuleContext.Provider>
-            </SettingContext.Provider>
+            <ConfigProvider
+                theme={{
+                    token: { motion: false, fontSize: 13 },
+                    components: { Table: { cellPaddingBlockSM: 0 } },
+                    algorithm
+                }}
+                componentSize="small"
+            >
+                <SettingContext.Provider value={settingContextValue}>
+                    <RuleContext.Provider value={ruleContext}>
+                        {contextHolder}
+                        <App />
+                    </RuleContext.Provider>
+                </SettingContext.Provider>
+            </ConfigProvider>
         </>
     )
 }

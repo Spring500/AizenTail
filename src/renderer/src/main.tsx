@@ -2,31 +2,10 @@ import './assets/main.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { App } from './App'
-import { ConfigProvider, theme } from 'antd'
+import { AppWarpper } from './App'
 
 ReactDOM.createRoot(document.getElementById('app')!).render(
     <React.StrictMode>
-        <ConfigProvider
-            theme={{
-                token: {
-                    // borderRadius: 3,
-                    motion: false,
-                    fontSize: 13
-                },
-                components: {
-                    Table: {
-                        cellPaddingBlockSM: 0
-                    }
-                },
-                algorithm: [
-                    // theme.compactAlgorithm,
-                    theme.darkAlgorithm
-                ]
-            }}
-            componentSize="small"
-        >
-            <App />
-        </ConfigProvider>
+        <AppWarpper />
     </React.StrictMode>
 )
