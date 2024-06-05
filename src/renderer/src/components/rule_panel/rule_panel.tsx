@@ -4,6 +4,38 @@ import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/App'
 import { PlusCircleFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-design/icons'
 
+const RenameButton: React.FC<{
+    value: string | undefined
+    disabled: boolean
+    onChange: (newValue: string | undefined) => void
+}> = function ({ value, disabled, onChange }) {
+    const [newName, setNewName] = useState(value)
+    return (
+        <Popover
+            content={
+                <Space>
+                    <Input
+                        value={newName}
+                        addonBefore={<EditFilled />}
+                        onChange={(v) => setNewName(v.target.value)}
+                    />
+                    <Button disabled={!newName} onClick={() => onChange(newName)}>
+                        确认
+                    </Button>
+                </Space>
+            }
+            title="重命名规则集"
+            trigger="click"
+            // open={open}
+            onOpenChange={(open) => open && setNewName(value)}
+        >
+            <Button disabled={disabled}>
+                <EditFilled /> 重命名规则集
+            </Button>
+        </Popover>
+    )
+}
+
 export const RuleSubPanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
@@ -51,30 +83,11 @@ export const RuleSubPanel: React.FC = function () {
                 >
                     <CopyFilled /> 复制规则集
                 </Button>
-                <Popover
-                    content={
-                        <Space>
-                            <Input
-                                addonBefore={<EditFilled />}
-                                onChange={(v) => setNewName(v.target.value)}
-                            />
-                            <Button
-                                disabled={!newName}
-                                onClick={() => ruleContext?.renameRuleSet(selectedRule, newName)}
-                            >
-                                确认
-                            </Button>
-                        </Space>
-                    }
-                    title="重命名规则集"
-                    trigger="click"
-                    // open={open}
-                    // onOpenChange={handleOpenChange}
-                >
-                    <Button disabled={selectedRule === 'default'}>
-                        <EditFilled /> 重命名规则集
-                    </Button>
-                </Popover>
+                <RenameButton
+                    value={selectedRule}
+                    disabled={selectedRule === 'default'}
+                    onChange={(newName) => ruleContext?.renameRuleSet(selectedRule, newName)}
+                />
                 <Popconfirm
                     title={`确定删除规则集${selectedRule}？`}
                     onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
