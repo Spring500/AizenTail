@@ -152,8 +152,10 @@ const App: React.FC = function () {
 export const AppWarpper: React.FC = function () {
     const [messageApi, contextHolder] = message.useMessage()
 
-    const [rules, setRules] = React.useState<TSetting>()
-    const [ruleInited, setRuleInited] = React.useState(false)
+    const [rules, setRules] = React.useState<TSetting>(() => {
+        ruleManager.reloadConfig()
+        return {}
+    })
     const [isFiltering, setIsFiltering] = React.useState(true)
     const [isAutoScroll, setIsAutoScroll] = React.useState(true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(false)
@@ -179,6 +181,11 @@ export const AppWarpper: React.FC = function () {
         setIsCompactMode
     }
 
+    const setRulesFromApp = (newRules: TSetting): void => {
+        setRules(newRules)
+        ruleManager.saveConfig(newRules)
+        console.log('save config', newRules)
+    }
     const ruleContext: TRuleContext = {
         rules,
         addFilter: (setKey, rule) => {
@@ -192,7 +199,7 @@ export const AppWarpper: React.FC = function () {
             if (!filters) ruleSet.filterRules = filters = []
 
             filters.push(rule)
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         setFilter: (setKey, index, rule) => {
             if (!rule) return
@@ -205,7 +212,7 @@ export const AppWarpper: React.FC = function () {
             if (!filters) ruleSet.filterRules = filters = []
             if (index < 0 || index >= filters.length) return
             filters[index] = rule
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         delFilter: (setKey, index) => {
             const newRules = { ...rules }
@@ -216,7 +223,7 @@ export const AppWarpper: React.FC = function () {
             if (!filters) ruleSet.filterRules = filters = []
 
             ruleSet.filterRules = filters.filter((_, i) => i !== index)
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         insertFilter: (setKey, index1, index2) => {
             const newRules = { ...rules }
@@ -230,7 +237,7 @@ export const AppWarpper: React.FC = function () {
                 return
             // 把index1的元素插入到index2之前
             filters.splice(index2, 0, filters.splice(index1, 1)[0])
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         addReplace: (setKey, rule) => {
             if (!rule) return
@@ -243,7 +250,7 @@ export const AppWarpper: React.FC = function () {
             if (!replaces) ruleSet.replaceRules = replaces = []
 
             replaces.push(rule)
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         copyRuleSet: (oldName, newName) => {
             if (!oldName || !newName || !rules || !rules[oldName]) return
@@ -254,7 +261,7 @@ export const AppWarpper: React.FC = function () {
             }
             const newRules = { ...rules }
             newRules[newName] = JSON.parse(JSON.stringify(newRules[oldName]))
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         delReplace: (setKey, index) => {
             const newRules = { ...rules }
@@ -265,7 +272,7 @@ export const AppWarpper: React.FC = function () {
             if (!replaces) ruleSet.replaceRules = replaces = []
 
             ruleSet.replaceRules = replaces.filter((_, i) => i !== index)
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         insertReplace: (setKey, index1, index2) => {
             const newRules = { ...rules }
@@ -279,8 +286,7 @@ export const AppWarpper: React.FC = function () {
                 return
             // 把index1的元素插入到index2之前
             replaces.splice(index2, 0, replaces.splice(index1, 1)[0])
-            setRules(newRules)
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         setReplace: (setKey, index, rule) => {
             if (!rule) return
@@ -293,10 +299,10 @@ export const AppWarpper: React.FC = function () {
             if (!replaces) ruleSet.replaceRules = replaces = []
             if (index < 0 || index >= replaces.length) return
             replaces[index] = rule
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         resetRules: (newRules) => {
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         newRuleSet: (ruleSetName) => {
             if (rules && rules[ruleSetName]) {
@@ -305,13 +311,13 @@ export const AppWarpper: React.FC = function () {
             }
             const newRules = { ...rules }
             newRules[ruleSetName] = { filterRules: [], replaceRules: [] }
-            setRules(newRules)
+            setRulesFromApp(newRules)
         },
         deleteRuleSet: (ruleSetName) => {
             if (!ruleSetName) return
             const newRules = { ...rules }
             delete newRules[ruleSetName]
-            setRules(newRules)
+            setRulesFromApp(newRules)
             setCurrentRuleSet('default')
         },
         renameRuleSet: (oldName, newName) => {
@@ -324,7 +330,7 @@ export const AppWarpper: React.FC = function () {
             const newRules = { ...rules }
             newRules[newName] = newRules[oldName]
             delete newRules[oldName]
-            setRules(newRules)
+            setRulesFromApp(newRules)
             setCurrentRuleSet(newName)
         }
     }
@@ -337,25 +343,8 @@ export const AppWarpper: React.FC = function () {
             setRules(newRules)
         }
         ruleManager.listen('ruleChanged', onRuleChanged)
-
-        return (): void => {
-            ruleManager.unlisten('ruleChanged', onRuleChanged)
-        }
+        return (): void => ruleManager.unlisten('ruleChanged', onRuleChanged)
     }, [])
-
-    React.useEffect(() => {
-        if (!ruleInited) return
-        ruleManager.saveConfig(rules)
-        console.log('save config', rules)
-    }, [rules])
-
-    // 当ruleInited为false时加载规则
-    React.useEffect(() => {
-        if (!ruleInited) {
-            ruleManager.reloadConfig()
-            setRuleInited(true)
-        }
-    }, [ruleInited])
 
     const algorithm: MappingAlgorithm[] = []
     if (colorTheme === 'dark') algorithm.push(theme.darkAlgorithm)

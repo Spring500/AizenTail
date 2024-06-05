@@ -39,7 +39,6 @@ const RenameButton: React.FC<{
 export const RuleSubPanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
-    const [newName, setNewName] = useState('')
     const selectedRule = settingContext?.currentRuleSet
 
     let options: string[] = []
