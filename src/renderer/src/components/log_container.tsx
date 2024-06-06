@@ -3,7 +3,7 @@ import { IListView, ListView } from './common/list'
 import React, { useEffect, useState } from 'react'
 import { createRef } from 'react'
 import { Dropdown, Typography, theme } from 'antd'
-import { RuleContext, SettingContext } from '@renderer/App'
+import { RuleContext, SettingContext } from '@renderer/context'
 import { CaretRightOutlined } from '@ant-design/icons'
 
 const EXCLUDED_OPACITY = 0.3

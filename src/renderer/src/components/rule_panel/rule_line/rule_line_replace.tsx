@@ -1,5 +1,5 @@
 import React from 'react'
-import { RuleContext, SettingContext } from '@renderer/App'
+import { RuleContext, SettingContext } from '@renderer/context'
 import { RuleTable } from './rule_line_table'
 import { ReplaceRegInput } from './rule_line_replace_reg'
 

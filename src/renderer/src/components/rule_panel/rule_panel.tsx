@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Input, Popconfirm, Popover, Radio, Space, Typography } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
-import { RuleContext, SettingContext } from '@renderer/App'
+import { RuleContext, SettingContext } from '@renderer/context'
 import { PlusCircleFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-design/icons'
 
 const RenameButton: React.FC<{

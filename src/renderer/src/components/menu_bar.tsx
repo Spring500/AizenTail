@@ -9,7 +9,7 @@ import {
     FilterFilled,
     OrderedListOutlined
 } from '@ant-design/icons'
-import { SettingContext } from '@renderer/App'
+import { SettingContext } from '@renderer/context'
 
 export const MenuBar: React.FC<{
     switchRulePanelVisible: () => void

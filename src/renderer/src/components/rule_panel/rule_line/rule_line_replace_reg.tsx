@@ -1,6 +1,6 @@
 import React from 'react'
 import { Tooltip, Input } from 'antd'
-import { RuleContext, SettingContext } from '@renderer/App'
+import { RuleContext, SettingContext } from '@renderer/context'
 export const ReplaceRegInput: React.FC<{
     value: string | undefined
     index: number

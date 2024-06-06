@@ -1,6 +1,6 @@
 import React from 'react'
 import { Space, Checkbox } from 'antd'
-import { SettingContext } from '@renderer/App'
+import { SettingContext } from '@renderer/context'
 
 export const SettingPanel: React.FC = function () {
     const settingContext = React.useContext(SettingContext)
