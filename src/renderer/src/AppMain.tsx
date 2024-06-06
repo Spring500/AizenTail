@@ -84,7 +84,8 @@ const AppMainComponent: React.FC = function () {
         '--theme-color-log-highlight-background': token.colorFill,
         '--theme-color-log-search-hit-text': token.colorText,
         '--theme-color-log-search-hit-background': token.colorWarning,
-        '--theme-border-radius': Math.floor(token.borderRadius / 2) + 'px'
+        '--theme-border-radius': Math.floor(token.borderRadius / 2) + 'px',
+        '--theme-color-bg-elevated': token.colorBgElevated
     }
     return (
         <Flex style={style} vertical>

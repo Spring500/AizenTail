@@ -59,6 +59,7 @@ body,
 }
 
 .logContainerMask{
+    background: var(--theme-color-bg-elevated);
     display: flex;
     justify-content: center;
     align-items: center;

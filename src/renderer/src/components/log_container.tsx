@@ -242,7 +242,7 @@ export const LogContainer: React.FC<{
             />
             {dragging && (
                 <div className="logContainerMask" style={{ zIndex: 100 }}>
-                    拖曳至此打开日志文件{' '}
+                    <Typography.Text>拖曳至此打开日志文件</Typography.Text>
                 </div>
             )}
         </div>
