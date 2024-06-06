@@ -3,13 +3,6 @@
     margin: 0;
 }
 
-:root {
-    --theme-color-info-text: #707070;
-    --theme-color-log-search-hit-background: yellow;
-    --theme-color-log-search-hit-text: black;
-    --theme-font-system: 12px/1.0 "Microsoft Yahei";
-    --theme-font-log: 13px/1.2 "SimSun";
-}
 
 body {
     overflow: hidden;
@@ -100,14 +93,17 @@ body,
 
 @keyframes blink {
     0% {  }
-    50% { background: gray; color: var(--theme-color-info-text-highlight); }
+    50% { 
+        background: var(--theme-color-log-highlight-background); 
+        color: var(--theme-color-log-highlight-text);
+    }
     100% {  }
 }
 
 .logSearchHit{
     background: var(--theme-color-log-search-hit-background);
     color: var(--theme-color-log-search-hit-text);
-    border-radius: 2px;
+    border-radius: var(--theme-border-radius);
 }
 
 .ruleContainer{

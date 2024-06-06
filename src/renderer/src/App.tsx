@@ -113,7 +113,11 @@ const App: React.FC = function () {
         '--theme-color-scrollbar-track': token.colorFillSecondary,
         '--theme-color-scrollbar-thumb': token.colorTextQuaternary,
         '--theme-color-scrollbar-thumb-hover': token.colorTextTertiary,
-        '--theme-border-radius': Math.floor(token.borderRadius / 2)
+        '--theme-color-log-highlight-text': token.colorText,
+        '--theme-color-log-highlight-background': token.colorFill,
+        '--theme-color-log-search-hit-text': token.colorText,
+        '--theme-color-log-search-hit-background': token.colorWarning,
+        '--theme-border-radius': Math.floor(token.borderRadius / 2) + 'px'
     }
     return (
         <Flex style={style} vertical>
@@ -143,7 +147,7 @@ const App: React.FC = function () {
                     />
                     <Typography.Text type="secondary">路径: {fileUrl}</Typography.Text>
                 </Space>
-                <Typography.Text type="secondary">提示{hint}</Typography.Text>
+                <Typography.Text type="secondary">{hint}</Typography.Text>
             </Flex>
         </Flex>
     )
@@ -191,25 +195,16 @@ export const AppWarpper: React.FC = function () {
         addFilter: (setKey, rule) => {
             if (!rule) return
             const newRules: TSetting = { ...rules }
-
-            let ruleSet = newRules[setKey]
-            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
-
-            let filters = ruleSet.filterRules
-            if (!filters) ruleSet.filterRules = filters = []
-
+            const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
+            const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             filters.push(rule)
             setRulesFromApp(newRules)
         },
         setFilter: (setKey, index, rule) => {
             if (!rule) return
             const newRules = { ...rules }
-
-            let ruleSet = newRules[setKey]
-            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
-
-            let filters = ruleSet.filterRules
-            if (!filters) ruleSet.filterRules = filters = []
+            const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
+            const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             if (index < 0 || index >= filters.length) return
             filters[index] = rule
             setRulesFromApp(newRules)
@@ -218,9 +213,7 @@ export const AppWarpper: React.FC = function () {
             const newRules = { ...rules }
             const ruleSet = newRules[setKey]
             if (!ruleSet) return
-
-            let filters = ruleSet.filterRules
-            if (!filters) ruleSet.filterRules = filters = []
+            const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
 
             ruleSet.filterRules = filters.filter((_, i) => i !== index)
             setRulesFromApp(newRules)
@@ -229,10 +222,7 @@ export const AppWarpper: React.FC = function () {
             const newRules = { ...rules }
             const ruleSet = newRules[setKey]
             if (!ruleSet) return
-
-            let filters = ruleSet.filterRules
-            if (!filters) ruleSet.filterRules = filters = []
-
+            const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             if (index1 < 0 || index1 >= filters.length || index2 < 0 || index2 >= filters.length)
                 return
             // 把index1的元素插入到index2之前
@@ -242,27 +232,12 @@ export const AppWarpper: React.FC = function () {
         addReplace: (setKey, rule) => {
             if (!rule) return
             const newRules = { ...rules }
-
-            let ruleSet = newRules[setKey]
-            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
-
-            let replaces = ruleSet.replaceRules
-            if (!replaces) ruleSet.replaceRules = replaces = []
-
+            const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
+            const replaces = ruleSet.replaceRules ?? (ruleSet.replaceRules = [])
             replaces.push(rule)
             setRulesFromApp(newRules)
         },
-        copyRuleSet: (oldName, newName) => {
-            if (!oldName || !newName || !rules || !rules[oldName]) return
-            if (oldName === newName) return
-            if (rules[newName]) {
-                messageApi.error(`规则集 ${newName} 已存在`)
-                return
-            }
-            const newRules = { ...rules }
-            newRules[newName] = JSON.parse(JSON.stringify(newRules[oldName]))
-            setRulesFromApp(newRules)
-        },
+
         delReplace: (setKey, index) => {
             const newRules = { ...rules }
             const ruleSet = newRules[setKey]
@@ -291,26 +266,30 @@ export const AppWarpper: React.FC = function () {
         setReplace: (setKey, index, rule) => {
             if (!rule) return
             const newRules = { ...rules }
-
-            let ruleSet = newRules[setKey]
-            if (!ruleSet) newRules[setKey] = ruleSet = { filterRules: [], replaceRules: [] }
-
-            let replaces = ruleSet.replaceRules
-            if (!replaces) ruleSet.replaceRules = replaces = []
+            const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
+            const replaces = ruleSet.replaceRules ?? (ruleSet.replaceRules = [])
             if (index < 0 || index >= replaces.length) return
             replaces[index] = rule
             setRulesFromApp(newRules)
         },
-        resetRules: (newRules) => {
-            setRulesFromApp(newRules)
-        },
+        resetRules: setRulesFromApp,
         newRuleSet: (ruleSetName) => {
-            if (rules && rules[ruleSetName]) {
+            if (rules[ruleSetName]) {
                 messageApi.error(`规则集 ${ruleSetName} 已存在`)
                 return
             }
             const newRules = { ...rules }
             newRules[ruleSetName] = { filterRules: [], replaceRules: [] }
+            setRulesFromApp(newRules)
+        },
+        copyRuleSet: (oldName, newName) => {
+            if (!oldName || !newName || !rules || !rules[oldName] || oldName === newName) return
+            if (rules[newName]) {
+                messageApi.error(`规则集 ${newName} 已存在`)
+                return
+            }
+            const newRules = { ...rules }
+            newRules[newName] = JSON.parse(JSON.stringify(newRules[oldName]))
             setRulesFromApp(newRules)
         },
         deleteRuleSet: (ruleSetName) => {
@@ -321,8 +300,7 @@ export const AppWarpper: React.FC = function () {
             setCurrentRuleSet('default')
         },
         renameRuleSet: (oldName, newName) => {
-            if (!oldName || !newName || !rules || !rules[oldName]) return
-            if (oldName === newName) return
+            if (!oldName || !newName || !rules || !rules[oldName] || oldName === newName) return
             if (rules[newName]) {
                 messageApi.error(`规则集 ${newName} 已存在`)
                 return
@@ -339,9 +317,7 @@ export const AppWarpper: React.FC = function () {
     }, [rules, currentRuleSet])
 
     React.useEffect(() => {
-        const onRuleChanged = (newRules: TSetting): void => {
-            setRules(newRules)
-        }
+        const onRuleChanged = (newRules: TSetting): void => setRules(newRules)
         ruleManager.listen('ruleChanged', onRuleChanged)
         return (): void => ruleManager.unlisten('ruleChanged', onRuleChanged)
     }, [])
@@ -350,22 +326,20 @@ export const AppWarpper: React.FC = function () {
     if (colorTheme === 'dark') algorithm.push(theme.darkAlgorithm)
     if (isCompactMode) algorithm.push(theme.compactAlgorithm)
     return (
-        <>
-            <ConfigProvider
-                theme={{
-                    token: { motion: false, fontSize: 13 },
-                    components: { Table: { cellPaddingBlockSM: 0 } },
-                    algorithm
-                }}
-                componentSize="small"
-            >
-                <SettingContext.Provider value={settingContextValue}>
-                    <RuleContext.Provider value={ruleContext}>
-                        {contextHolder}
-                        <App />
-                    </RuleContext.Provider>
-                </SettingContext.Provider>
-            </ConfigProvider>
-        </>
+        <ConfigProvider
+            theme={{
+                token: { motion: false, fontSize: 13 },
+                components: { Table: { cellPaddingBlockSM: 0 } },
+                algorithm
+            }}
+            componentSize="small"
+        >
+            <SettingContext.Provider value={settingContextValue}>
+                <RuleContext.Provider value={ruleContext}>
+                    {contextHolder}
+                    <App />
+                </RuleContext.Provider>
+            </SettingContext.Provider>
+        </ConfigProvider>
     )
 }
