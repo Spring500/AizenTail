@@ -12,7 +12,8 @@ import {
     RowProps,
     Popconfirm,
     Typography,
-    ConfigProvider
+    ConfigProvider,
+    Tooltip
 } from 'antd'
 import React from 'react'
 
@@ -21,6 +22,7 @@ type TKeyDesc<TKeyType> =
           key: keyof TKeyType
           title: string
           type: 'input' | 'checkbox' | 'color'
+          desc?: string
       }
     | {
           key: keyof TKeyType
@@ -133,6 +135,7 @@ export const RuleTable = function <TDataType extends object>(props: {
                     key: desc.key as string,
                     render: (text, record, index): React.ReactNode => (
                         <Input
+                            title={desc.desc ?? desc.title}
                             value={text}
                             onChange={(value) =>
                                 props.onChangeRule(index, {
@@ -152,6 +155,7 @@ export const RuleTable = function <TDataType extends object>(props: {
                     width: 60,
                     render: (enable: boolean, record, index) => (
                         <Checkbox
+                            title={desc.desc ?? desc.title}
                             checked={enable}
                             onChange={(e) => {
                                 const newRule = { ...record, [desc.key]: e.target.checked }
@@ -168,13 +172,15 @@ export const RuleTable = function <TDataType extends object>(props: {
                     align: 'center',
                     width: 60,
                     render: (color: string, record, index) => (
-                        <RuleColorPicker
-                            color={color}
-                            onChange={(color) => {
-                                const newRule = { ...record, [desc.key]: getColorStr(color) }
-                                props.onChangeRule(index, newRule)
-                            }}
-                        />
+                        <Tooltip title={'测试'}>
+                            <RuleColorPicker
+                                color={color}
+                                onChange={(color) => {
+                                    const newRule = { ...record, [desc.key]: getColorStr(color) }
+                                    props.onChangeRule(index, newRule)
+                                }}
+                            />
+                        </Tooltip>
                     )
                 }
             default:
@@ -191,7 +197,7 @@ export const RuleTable = function <TDataType extends object>(props: {
         {
             title: '',
             key: 'action',
-            width: 80,
+            width: 60,
             align: 'center',
             render: (_, _1, index) => (
                 <Popconfirm title={`确认删除规则?`} onConfirm={() => props.onDeleteRule(index)}>
