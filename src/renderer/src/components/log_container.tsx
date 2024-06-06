@@ -37,6 +37,8 @@ export const LogContainer: React.FC<{
     const [dragging, setDragging] = useState(false)
     const [logCount, setLogCount] = useState(0)
     const [highlightLine, setHighlightLine] = useState(-1)
+    const [filtedLogIds, setFiltedLogIds] = useState<number[]>([])
+    const [lineToIndexMap, setLineToIndexMap] = useState<Map<number, number>>(new Map())
 
     const currentRuleSet = ruleContext?.rules?.[settingContext?.currentRuleSet ?? '']
     const replaceRules = currentRuleSet?.replaceRules ?? []
@@ -84,17 +86,18 @@ export const LogContainer: React.FC<{
         listRef.current?.scrollToItem(index, 'center', 'instant')
     }
 
-    const onTick = function (): void {
-        props.manager.refreshFile()
-    }
     // 监听manager的变化
     useEffect(() => {
         const manager = props.manager
         if (!manager) return
-        manager.onSetLogCount = setLogCount
-        const timer = setInterval(onTick, 100)
+        manager.onFilterChanged = (count, filtedLogIds, lineToIndexMap): void => {
+            setLogCount(count)
+            setFiltedLogIds(filtedLogIds)
+            setLineToIndexMap(lineToIndexMap)
+        }
+        const timer = setInterval(manager.refreshFile, 100)
         return () => {
-            if (manager.onSetLogCount === setLogCount) manager.onSetLogCount = null
+            if (manager.onFilterChanged === setLogCount) manager.onFilterChanged = null
             clearInterval(timer)
         }
     }, [mainRef])
@@ -119,12 +122,12 @@ export const LogContainer: React.FC<{
     useEffect(() => {
         if (!settingContext?.isAutoScroll) return
         if (highlightLine !== -1) {
-            const index = props.manager.lineToIndex(highlightLine)
+            const index = lineToIndex(highlightLine)
             if (index !== -1) scrollToItem(index)
         } else {
             scrollToItem(
                 settingContext?.isFiltering
-                    ? props.manager.filtedLogIds.length - 1
+                    ? filtedLogIds.length - 1
                     : props.manager.logs.length - 1
             )
         }
@@ -182,17 +185,24 @@ export const LogContainer: React.FC<{
         return {}
     }
 
+    const isFiltering = (): boolean => {
+        return filtedLogIds?.length > 0 && !!settingContext?.isFiltering
+    }
+    const indexToLine = (index: number): number => {
+        return isFiltering() ? filtedLogIds[index] ?? -1 : index <= logCount - 1 ? index : -1
+    }
+    const lineToIndex = (line: number): number => {
+        return isFiltering() ? lineToIndexMap.get(line) ?? -1 : line
+    }
     const hasFilter = filterRules.length > 0 && filterRules.some((rule) => rule.enable)
 
     const LogRowRenderer = function (index: number): React.ReactNode {
         const manager = props.manager
-        const logText = replaceLog(manager.getLogText(index))
-        const line = props.manager.indexToLine(index)
-        const isExculed =
-            !settingContext?.isFiltering && hasFilter && !manager.lineToIndexMap.has(index)
+        const logText = replaceLog(manager.logs[indexToLine(index)]?.text ?? '')
+        const line = indexToLine(index)
+        const isExculed = !settingContext?.isFiltering && hasFilter && !lineToIndexMap.has(index)
         const isHighlight = line >= 0 && line === highlightLine
         const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
-
         const opacity = isExculed ? EXCLUDED_OPACITY : undefined
         return (
             <Dropdown
@@ -226,7 +236,6 @@ export const LogContainer: React.FC<{
         )
     }
     const lineHeight = Math.max(Math.ceil(token.fontSize * token.lineHeight), 10)
-
     return (
         <div
             className="logContainer"

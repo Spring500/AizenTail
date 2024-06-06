@@ -41,3 +41,8 @@ export const MessageContext = React.createContext<{
     messageApi: MessageInstance
     contextHolder: React.ReactNode
 } | null>(null)
+
+export const LogContext = React.createContext<{
+    filtedLogIds: number[]
+    lineToIndexMap: Map<number, number>
+} | null>(null)

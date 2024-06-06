@@ -137,7 +137,7 @@ export const AppMain: React.FC<{
     initSetting: TSettings
 }> = function ({ initSetting }) {
     const [messageApi, contextHolder] = message.useMessage()
-    const [rules, setRules] = React.useState(initSetting.rules ?? {})
+    const [rules, setRulesInternal] = React.useState(initSetting.rules ?? {})
     const [isFiltering, setIsFiltering] = React.useState(initSetting.isFiltering ?? true)
     const [isAutoScroll, setIsAutoScroll] = React.useState(initSetting.isAutoScroll ?? true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(initSetting.isAlwaysOnTop ?? false)
@@ -146,11 +146,18 @@ export const AppMain: React.FC<{
     )
     const [colorTheme, setColorTheme] = React.useState(initSetting.colorTheme ?? 'dark')
     const [isCompactMode, setIsCompactMode] = React.useState(initSetting.isCompactMode ?? false)
-    const [currentRuleSet, setCurrentRuleSet] = React.useState(() => {
+    const [currentRuleSet, setCurrentRuleSetInternal] = React.useState(() => {
         const ruleSet = initSetting.currentRuleSet
         return !ruleSet || !initSetting.rules?.[ruleSet] ? 'default' : ruleSet
     })
-
+    const setRules = (newRules: TRules): void => {
+        logManager.setFilterRules(newRules?.[currentRuleSet]?.filterRules)
+        setRulesInternal(newRules)
+    }
+    const setCurrentRuleSet = (ruleSet: string): void => {
+        logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
+        setCurrentRuleSetInternal(ruleSet)
+    }
     const settingContextValue: React.ContextType<typeof SettingContext> = {
         isAlwaysOnTop,
         setIsAlwaysOnTop,

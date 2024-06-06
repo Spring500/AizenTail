@@ -15,32 +15,10 @@ const RULE_CACHE_MIN = 2
 // TODO：已经计算好的日志行号和日志行号对应的索引，可以直接使用，不需要每次都计算
 class LogManager {
     readonly logs = new Array<LogMeta>()
-    filtedLogIds = new Array<number>()
-    /**当开启筛选时，获取显示行数对应的日志行 */ lineToIndexMap = new Map<number, number>()
 
     constructor() {
         console.log('LogManager constructor')
         window.electron.watchLogChange(this.updateFile)
-    }
-
-    /**获取日志行号 */
-    public indexToLine(index: number): number {
-        return this.isFiltering()
-            ? this.filtedLogIds[index] ?? -1
-            : index <= this.logs.length - 1
-              ? index
-              : -1
-    }
-
-    public lineToIndex(line: number): number {
-        return this.isFiltering() ? this.lineToIndexMap.get(line) ?? -1 : line
-    }
-
-    /**获取正则替换后的日志文本 */
-    public getLogText(index: number): string {
-        index = this.isFiltering() ? this.filtedLogIds[index] : index
-        const text = this.logs[index]?.text ?? ''
-        return text
     }
 
     async openFile(filepath: string): Promise<void> {
@@ -185,28 +163,27 @@ class LogManager {
             this.removeRuleCaches(removeKeyList)
         }
 
-        this.filtedLogIds.length = 0
-        this.lineToIndexMap.clear()
-        const rules = this.GetCurrentFilterRules().map((rule) => ({
-            ...rule,
-            ruleId: this.getRuleIndex(rule)
-        }))
-        const patterns = this.inputFilters.map((pattern) => ({
-            pattern,
-            patternId: this.getPatternIndex(pattern)
-        }))
+        const filtedLogIds: number[] = []
+        const lineToIndexMap = new Map<number, number>()
         if (this.hasFilter()) {
+            const rules = this.GetCurrentFilterRules().map((rule) => ({
+                ...rule,
+                ruleId: this.getRuleIndex(rule)
+            }))
+            const patterns = this.inputFilters.map((pattern) => ({
+                pattern,
+                patternId: this.getPatternIndex(pattern)
+            }))
             for (let line = 0; line < this.logs.length; line++) {
                 if (this.calculateExcluded(line, rules, patterns)) continue
-                const index = this.filtedLogIds.length
-                this.lineToIndexMap.set(line, index)
-                this.filtedLogIds.push(line)
+                const index = filtedLogIds.length
+                lineToIndexMap.set(line, index)
+                filtedLogIds.push(line)
             }
             console.log(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`)
         }
-        this.onSetLogCount?.(
-            this.isFiltering() ? this.filtedLogIds.length + 1 : logManager.logs.length + 1
-        )
+        const count = this.isFiltering() ? filtedLogIds.length : this.logs.length
+        this.onFilterChanged?.(count + 1, filtedLogIds, lineToIndexMap)
     }
 
     private filterRules: FilterConfig[] = []
@@ -341,8 +318,11 @@ class LogManager {
     }
 
     onSetHint: ((hint: string) => void) | null = null
-    onSetLogCount: ((count: number) => void) | null = null
+    onFilterChanged:
+        | ((count: number, filtedLogIds: number[], lineToIndexMap: Map<number, number>) => void)
+        | null = null
 }
 export type ILogManager = LogManager
 export const logManager = new LogManager()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(window as any).logManager = logManager
