@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createRef } from 'react'
 import { Dropdown, Typography, theme } from 'antd'
 import { RuleContext, SettingContext } from '@renderer/App'
+import { CaretRightOutlined } from '@ant-design/icons'
 
 const EXCLUDED_OPACITY = 0.3
 
@@ -209,6 +210,7 @@ export const LogContainer: React.FC<{
             >
                 <div className="log" style={{ opacity }} onClick={onClick}>
                     <Typography.Text className="logIndex" italic type="secondary">
+                        {isHighlight ? <CaretRightOutlined /> : undefined}
                         {line >= 0 ? line : ''}
                     </Typography.Text>
                     <Typography.Text
