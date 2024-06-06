@@ -4,7 +4,8 @@ import { RuleContext, SettingContext } from '@renderer/App'
 export const FilterRegInput: React.FC<{
     value: string | undefined
     index: number
-}> = function ({ value, index }) {
+    title?: string
+}> = function ({ value, index, title }) {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
@@ -37,6 +38,7 @@ export const FilterRegInput: React.FC<{
                 status={errorTooltip ? 'error' : undefined}
                 style={{ color: rule.color, backgroundColor: rule.background }}
                 value={value ?? ''}
+                title={title}
                 onChange={(e) =>
                     ruleContext?.setFilter(ruleSetKey, index, {
                         ...rule,

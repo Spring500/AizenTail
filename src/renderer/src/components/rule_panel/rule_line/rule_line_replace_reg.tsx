@@ -4,7 +4,8 @@ import { RuleContext, SettingContext } from '@renderer/App'
 export const ReplaceRegInput: React.FC<{
     value: string | undefined
     index: number
-}> = function ({ value, index }) {
+    title?: string
+}> = function ({ value, index, title }) {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
@@ -36,6 +37,7 @@ export const ReplaceRegInput: React.FC<{
                 spellCheck={false}
                 status={errorTooltip ? 'error' : undefined}
                 value={value ?? ''}
+                title={title}
                 onChange={(e) =>
                     ruleContext?.setReplace(ruleSetKey, index, {
                         ...rule,

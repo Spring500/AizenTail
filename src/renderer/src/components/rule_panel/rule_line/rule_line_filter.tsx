@@ -30,13 +30,32 @@ export const FilterRulePanel: React.FC = function () {
                     key: 'reg',
                     title: '匹配串',
                     render: (text: string, _, index) => (
-                        <FilterRegInput value={text} index={index} />
+                        <FilterRegInput
+                            value={text}
+                            index={index}
+                            title="根据输入的正则表达式匹配日志条目"
+                        />
                     )
                 },
-                { type: 'checkbox', key: 'regexEnable', title: '正则' },
-                { type: 'checkbox', key: 'exclude', title: '反向' },
-                { type: 'color', key: 'color', title: '字体色' },
-                { type: 'color', key: 'background', title: '背景色' }
+                { type: 'checkbox', key: 'regexEnable', title: '正则', desc: '是否启用正则匹配' },
+                {
+                    type: 'checkbox',
+                    key: 'exclude',
+                    title: '反向',
+                    desc: '是否启用反向匹配，当启用时只有不满足匹配串的日志条目会被显示'
+                },
+                {
+                    type: 'color',
+                    key: 'color',
+                    title: '字体色',
+                    desc: '设置匹配到的日志条目的字体颜色'
+                },
+                {
+                    type: 'color',
+                    key: 'background',
+                    title: '背景色',
+                    desc: '设置匹配到的日志条目的背景颜色'
+                }
             ]}
             selectedRowKeys={enabledRules}
             onSelectionChanged={onEnabledChanged}

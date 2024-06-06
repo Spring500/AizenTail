@@ -12,8 +12,7 @@ import {
     RowProps,
     Popconfirm,
     Typography,
-    ConfigProvider,
-    Tooltip
+    ConfigProvider
 } from 'antd'
 import React from 'react'
 
@@ -43,8 +42,13 @@ const getColorStr = (color: Color | undefined): string | undefined => {
 const RuleColorPicker: React.FC<{
     color: string | undefined
     onChange: (color: Color) => void
-}> = function ({ color, onChange }) {
-    return <ColorPicker allowClear disabledAlpha value={color} onChangeComplete={onChange} />
+    title?: string
+}> = function ({ color, onChange, title }) {
+    return (
+        <div title={title}>
+            <ColorPicker allowClear disabledAlpha value={color} onChangeComplete={onChange} />
+        </div>
+    )
 }
 
 const RowContext = React.createContext<{
@@ -172,15 +176,14 @@ export const RuleTable = function <TDataType extends object>(props: {
                     align: 'center',
                     width: 60,
                     render: (color: string, record, index) => (
-                        <Tooltip title={'测试'}>
-                            <RuleColorPicker
-                                color={color}
-                                onChange={(color) => {
-                                    const newRule = { ...record, [desc.key]: getColorStr(color) }
-                                    props.onChangeRule(index, newRule)
-                                }}
-                            />
-                        </Tooltip>
+                        <RuleColorPicker
+                            color={color}
+                            title={desc.desc ?? desc.title}
+                            onChange={(color) => {
+                                const newRule = { ...record, [desc.key]: getColorStr(color) }
+                                props.onChangeRule(index, newRule)
+                            }}
+                        />
                     )
                 }
             default:

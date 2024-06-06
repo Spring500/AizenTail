@@ -34,11 +34,20 @@ export const ReplaceRulePanel: React.FC = function () {
                     key: 'reg',
                     title: '匹配串',
                     render: (text: string, _, index) => (
-                        <ReplaceRegInput value={text} index={index} />
+                        <ReplaceRegInput
+                            value={text}
+                            index={index}
+                            title="根据输入的正则表达式匹配日志条目"
+                        />
                     )
                 },
-                { type: 'checkbox', key: 'regexEnable', title: '正则' },
-                { type: 'input', key: 'replace', title: '替换串' }
+                { type: 'checkbox', key: 'regexEnable', title: '正则', desc: '是否启用正则匹配' },
+                {
+                    type: 'input',
+                    key: 'replace',
+                    title: '替换串',
+                    desc: '将根据正则表达式匹配得到的字符串替换显示为对应的字符串。用$1、$2...等分别表示与正则表达式中的第1、2...个子表达式相匹配的文本'
+                }
             ]}
             selectedRowKeys={enabledRules}
             onSelectionChanged={onEnabledChanged}
