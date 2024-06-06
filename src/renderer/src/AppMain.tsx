@@ -17,10 +17,10 @@ import {
 } from 'antd'
 import { SettingFilled, OrderedListOutlined } from '@ant-design/icons'
 import { SettingPanel } from './components/setting_panel'
-import { RuleContext, SettingContext } from './context'
+import { MessageContext, RuleContext, SettingContext } from './context'
 
 const AppMainComponent: React.FC = function () {
-    const [messageApi] = message.useMessage()
+    const { messageApi } = React.useContext(MessageContext) ?? {}
     const { token } = theme.useToken()
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
@@ -29,7 +29,7 @@ const AppMainComponent: React.FC = function () {
     const [currentPanel, setCurrentPanel] = React.useState<'rule' | 'setting' | undefined>('rule')
 
     React.useEffect(() => {
-        if (hint && hint.length > 0) messageApi.info(hint)
+        if (hint && hint.length > 0) messageApi?.info(hint)
     }, [hint])
     React.useEffect(() => {
         logManager.setFilterDisabled(!settingContext?.isFiltering)
@@ -329,8 +329,10 @@ export const AppMain: React.FC<{
         >
             <SettingContext.Provider value={settingContextValue}>
                 <RuleContext.Provider value={ruleContext}>
-                    {contextHolder}
-                    <AppMainComponent />
+                    <MessageContext.Provider value={{ messageApi, contextHolder }}>
+                        {contextHolder}
+                        <AppMainComponent />
+                    </MessageContext.Provider>
                 </RuleContext.Provider>
             </SettingContext.Provider>
         </ConfigProvider>

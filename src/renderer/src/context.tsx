@@ -1,5 +1,6 @@
 import React from 'react'
 import { TRules } from './managers/rule_manager'
+import { MessageInstance } from 'antd/es/message/interface'
 
 type TRuleContext = {
     rules: TRules | undefined
@@ -36,3 +37,7 @@ type TSettings = {
 
 export const RuleContext = React.createContext<TRuleContext | null>(null)
 export const SettingContext = React.createContext<TSettings | null>(null)
+export const MessageContext = React.createContext<{
+    messageApi: MessageInstance
+    contextHolder: React.ReactNode
+} | null>(null)
