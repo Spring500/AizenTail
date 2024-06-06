@@ -17,19 +17,18 @@ class RuleManager {
         await window.electron.writeFile(filepath, JSON.stringify(setting, undefined, 4))
     }
 
-    async reloadConfig(filepath: string = 'setting.json'): Promise<void> {
+    async reloadConfig(filepath: string = 'setting.json'): Promise<TSetting | undefined> {
         const settingString = await window.electron.openFile(filepath)
-        if (settingString === null) return
+        if (settingString === null) return undefined
         let setting: TSetting | undefined = undefined
         try {
-            console.log('规则初始化', filepath, settingString)
             setting = JSON.parse(settingString)
         } catch (e) {
             console.error('initSetting error', e)
         }
         setting = setting ?? {}
-        console.log('规则初始化完毕', setting)
         this.dispatch('ruleChanged', setting)
+        return setting
     }
 
     public saveConfig(setting: TSetting | undefined): void {

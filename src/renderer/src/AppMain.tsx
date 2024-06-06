@@ -19,7 +19,7 @@ import { SettingFilled, OrderedListOutlined } from '@ant-design/icons'
 import { SettingPanel } from './components/setting_panel'
 import { RuleContext, SettingContext } from './context'
 
-const App: React.FC = function () {
+const AppMainComponent: React.FC = function () {
     const [messageApi] = message.useMessage()
     const { token } = theme.useToken()
     const ruleContext = React.useContext(RuleContext)
@@ -132,13 +132,11 @@ const App: React.FC = function () {
     )
 }
 
-export const AppWarpper: React.FC = function () {
+export const AppMain: React.FC<{
+    initSetting: TSetting
+}> = function (props) {
     const [messageApi, contextHolder] = message.useMessage()
-
-    const [rules, setRules] = React.useState<TSetting>(() => {
-        ruleManager.reloadConfig()
-        return {}
-    })
+    const [rules, setRules] = React.useState(props.initSetting)
     const [isFiltering, setIsFiltering] = React.useState(true)
     const [isAutoScroll, setIsAutoScroll] = React.useState(true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(false)
@@ -295,12 +293,6 @@ export const AppWarpper: React.FC = function () {
         logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
     }, [rules, currentRuleSet])
 
-    React.useEffect(() => {
-        const onRuleChanged = (newRules: TSetting): void => setRules(newRules)
-        ruleManager.listen('ruleChanged', onRuleChanged)
-        return (): void => ruleManager.unlisten('ruleChanged', onRuleChanged)
-    }, [])
-
     const algorithm: MappingAlgorithm[] = []
     if (colorTheme === 'dark') algorithm.push(theme.darkAlgorithm)
     if (isCompactMode) algorithm.push(theme.compactAlgorithm)
@@ -316,7 +308,7 @@ export const AppWarpper: React.FC = function () {
             <SettingContext.Provider value={settingContextValue}>
                 <RuleContext.Provider value={ruleContext}>
                     {contextHolder}
-                    <App />
+                    <AppMainComponent />
                 </RuleContext.Provider>
             </SettingContext.Provider>
         </ConfigProvider>
