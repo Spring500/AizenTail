@@ -1,5 +1,5 @@
 const SETTING_PATH = 'setting.json'
-export type TSetting = Record<
+export type TRules = Record<
     string,
     {
         filterRules?: FilterConfig[]
@@ -7,44 +7,41 @@ export type TSetting = Record<
     }
 >
 
+export type TSettings = {
+    rules?: TRules
+    isAlwaysOnTop?: boolean
+    isShowHoverText?: boolean
+    isFiltering?: boolean
+    isAutoScroll?: boolean
+    currentRuleSet?: string
+    colorTheme?: 'light' | 'dark'
+    isCompactMode?: boolean
+}
+
 // TODO: 添加脏标记，只有在规则发生变化时才写入规则
 
 class RuleManager {
-    async saveFile(filepath: string = SETTING_PATH, setting: TSetting | undefined): Promise<void> {
+    async saveFile(filepath: string = SETTING_PATH, setting: TSettings | undefined): Promise<void> {
         console.log('保存文件', filepath)
-        if (!setting) setting = { rules: {} }
         if (!filepath) return
-        await window.electron.writeFile(filepath, JSON.stringify(setting, undefined, 4))
+        await window.electron.writeFile(filepath, JSON.stringify(setting ?? {}, undefined, 4))
     }
 
-    async reloadConfig(filepath: string = 'setting.json'): Promise<TSetting | undefined> {
+    async reloadConfig(filepath: string = 'setting.json'): Promise<TSettings | undefined> {
         const settingString = await window.electron.openFile(filepath)
         if (settingString === null) return undefined
-        let setting: TSetting | undefined = undefined
+        let setting: TSettings | undefined = undefined
         try {
             setting = JSON.parse(settingString)
         } catch (e) {
             console.error('initSetting error', e)
         }
         setting = setting ?? {}
-        this.dispatch('ruleChanged', setting)
         return setting
     }
 
-    public saveConfig(setting: TSetting | undefined): void {
+    public saveConfig(setting: TSettings | undefined): void {
         this.saveFile(SETTING_PATH, setting)
-    }
-
-    private callbacks = new Map<string, Set<(...args: any[]) => void>>()
-    listen(event: 'ruleChanged', callback: (rules: TSetting) => void): void {
-        if (!this.callbacks.has(event)) this.callbacks.set(event, new Set())
-        this.callbacks.get(event)?.add(callback)
-    }
-    unlisten(event: 'ruleChanged', callback: (rules: TSetting) => void): void {
-        this.callbacks.get(event)?.delete(callback)
-    }
-    dispatch(event: 'ruleChanged', rules: TSetting): void {
-        this.callbacks.get(event)?.forEach((callback) => callback(rules))
     }
 }
 

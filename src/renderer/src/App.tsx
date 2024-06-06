@@ -1,9 +1,10 @@
 import React from 'react'
-import { TSetting, ruleManager } from './managers/rule_manager'
+import { TSettings, ruleManager } from './managers/rule_manager'
 import { AppMain } from './AppMain'
 import { AppLoading } from './AppLoading'
 
 export const App: React.FC = function () {
+    const [initSetting, setInitSetting] = React.useState<TSettings>({})
     const [loading, setLoading] = React.useState(() => {
         console.log('初始化加载中...')
         ruleManager
@@ -23,6 +24,6 @@ export const App: React.FC = function () {
             })
         return true
     })
-    const [initSetting, setInitSetting] = React.useState<TSetting>({})
+
     return <>{loading ? <AppLoading /> : <AppMain initSetting={initSetting} />}</>
 }

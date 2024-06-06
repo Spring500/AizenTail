@@ -4,7 +4,7 @@ import { TitleBar } from './components/title_bar'
 import { MenuBar } from './components/menu_bar'
 import { RulePanel } from './components/rule_panel/rule_panel'
 import React from 'react'
-import { TSetting, ruleManager } from './managers/rule_manager'
+import { TRules, TSettings, ruleManager } from './managers/rule_manager'
 import {
     Button,
     ConfigProvider,
@@ -133,17 +133,22 @@ const AppMainComponent: React.FC = function () {
 }
 
 export const AppMain: React.FC<{
-    initSetting: TSetting
-}> = function (props) {
+    initSetting: TSettings
+}> = function ({ initSetting }) {
     const [messageApi, contextHolder] = message.useMessage()
-    const [rules, setRules] = React.useState(props.initSetting)
-    const [isFiltering, setIsFiltering] = React.useState(true)
-    const [isAutoScroll, setIsAutoScroll] = React.useState(true)
-    const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(false)
-    const [isShowHoverText, setIsShowHoverText] = React.useState(true)
-    const [colorTheme, setColorTheme] = React.useState<'light' | 'dark'>('dark')
-    const [isCompactMode, setIsCompactMode] = React.useState(false)
-    const [currentRuleSet, setCurrentRuleSet] = React.useState('default')
+    const [rules, setRules] = React.useState(initSetting.rules ?? {})
+    const [isFiltering, setIsFiltering] = React.useState(initSetting.isFiltering ?? true)
+    const [isAutoScroll, setIsAutoScroll] = React.useState(initSetting.isAutoScroll ?? true)
+    const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(initSetting.isAlwaysOnTop ?? false)
+    const [isShowHoverText, setIsShowHoverText] = React.useState(
+        initSetting.isShowHoverText ?? true
+    )
+    const [colorTheme, setColorTheme] = React.useState(initSetting.colorTheme ?? 'dark')
+    const [isCompactMode, setIsCompactMode] = React.useState(initSetting.isCompactMode ?? false)
+    const [currentRuleSet, setCurrentRuleSet] = React.useState(() => {
+        const ruleSet = initSetting.currentRuleSet
+        return !ruleSet || !initSetting.rules?.[ruleSet] ? 'default' : ruleSet
+    })
 
     const settingContextValue: React.ContextType<typeof SettingContext> = {
         isAlwaysOnTop,
@@ -162,20 +167,15 @@ export const AppMain: React.FC<{
         setIsCompactMode
     }
 
-    const setRulesFromApp = (newRules: TSetting): void => {
-        setRules(newRules)
-        ruleManager.saveConfig(newRules)
-        console.log('save config', newRules)
-    }
     const ruleContext: React.ContextType<typeof RuleContext> = {
         rules,
         addFilter: (setKey, rule) => {
             if (!rule) return
-            const newRules: TSetting = { ...rules }
+            const newRules: TRules = { ...rules }
             const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             filters.push(rule)
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         setFilter: (setKey, index, rule) => {
             if (!rule) return
@@ -184,7 +184,7 @@ export const AppMain: React.FC<{
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             if (index < 0 || index >= filters.length) return
             filters[index] = rule
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         delFilter: (setKey, index) => {
             const newRules = { ...rules }
@@ -193,7 +193,7 @@ export const AppMain: React.FC<{
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
 
             ruleSet.filterRules = filters.filter((_, i) => i !== index)
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         insertFilter: (setKey, index1, index2) => {
             const newRules = { ...rules }
@@ -204,7 +204,7 @@ export const AppMain: React.FC<{
                 return
             // 把index1的元素插入到index2之前
             filters.splice(index2, 0, filters.splice(index1, 1)[0])
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         addReplace: (setKey, rule) => {
             if (!rule) return
@@ -212,7 +212,7 @@ export const AppMain: React.FC<{
             const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
             const replaces = ruleSet.replaceRules ?? (ruleSet.replaceRules = [])
             replaces.push(rule)
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
 
         delReplace: (setKey, index) => {
@@ -224,7 +224,7 @@ export const AppMain: React.FC<{
             if (!replaces) ruleSet.replaceRules = replaces = []
 
             ruleSet.replaceRules = replaces.filter((_, i) => i !== index)
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         insertReplace: (setKey, index1, index2) => {
             const newRules = { ...rules }
@@ -238,7 +238,7 @@ export const AppMain: React.FC<{
                 return
             // 把index1的元素插入到index2之前
             replaces.splice(index2, 0, replaces.splice(index1, 1)[0])
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         setReplace: (setKey, index, rule) => {
             if (!rule) return
@@ -247,9 +247,9 @@ export const AppMain: React.FC<{
             const replaces = ruleSet.replaceRules ?? (ruleSet.replaceRules = [])
             if (index < 0 || index >= replaces.length) return
             replaces[index] = rule
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
-        resetRules: setRulesFromApp,
+        resetRules: setRules,
         newRuleSet: (ruleSetName) => {
             if (rules[ruleSetName]) {
                 messageApi.error(`规则集 ${ruleSetName} 已存在`)
@@ -257,7 +257,7 @@ export const AppMain: React.FC<{
             }
             const newRules = { ...rules }
             newRules[ruleSetName] = { filterRules: [], replaceRules: [] }
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         copyRuleSet: (oldName, newName) => {
             if (!oldName || !newName || !rules || !rules[oldName] || oldName === newName) return
@@ -267,13 +267,13 @@ export const AppMain: React.FC<{
             }
             const newRules = { ...rules }
             newRules[newName] = JSON.parse(JSON.stringify(newRules[oldName]))
-            setRulesFromApp(newRules)
+            setRules(newRules)
         },
         deleteRuleSet: (ruleSetName) => {
             if (!ruleSetName) return
             const newRules = { ...rules }
             delete newRules[ruleSetName]
-            setRulesFromApp(newRules)
+            setRules(newRules)
             setCurrentRuleSet('default')
         },
         renameRuleSet: (oldName, newName) => {
@@ -285,14 +285,36 @@ export const AppMain: React.FC<{
             const newRules = { ...rules }
             newRules[newName] = newRules[oldName]
             delete newRules[oldName]
-            setRulesFromApp(newRules)
+            setRules(newRules)
             setCurrentRuleSet(newName)
         }
     }
     React.useEffect(() => {
         logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
     }, [rules, currentRuleSet])
-
+    React.useEffect(() => {
+        const newSetting = {
+            rules,
+            isAlwaysOnTop,
+            isShowHoverText,
+            isFiltering,
+            isAutoScroll,
+            currentRuleSet,
+            colorTheme,
+            isCompactMode
+        }
+        ruleManager.saveConfig(newSetting)
+        console.log('save config', newSetting)
+    }, [
+        rules,
+        isAlwaysOnTop,
+        isShowHoverText,
+        isFiltering,
+        isAutoScroll,
+        currentRuleSet,
+        colorTheme,
+        isCompactMode
+    ])
     const algorithm: MappingAlgorithm[] = []
     if (colorTheme === 'dark') algorithm.push(theme.darkAlgorithm)
     if (isCompactMode) algorithm.push(theme.compactAlgorithm)

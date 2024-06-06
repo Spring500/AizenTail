@@ -1,8 +1,8 @@
 import React from 'react'
-import { TSetting } from './managers/rule_manager'
+import { TRules } from './managers/rule_manager'
 
 type TRuleContext = {
-    rules: TSetting | undefined
+    rules: TRules | undefined
     addFilter(ruleSetName: string, rule: FilterConfig): void
     setFilter(ruleSetName: string, index: number, rule: FilterConfig): void
     delFilter(ruleSetName: string, index: number): void
@@ -11,7 +11,7 @@ type TRuleContext = {
     setReplace(ruleSetName: string, index: number, rule: ReplaceConfig): void
     delReplace(ruleSetName: string, index: number): void
     insertReplace(ruleSetName: string, index1: number, index2: number): void
-    resetRules(rules: TSetting): void
+    resetRules(rules: TRules): void
     newRuleSet(ruleSetName: string): void
     copyRuleSet(oldName: string | undefined, newName: string | undefined): void
     deleteRuleSet(ruleSetName: string | undefined): void
