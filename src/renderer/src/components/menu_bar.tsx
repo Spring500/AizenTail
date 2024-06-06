@@ -7,7 +7,7 @@ import {
     LayoutFilled,
     SearchOutlined,
     FilterFilled,
-    SettingFilled
+    OrderedListOutlined
 } from '@ant-design/icons'
 import { SettingContext } from '@renderer/App'
 
@@ -94,7 +94,7 @@ export const MenuBar: React.FC<{
                     type={props.rulePanelVisible ? 'primary' : 'text'}
                     onClick={props.switchRulePanelVisible}
                     title="开关筛选及高亮规则配置面板"
-                    icon={<SettingFilled />}
+                    icon={<OrderedListOutlined />}
                 >
                     规则面板
                 </Button>

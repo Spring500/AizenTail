@@ -15,7 +15,8 @@ import {
     message,
     theme
 } from 'antd'
-import { SettingFilled } from '@ant-design/icons'
+import { SettingFilled, OrderedListOutlined } from '@ant-design/icons'
+import { SettingPanel } from './components/setting_panel'
 
 type TRuleContext = {
     rules: TSetting | undefined
@@ -61,7 +62,7 @@ const App: React.FC = function () {
     const settingContext = React.useContext(SettingContext)
     const [hint, setHint] = React.useState('')
     const [fileUrl, setFileUrl] = React.useState('file directory')
-    const [rulePanelVisible, setRulePanelVisible] = React.useState(false)
+    const [currentPanel, setCurrentPanel] = React.useState<'rule' | 'setting' | undefined>('rule')
 
     React.useEffect(() => {
         if (hint && hint.length > 0) messageApi.info(hint)
@@ -97,15 +98,17 @@ const App: React.FC = function () {
             if (document.onkeyup == onKeyUp) document.onkeyup = null
         }
     }, [settingContext?.isFiltering, settingContext?.isAutoScroll, settingContext?.isAlwaysOnTop])
-    const onSwitchRulePanelVisible = (): void => setRulePanelVisible(!rulePanelVisible)
+    const switchCurrentPanel = (panel: 'rule' | 'setting'): void =>
+        setCurrentPanel(currentPanel === panel ? undefined : panel)
     const OnChangeFile = async (file: File | null): Promise<void> => {
         if (!file) return
         const filepath = file.path
         await logManager.openFile(filepath)
     }
-    const logContainerStyle: React.CSSProperties = rulePanelVisible
-        ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
-        : { resize: 'none', height: 'auto', flex: '1 1 auto' }
+    const logContainerStyle: React.CSSProperties =
+        currentPanel !== undefined
+            ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
+            : { resize: 'none', height: 'auto', flex: '1 1 auto' }
     const style = {
         width: '100%',
         height: '100%',
@@ -123,8 +126,8 @@ const App: React.FC = function () {
         <Flex style={style} vertical>
             <TitleBar />
             <MenuBar
-                switchRulePanelVisible={onSwitchRulePanelVisible}
-                rulePanelVisible={rulePanelVisible}
+                switchRulePanelVisible={() => switchCurrentPanel('rule')}
+                rulePanelVisible={currentPanel === 'rule'}
                 loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
                 saveRule={(filepath) => ruleManager.saveFile(filepath, ruleContext?.rules)}
                 openLogFile={(filepath) => {
@@ -137,14 +140,26 @@ const App: React.FC = function () {
                 style={logContainerStyle}
                 onChangeFile={OnChangeFile}
             />
-            {rulePanelVisible && <RulePanel />}
+            {currentPanel && (
+                <div className="ruleContainer" style={{ padding: '4px', margin: '4px' }}>
+                    {currentPanel === 'rule' && <RulePanel />}
+                    {currentPanel === 'setting' && <SettingPanel />}
+                </div>
+            )}
             <Flex justify="space-between" align="center" style={{ margin: '2px 4px' }}>
                 <Space>
-                    <Button
-                        type={rulePanelVisible ? 'primary' : 'text'}
-                        icon={<SettingFilled />}
-                        onClick={onSwitchRulePanelVisible}
-                    />
+                    <Space.Compact>
+                        <Button
+                            type={currentPanel === 'rule' ? 'primary' : 'text'}
+                            icon={<OrderedListOutlined />}
+                            onClick={() => switchCurrentPanel('rule')}
+                        />
+                        <Button
+                            type={currentPanel === 'setting' ? 'primary' : 'text'}
+                            icon={<SettingFilled />}
+                            onClick={() => switchCurrentPanel('setting')}
+                        />
+                    </Space.Compact>
                     <Typography.Text type="secondary">路径: {fileUrl}</Typography.Text>
                 </Space>
                 <Typography.Text type="secondary">{hint}</Typography.Text>
