@@ -1,6 +1,6 @@
 import React from 'react'
 import { RuleContext, SettingContext } from '@renderer/context'
-import { RuleTable } from './rule_line_table'
+import { RuleTable } from '../rule_table'
 import { FilterRegInput } from './rule_line_filter_reg'
 
 export const FilterRulePanel: React.FC = function () {
