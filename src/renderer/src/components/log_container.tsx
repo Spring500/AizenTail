@@ -174,7 +174,7 @@ export const LogContainer: React.FC<{
             } else {
                 hitted = log.includes(rule.reg ?? '')
             }
-            if (rule.exclude) hitted = !hitted
+            if (rule.exclude) continue
             if (!hitted) continue
 
             return {
