@@ -7,7 +7,6 @@ import {
     Button,
     Table,
     Input,
-    ColorPicker,
     Checkbox,
     RowProps,
     Popconfirm,
@@ -32,24 +31,8 @@ type TKeyDesc<TKeyType> =
 import { DeleteFilled, PlusCircleFilled, HolderOutlined } from '@ant-design/icons'
 import { ColumnsType } from 'antd/es/table'
 import { TableRowSelection } from 'antd/es/table/interface'
-import { Color } from 'antd/es/color-picker'
 import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
-
-const getColorStr = (color: Color | undefined): string | undefined => {
-    if (!color) return undefined
-    return color.cleared ? undefined : color.toHexString()
-}
-const RuleColorPicker: React.FC<{
-    color: string | undefined
-    onChange: (color: Color) => void
-    title?: string
-}> = function ({ color, onChange, title }) {
-    return (
-        <div title={title}>
-            <ColorPicker allowClear disabledAlpha value={color} onChangeComplete={onChange} />
-        </div>
-    )
-}
+import { RuleColorPicker } from './rule_line/color_picker'
 
 const RowContext = React.createContext<{
     setActivatorNodeRef?: (element: HTMLElement | null) => void
@@ -178,10 +161,12 @@ export const RuleTable = function <TDataType extends object>(props: {
                     render: (color: string, record, index) => (
                         <RuleColorPicker
                             color={color}
-                            title={desc.desc ?? desc.title}
-                            onChange={(color) => {
-                                const newRule = { ...record, [desc.key]: getColorStr(color) }
-                                props.onChangeRule(index, newRule)
+                            title={desc.title}
+                            tooltip={desc.desc ?? desc.title}
+                            onChange={(newColor) => {
+                                const newRule = { ...record, [desc.key]: newColor }
+                                console.log('newColor', newRule)
+                                return props.onChangeRule(index, newRule)
                             }}
                         />
                     )
