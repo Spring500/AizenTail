@@ -2,14 +2,7 @@ import React, { useState } from 'react'
 import { Button, Flex, Input, Popconfirm, Popover, Radio, Space, Typography } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/context'
-import {
-    FileAddFilled,
-    DeleteFilled,
-    EditFilled,
-    CopyFilled,
-    UploadOutlined,
-    SaveFilled
-} from '@ant-design/icons'
+import { FileAddFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-design/icons'
 
 const RenameButton: React.FC<{
     value: string | undefined
@@ -97,17 +90,18 @@ export const RulePanel: React.FC = function () {
                     >
                         复制
                     </Button>
-                    <Button icon={<UploadOutlined />} disabled>
-                        读取规则
-                    </Button>
-                    <Button icon={<SaveFilled />} disabled>
-                        保存规则
-                    </Button>
                     <RenameButton
                         value={selectedRule}
                         disabled={selectedRule === 'default'}
                         onChange={(newName) => ruleContext?.renameRuleSet(selectedRule, newName)}
                     />
+                    {/* <Button icon={<UploadOutlined />} disabled>
+                        读取规则
+                    </Button>
+                    <Button icon={<SaveFilled />} disabled>
+                        保存规则
+                    </Button> */}
+
                     <Popconfirm
                         title={`确定删除规则集${selectedRule}？`}
                         onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
