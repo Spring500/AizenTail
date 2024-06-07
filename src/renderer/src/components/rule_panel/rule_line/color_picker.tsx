@@ -23,7 +23,8 @@ export const RuleColorPicker: React.FC<{
     onChange: (color: string | undefined) => void
     title?: string
     tooltip?: string
-}> = function ({ color, onChange, title, tooltip }) {
+    disabled?: boolean
+}> = function ({ color, onChange, title, tooltip, disabled }) {
     const customPanelRender: ColorPickerProps['panelRender'] = (panel) => (
         <Space direction="vertical">
             <Flex justify="space-between">
@@ -36,16 +37,18 @@ export const RuleColorPicker: React.FC<{
         </Space>
     )
     const colorPicker = React.useMemo(() => {
+        if (disabled) return null
         return (
-            <ColorPicker
-                // allowClear
-                disabledAlpha
-                value={color ?? null}
-                presets={presets}
-                onChangeComplete={(color) => onChange(getColorStr(color))}
-                panelRender={customPanelRender}
-            />
+            <div title={tooltip}>
+                <ColorPicker
+                    disabledAlpha
+                    value={color ?? null}
+                    presets={presets}
+                    onChangeComplete={(color) => onChange(getColorStr(color))}
+                    panelRender={customPanelRender}
+                />
+            </div>
         )
-    }, [color, title, onChange])
+    }, [color, title, disabled, onChange])
     return colorPicker
 }

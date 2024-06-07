@@ -20,6 +20,7 @@ type TKeyDesc<TKeyType> =
           key: keyof TKeyType
           title: string
           type: 'input' | 'checkbox' | 'color'
+          disabled?: (record: TKeyType) => boolean
           desc?: string
       }
     | {
@@ -124,6 +125,7 @@ export const RuleTable = function <TDataType extends object>(props: {
                         <Input
                             title={desc.desc ?? desc.title}
                             value={text}
+                            disabled={desc.disabled?.(record)}
                             onChange={(value) =>
                                 props.onChangeRule(index, {
                                     ...record,
@@ -144,6 +146,7 @@ export const RuleTable = function <TDataType extends object>(props: {
                         <Checkbox
                             title={desc.desc ?? desc.title}
                             checked={enable}
+                            disabled={desc.disabled?.(record)}
                             onChange={(e) => {
                                 const newRule = { ...record, [desc.key]: e.target.checked }
                                 props.onChangeRule(index, newRule)
@@ -162,10 +165,10 @@ export const RuleTable = function <TDataType extends object>(props: {
                         <RuleColorPicker
                             color={color}
                             title={desc.title}
+                            disabled={desc.disabled?.(record)}
                             tooltip={desc.desc ?? desc.title}
                             onChange={(newColor) => {
                                 const newRule = { ...record, [desc.key]: newColor }
-                                console.log('newColor', newRule)
                                 return props.onChangeRule(index, newRule)
                             }}
                         />

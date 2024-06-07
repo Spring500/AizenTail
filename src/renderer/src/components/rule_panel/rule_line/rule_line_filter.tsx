@@ -47,12 +47,14 @@ export const FilterRulePanel: React.FC = function () {
                 {
                     type: 'color',
                     key: 'color',
+                    disabled: (record) => !!record.exclude,
                     title: '字体色',
                     desc: '设置匹配到的日志条目的字体颜色'
                 },
                 {
                     type: 'color',
                     key: 'background',
+                    disabled: (record) => !!record.exclude,
                     title: '背景色',
                     desc: '设置匹配到的日志条目的背景颜色'
                 }
