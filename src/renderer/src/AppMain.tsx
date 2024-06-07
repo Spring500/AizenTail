@@ -76,7 +76,7 @@ const AppMainComponent: React.FC = function () {
     const style = {
         width: '100%',
         height: '100%',
-        backgroundColor: token.colorBgLayout,
+        backgroundColor: token.colorBgContainer,
         '--theme-color-scrollbar-track': token.colorFillSecondary,
         '--theme-color-scrollbar-thumb': token.colorTextQuaternary,
         '--theme-color-scrollbar-thumb-hover': token.colorTextTertiary,
