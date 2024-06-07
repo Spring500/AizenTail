@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
-import { Button, Input, Popconfirm, Popover, Radio, Space, Typography } from 'antd'
+import { Button, Flex, Input, Popconfirm, Popover, Radio, Space, Typography } from 'antd'
 import { FilterRulePanel, ReplaceRulePanel } from './rule_line'
 import { RuleContext, SettingContext } from '@renderer/context'
-import { PlusCircleFilled, DeleteFilled, EditFilled, CopyFilled } from '@ant-design/icons'
+import {
+    FileAddFilled,
+    DeleteFilled,
+    EditFilled,
+    CopyFilled,
+    UploadOutlined,
+    SaveFilled
+} from '@ant-design/icons'
 
 const RenameButton: React.FC<{
     value: string | undefined
@@ -30,7 +37,7 @@ const RenameButton: React.FC<{
             onOpenChange={(open) => open && setNewName(value)}
         >
             <Button disabled={disabled}>
-                <EditFilled /> 重命名规则集
+                <EditFilled /> 重命名
             </Button>
         </Popover>
     )
@@ -63,39 +70,58 @@ export const RulePanel: React.FC = function () {
 
     return (
         <Space direction="vertical" style={{ width: '100%' }} size={0}>
-            <Space>
-                <Typography.Text>规则集</Typography.Text>
-                <Radio.Group
-                    value={selectedRule}
-                    onChange={(e) => settingContext?.setCurrentRuleSet(e.target.value)}
-                    optionType="button"
-                    buttonStyle="solid"
-                    options={options}
-                />
-                <Button onClick={() => ruleContext?.newRuleSet(genNewSetName())}>
-                    <PlusCircleFilled /> 添加规则集
-                </Button>
-                <Button
-                    onClick={() =>
-                        ruleContext?.copyRuleSet(selectedRule, genCopySetName(selectedRule))
-                    }
-                >
-                    <CopyFilled /> 复制规则集
-                </Button>
-                <RenameButton
-                    value={selectedRule}
-                    disabled={selectedRule === 'default'}
-                    onChange={(newName) => ruleContext?.renameRuleSet(selectedRule, newName)}
-                />
-                <Popconfirm
-                    title={`确定删除规则集${selectedRule}？`}
-                    onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
-                >
-                    <Button disabled={selectedRule === 'default'} icon={<DeleteFilled />} danger>
-                        删除规则集
+            <Flex justify="space-between">
+                <Space>
+                    <Typography.Text>规则集</Typography.Text>
+                    <Radio.Group
+                        value={selectedRule}
+                        onChange={(e) => settingContext?.setCurrentRuleSet(e.target.value)}
+                        optionType="button"
+                        buttonStyle="solid"
+                        options={options}
+                    />
+                </Space>
+                <Space wrap>
+                    <Typography.Text>规则集操作</Typography.Text>
+                    <Button
+                        icon={<FileAddFilled />}
+                        onClick={() => ruleContext?.newRuleSet(genNewSetName())}
+                    >
+                        新建
                     </Button>
-                </Popconfirm>
-            </Space>
+                    <Button
+                        icon={<CopyFilled />}
+                        onClick={() =>
+                            ruleContext?.copyRuleSet(selectedRule, genCopySetName(selectedRule))
+                        }
+                    >
+                        复制
+                    </Button>
+                    <Button icon={<UploadOutlined />} disabled>
+                        读取规则
+                    </Button>
+                    <Button icon={<SaveFilled />} disabled>
+                        保存规则
+                    </Button>
+                    <RenameButton
+                        value={selectedRule}
+                        disabled={selectedRule === 'default'}
+                        onChange={(newName) => ruleContext?.renameRuleSet(selectedRule, newName)}
+                    />
+                    <Popconfirm
+                        title={`确定删除规则集${selectedRule}？`}
+                        onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
+                    >
+                        <Button
+                            disabled={selectedRule === 'default'}
+                            icon={<DeleteFilled />}
+                            danger
+                        >
+                            删除
+                        </Button>
+                    </Popconfirm>
+                </Space>
+            </Flex>
             <FilterRulePanel />
             <ReplaceRulePanel />
         </Space>
