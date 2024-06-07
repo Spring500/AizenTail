@@ -246,7 +246,7 @@ export const LogContainer: React.FC<{
                 ref={listRef}
                 style={{ height: '100%', inset: '0%' }}
                 itemRender={LogRowRenderer}
-                count={logCount}
+                count={logCount + 1}
                 itemHeight={lineHeight}
             />
             {dragging && (

@@ -183,7 +183,7 @@ class LogManager {
             console.log(`过滤耗时 ${Date.now() - this.lastRefreshTime}ms`)
         }
         const count = this.isFiltering() ? filtedLogIds.length : this.logs.length
-        this.onFilterChanged?.(count + 1, filtedLogIds, lineToIndexMap)
+        this.onFilterChanged?.(count, filtedLogIds, lineToIndexMap)
     }
 
     private filterRules: FilterConfig[] = []
