@@ -137,11 +137,11 @@ export const RuleTable = function <TDataType extends object>(props: {
                 }
             case 'checkbox':
                 return {
-                    title: desc.title,
+                    title: <div style={{ whiteSpace: 'nowrap' }}>{desc.title}</div>,
                     dataIndex: desc.key as string,
                     key: desc.key as string,
                     align: 'center',
-                    width: 60,
+                    width: 0,
                     render: (enable: boolean, record, index) => (
                         <Checkbox
                             title={desc.desc ?? desc.title}
@@ -156,11 +156,11 @@ export const RuleTable = function <TDataType extends object>(props: {
                 }
             case 'color':
                 return {
-                    title: desc.title,
+                    title: <div style={{ whiteSpace: 'nowrap' }}>{desc.title}</div>,
                     dataIndex: desc.key as string,
                     key: desc.key as string,
                     align: 'center',
-                    width: 60,
+                    width: 0,
                     render: (color: string, record, index) => (
                         <RuleColorPicker
                             color={color}
