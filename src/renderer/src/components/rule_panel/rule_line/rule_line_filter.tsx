@@ -1,7 +1,7 @@
 import React from 'react'
 import { RuleContext, SettingContext } from '@renderer/context'
 import { RuleTable } from '../rule_table'
-import { FilterRegInput } from './rule_line_filter_reg'
+import { RegExInput } from './regex_input'
 
 export const FilterRulePanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
@@ -29,11 +29,15 @@ export const FilterRulePanel: React.FC = function () {
                 {
                     key: 'reg',
                     title: '匹配串',
-                    render: (text: string, _, index) => (
-                        <FilterRegInput
+                    render: (text: string, rule, index) => (
+                        <RegExInput
                             value={text}
-                            index={index}
+                            regexEnable={rule.regexEnable}
+                            style={{ color: rule.color, backgroundColor: rule.background }}
                             title="根据输入的正则表达式匹配日志条目"
+                            onChange={(reg) =>
+                                ruleContext?.setFilter(ruleSetKey, index, { ...rule, reg })
+                            }
                         />
                     )
                 },

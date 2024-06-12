@@ -6,7 +6,6 @@ import {
     Space,
     Button,
     Table,
-    Input,
     Checkbox,
     RowProps,
     Popconfirm,
@@ -34,6 +33,7 @@ import { ColumnsType } from 'antd/es/table'
 import { TableRowSelection } from 'antd/es/table/interface'
 import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import { RuleColorPicker } from './rule_line/color_picker'
+import { RuleTextInput } from './rule_line/text_input'
 
 const RowContext = React.createContext<{
     setActivatorNodeRef?: (element: HTMLElement | null) => void
@@ -52,7 +52,7 @@ const DragHandle: React.FC = () => {
     )
 }
 
-const Row: React.FC<RowProps> = (props) => {
+const RuleTableRow: React.FC<RowProps> = (props) => {
     const {
         attributes,
         listeners,
@@ -62,7 +62,6 @@ const Row: React.FC<RowProps> = (props) => {
         transition,
         isDragging
     } = useSortable({ transition: null, id: props['data-row-key'] })
-
     const style: React.CSSProperties = {
         ...props.style,
         transform: CSS.Translate.toString(transform),
@@ -122,16 +121,13 @@ export const RuleTable = function <TDataType extends object>(props: {
                     dataIndex: desc.key as string,
                     key: desc.key as string,
                     render: (text, record, index): React.ReactNode => (
-                        <Input
+                        <RuleTextInput
                             title={desc.desc ?? desc.title}
                             value={text}
                             disabled={desc.disabled?.(record)}
-                            onChange={(value) =>
-                                props.onChangeRule(index, {
-                                    ...record,
-                                    [desc.key]: value.target.value
-                                })
-                            }
+                            onConfirm={(value) => {
+                                props.onChangeRule(index, { ...record, [desc.key]: value })
+                            }}
                         />
                     )
                 }
@@ -224,7 +220,7 @@ export const RuleTable = function <TDataType extends object>(props: {
                             title={(): React.ReactNode => (
                                 <Typography>{props.tableName ?? ''}</Typography>
                             )}
-                            components={{ body: { row: Row } }}
+                            components={{ body: { row: RuleTableRow } }}
                             dataSource={datas}
                             columns={colmuns}
                             rowSelection={rowSelection}
