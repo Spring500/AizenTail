@@ -101,6 +101,21 @@ body,
     100% {  }
 }
 
+.logDeleted{
+    border-radius: var(--theme-border-radius);
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.logAdded{
+    /* background: var(--theme-color-log-search-hit-background);
+    color: var(--theme-color-log-search-hit-text); */
+    border-radius: var(--theme-border-radius);
+    font-style: italic;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
 .logSearchHit{
     background: var(--theme-color-log-search-hit-background);
     color: var(--theme-color-log-search-hit-text);

@@ -39,6 +39,12 @@ const RowContext = React.createContext<{
     setActivatorNodeRef?: (element: HTMLElement | null) => void
     listeners?: SyntheticListenerMap
 }>({})
+
+const TableContext = React.createContext<{
+    onEnterRow?: (index: number) => void
+    onLeaveRow?: (index: number) => void
+}>({})
+
 const DragHandle: React.FC = () => {
     const { setActivatorNodeRef, listeners } = React.useContext(RowContext)
     return (
@@ -62,6 +68,7 @@ const RuleTableRow: React.FC<RowProps> = (props) => {
         transition,
         isDragging
     } = useSortable({ transition: null, id: props['data-row-key'] })
+    const { onEnterRow, onLeaveRow } = React.useContext(TableContext)
     const style: React.CSSProperties = {
         ...props.style,
         transform: CSS.Translate.toString(transform),
@@ -72,7 +79,14 @@ const RuleTableRow: React.FC<RowProps> = (props) => {
     const contextValue = { setActivatorNodeRef, listeners }
     return (
         <RowContext.Provider value={contextValue}>
-            <tr {...props} ref={setNodeRef} style={style} {...attributes} />
+            <tr
+                {...props}
+                ref={setNodeRef}
+                style={style}
+                {...attributes}
+                onMouseEnter={() => onEnterRow?.(parseInt(props['data-row-key']))}
+                onMouseLeave={() => onLeaveRow?.(parseInt(props['data-row-key']))}
+            />
         </RowContext.Provider>
     )
 }
@@ -99,6 +113,7 @@ export const RuleTable = function <TDataType extends object>(props: {
     onChangeRule: (index: number, rule: TDataType) => void
     onDeleteRule: (index: number) => void
     onInsertRule: (oldIndex: number, newIndex: number) => void
+    onHoverRow?: (index: number | undefined) => void
 }): React.ReactNode {
     const datas =
         props.datas?.map((rule, index) => {
@@ -216,21 +231,28 @@ export const RuleTable = function <TDataType extends object>(props: {
                     strategy={verticalListSortingStrategy}
                 >
                     <ConfigProvider renderEmpty={renderEmptyTable}>
-                        <Table
-                            title={(): React.ReactNode => (
-                                <Typography>{props.tableName ?? ''}</Typography>
-                            )}
-                            components={{ body: { row: RuleTableRow } }}
-                            dataSource={datas}
-                            columns={colmuns}
-                            rowSelection={rowSelection}
-                            pagination={false}
-                            footer={() => (
-                                <Button onClick={() => props.onAddRule({} as TDataType)}>
-                                    <PlusCircleFilled /> 添加规则
-                                </Button>
-                            )}
-                        />
+                        <TableContext.Provider
+                            value={{
+                                onEnterRow: (index) => props.onHoverRow?.(index),
+                                onLeaveRow: () => props.onHoverRow?.(undefined)
+                            }}
+                        >
+                            <Table
+                                title={(): React.ReactNode => (
+                                    <Typography>{props.tableName ?? ''}</Typography>
+                                )}
+                                components={{ body: { row: RuleTableRow } }}
+                                dataSource={datas}
+                                columns={colmuns}
+                                rowSelection={rowSelection}
+                                pagination={false}
+                                footer={() => (
+                                    <Button onClick={() => props.onAddRule({} as TDataType)}>
+                                        <PlusCircleFilled /> 添加规则
+                                    </Button>
+                                )}
+                            />
+                        </TableContext.Provider>
                     </ConfigProvider>
                 </SortableContext>
             </DndContext>

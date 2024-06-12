@@ -158,6 +158,10 @@ export const AppMain: React.FC<{
         logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
         setCurrentRuleSetInternal(ruleSet)
     }
+
+    const [currentHoverFilter, setCurrentHoverFilter] = React.useState<number | undefined>(
+        undefined
+    )
     const settingContextValue: React.ContextType<typeof SettingContext> = {
         isAlwaysOnTop,
         setIsAlwaysOnTop,
@@ -172,7 +176,9 @@ export const AppMain: React.FC<{
         colorTheme,
         setColorTheme,
         isCompactMode,
-        setIsCompactMode
+        setIsCompactMode,
+        currentHoverFilter,
+        setCurrentHoverFilter
     }
 
     const ruleContext: React.ContextType<typeof RuleContext> = {

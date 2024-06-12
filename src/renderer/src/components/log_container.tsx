@@ -8,20 +8,140 @@ import { CaretRightOutlined } from '@ant-design/icons'
 
 const EXCLUDED_OPACITY = 0.3
 
+const rexCache = new Map<string, RegExp | undefined>()
+const getRegExp = function (matchText: string): RegExp | undefined {
+    // 如果正则表达式缓存过大则清理
+    if (rexCache.size > 100) rexCache.clear()
+
+    let res = rexCache.get(matchText)
+    if (!res) {
+        try {
+            res = new RegExp(matchText, 'gi')
+        } catch {
+            /* empty */
+        } finally {
+            rexCache.set(matchText, res)
+        }
+    } else res.lastIndex = 0
+    return res
+}
+
+const replaceLog = function (
+    rawText: string,
+    replaceRules: ReplaceConfig[] | undefined,
+    ignoreRule: number
+): string {
+    let text = rawText ?? ''
+    if (!replaceRules) return text
+    for (let i = 0; i < replaceRules.length; i++) {
+        const { reg: regText, enable, regexEnable, replace } = replaceRules[i]
+        if (!enable) continue
+        if (!regText || regText === '') continue
+        if (i === ignoreRule) {
+            if (regexEnable) {
+                const regExp = getRegExp(regText)
+                if (!regExp) continue
+                let newText = '',
+                    leftText = text
+                while (leftText.length > 0) {
+                    const match = regExp.exec(leftText)
+                    if (!match) {
+                        newText += leftText
+                        break
+                    }
+                    const matchedText = match[0]
+                    regExp.lastIndex = 0
+                    const replaceText = matchedText.replace(
+                        regExp,
+                        `\x01\x02D${matchedText}\x01\x02N${replace ?? ''}\x01`
+                    )
+                    newText = newText + leftText.substring(0, match.index) + replaceText
+                    leftText = leftText.substring(match.index + matchedText.length)
+                    regExp.lastIndex = 0
+                }
+                text = newText
+            } else {
+                text = text.replaceAll(regText, `\x01\x02D${regText}\x01\x02N${replace ?? ''}\x01`)
+            }
+        } else {
+            if (regexEnable) {
+                const regExp = getRegExp(regText)
+                if (!regExp) continue
+                text = text.replaceAll(regExp, replace ?? '')
+            } else {
+                text = text.replaceAll(regText, replace ?? '')
+            }
+        }
+    }
+    return text
+}
+
 const splitLog = function (text: string, keywords: string[]): React.ReactNode {
     let splitedText = text
     for (const keyword of keywords) {
         const plainedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        splitedText = splitedText.replace(new RegExp(`(${plainedKeyword})`, 'gi'), '\x01\x02$1\x01')
+        splitedText = splitedText.replace(
+            new RegExp(`(${plainedKeyword})`, 'gi'),
+            '\x01\x02L$1\x01'
+        )
     }
     return splitedText.split('\x01').map((text, index) => {
-        if (text[0] !== '\x02') return <span key={index}>{text}</span>
-        return (
-            <span className="logSearchHit" key={index}>
-                {text.substring(1)}
-            </span>
-        )
+        if (text[0] !== '\x02') {
+            if (text === '') return null
+            return <span key={index}>{text}</span>
+        }
+        if (text.length < 2) return null
+        switch (text[1]) {
+            case 'D':
+                return (
+                    <span className="logDeleted" key={index}>
+                        {text.substring(2)}
+                    </span>
+                )
+            case 'N':
+                return (
+                    <span className="logAdded" key={index}>
+                        {text.substring(2)}
+                    </span>
+                )
+            case 'L':
+            default:
+                return (
+                    <span className="logSearchHit" key={index}>
+                        {text.substring(2)}
+                    </span>
+                )
+        }
     })
+}
+
+const LogLine: React.FC<{
+    rawLogText: string
+    logIndex: number
+    logLine: number
+    isHighlight: boolean
+    isExculed: boolean
+    manager: ILogManager
+    getLogColor: (log: string) => React.CSSProperties
+    setHighlightLine: (line: number) => void
+    onClick: () => void
+}> = function (props) {
+    const settingContext = React.useContext(SettingContext)
+    const currentHoverFilter = settingContext?.currentHoverFilter ?? -1
+    const ruleContext = React.useContext(RuleContext)
+    const replaceRules = ruleContext?.rules?.[settingContext?.currentRuleSet ?? '']?.replaceRules
+    const logText = replaceLog(props.rawLogText ?? '', replaceRules, currentHoverFilter)
+
+    return (
+        <Typography.Text
+            className={`logText${props.isHighlight ? ' highlightLogText' : ''}`}
+            title={settingContext?.isShowHoverText ? logText : undefined}
+            style={{ ...props.getLogColor(props.rawLogText), whiteSpace: 'pre' }}
+        >
+            {splitLog(logText, props.manager.inputFilters)}
+            <br />
+        </Typography.Text>
+    )
 }
 
 export const LogContainer: React.FC<{
@@ -196,20 +316,21 @@ export const LogContainer: React.FC<{
     }
     const hasFilter = filterRules.length > 0 && filterRules.some((rule) => rule.enable)
 
-    const LogRowRenderer = function (index: number): React.ReactNode {
+    const LogRowRenderer = function (logIndex: number): React.ReactNode {
         const manager = props.manager
-        const logText = replaceLog(manager.logs[indexToLine(index)]?.text ?? '')
-        const line = indexToLine(index)
-        const isExculed = !settingContext?.isFiltering && hasFilter && !lineToIndexMap.has(index)
-        const isHighlight = line >= 0 && line === highlightLine
-        const onClick = (): void => setHighlightLine(line !== highlightLine ? line : -1)
+        const rawLogText = manager.logs[indexToLine(logIndex)]?.text ?? ''
+        const logText = replaceLog(rawLogText)
+        const logLine = indexToLine(logIndex)
+        const isExculed = !settingContext?.isFiltering && hasFilter && !lineToIndexMap.has(logIndex)
+        const isHighlight = logLine >= 0 && logLine === highlightLine
+        const onClick = (): void => setHighlightLine(logLine !== highlightLine ? logLine : -1)
         const opacity = isExculed ? EXCLUDED_OPACITY : undefined
         return (
             <Dropdown
                 trigger={['contextMenu']}
                 menu={{
                     items: [
-                        { key: 'choose', label: '选择', onClick: () => setHighlightLine(line) },
+                        { key: 'choose', label: '选择', onClick: () => setHighlightLine(logLine) },
                         {
                             key: 'copy',
                             label: '复制',
@@ -221,16 +342,19 @@ export const LogContainer: React.FC<{
                 <div className="log" style={{ opacity }} onClick={onClick}>
                     <Typography.Text className="logIndex" italic type="secondary">
                         {isHighlight ? <CaretRightOutlined /> : undefined}
-                        {line >= 0 ? line : ''}
+                        {logLine >= 0 ? logLine : ''}
                     </Typography.Text>
-                    <Typography.Text
-                        className={`logText${isHighlight ? ' highlightLogText' : ''}`}
-                        title={settingContext?.isShowHoverText ? logText : undefined}
-                        style={{ ...getLogColor(logText), whiteSpace: 'pre' }}
-                    >
-                        {splitLog(logText, manager.inputFilters)}
-                        <br />
-                    </Typography.Text>
+                    <LogLine
+                        rawLogText={rawLogText}
+                        logIndex={indexToLine(logIndex)}
+                        logLine={logLine}
+                        isHighlight={isHighlight}
+                        isExculed={isExculed}
+                        manager={manager}
+                        getLogColor={getLogColor}
+                        setHighlightLine={setHighlightLine}
+                        onClick={onClick}
+                    />
                 </div>
             </Dropdown>
         )

@@ -18,7 +18,7 @@ type TRuleContext = {
     deleteRuleSet(ruleSetName: string | undefined): void
     renameRuleSet(oldName: string | undefined, newName: string | undefined): void
 }
-type TSettings = {
+type TSettingContext = {
     isAlwaysOnTop: boolean
     setIsAlwaysOnTop: (value: boolean) => void
     isShowHoverText: boolean
@@ -33,10 +33,12 @@ type TSettings = {
     setColorTheme: (v: 'light' | 'dark') => void
     isCompactMode: boolean
     setIsCompactMode: (v: boolean) => void
+    currentHoverFilter?: number
+    setCurrentHoverFilter?: (v: number | undefined) => void
 }
 
 export const RuleContext = React.createContext<TRuleContext | null>(null)
-export const SettingContext = React.createContext<TSettings | null>(null)
+export const SettingContext = React.createContext<TSettingContext | null>(null)
 export const MessageContext = React.createContext<{
     messageApi: MessageInstance
     contextHolder: React.ReactNode

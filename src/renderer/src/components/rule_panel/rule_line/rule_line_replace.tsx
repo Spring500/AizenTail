@@ -60,6 +60,7 @@ export const ReplaceRulePanel: React.FC = function () {
             onInsertRule={(oldIndex, newIndex) =>
                 ruleContext?.insertReplace(ruleSetKey, oldIndex, newIndex)
             }
+            onHoverRow={(index) => settingContext?.setCurrentHoverFilter?.(index)}
         />
     )
 }
