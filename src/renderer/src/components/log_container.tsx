@@ -128,8 +128,8 @@ const LogLine: React.FC<{
 }> = function (props) {
     const settingContext = React.useContext(SettingContext)
     const currentHoverFilter = settingContext?.currentHoverFilter ?? -1
-    const ruleContext = React.useContext(RuleContext)
-    const replaceRules = ruleContext?.ruleSets?.[settingContext?.currentRuleSet ?? '']?.replaceRules
+    const { ruleSets } = React.useContext(RuleContext)
+    const replaceRules = ruleSets?.[settingContext?.currentRuleSet ?? '']?.replaceRules
     const logText = replaceLog(props.rawLogText ?? '', replaceRules, currentHoverFilter)
 
     return (
@@ -150,8 +150,8 @@ export const LogContainer: React.FC<{
     onChangeFile: (file: File | null) => void
 }> = function (props) {
     const { token } = theme.useToken()
-    const settingContext = React.useContext(SettingContext)
-    const ruleContext = React.useContext(RuleContext)
+    const { currentRuleSet, isAutoScroll, isFiltering } = React.useContext(SettingContext)
+    const { ruleSets } = React.useContext(RuleContext)
     const mainRef = createRef<HTMLDivElement>()
     const listRef = createRef<IListView>()
     const [dragging, setDragging] = useState(false)
@@ -160,9 +160,9 @@ export const LogContainer: React.FC<{
     const [filtedLogIds, setFiltedLogIds] = useState<number[]>([])
     const [lineToIndexMap, setLineToIndexMap] = useState<Map<number, number>>(new Map())
 
-    const currentRuleSet = ruleContext?.ruleSets?.[settingContext?.currentRuleSet ?? '']
-    const replaceRules = currentRuleSet?.replaceRules ?? []
-    const filterRules = currentRuleSet?.filterRules ?? []
+    const ruleSet = ruleSets?.[currentRuleSet ?? '']
+    const replaceRules = ruleSet?.replaceRules ?? []
+    const filterRules = ruleSet?.filterRules ?? []
 
     const onDrop = (event: DragEvent): void => {
         event.preventDefault()
@@ -240,18 +240,14 @@ export const LogContainer: React.FC<{
     }, [mainRef])
 
     useEffect(() => {
-        if (!settingContext?.isAutoScroll) return
+        if (!isAutoScroll) return
         if (highlightLine !== -1) {
             const index = lineToIndex(highlightLine)
             if (index !== -1) scrollToItem(index)
         } else {
-            scrollToItem(
-                settingContext?.isFiltering
-                    ? filtedLogIds.length - 1
-                    : props.manager.logs.length - 1
-            )
+            scrollToItem(isFiltering ? filtedLogIds.length - 1 : props.manager.logs.length - 1)
         }
-    }, [logCount, settingContext?.isFiltering])
+    }, [logCount, isFiltering])
 
     const rexCache = new Map<string, RegExp | undefined>()
     const getRegExp = function (matchText: string): RegExp | undefined {
@@ -305,14 +301,14 @@ export const LogContainer: React.FC<{
         return {}
     }
 
-    const isFiltering = (): boolean => {
-        return filtedLogIds?.length > 0 && !!settingContext?.isFiltering
+    const hasFilterResult = (): boolean => {
+        return filtedLogIds?.length > 0 && !!isFiltering
     }
     const indexToLine = (index: number): number => {
-        return isFiltering() ? filtedLogIds[index] ?? -1 : index <= logCount - 1 ? index : -1
+        return hasFilterResult() ? filtedLogIds[index] ?? -1 : index <= logCount - 1 ? index : -1
     }
     const lineToIndex = (line: number): number => {
-        return isFiltering() ? lineToIndexMap.get(line) ?? -1 : line
+        return hasFilterResult() ? lineToIndexMap.get(line) ?? -1 : line
     }
     const hasFilter = filterRules.length > 0 && filterRules.some((rule) => rule.enable)
 
@@ -321,7 +317,7 @@ export const LogContainer: React.FC<{
         const rawLogText = manager.logs[indexToLine(logIndex)]?.text ?? ''
         const logText = replaceLog(rawLogText)
         const logLine = indexToLine(logIndex)
-        const isExculed = !settingContext?.isFiltering && hasFilter && !lineToIndexMap.has(logIndex)
+        const isExculed = !isFiltering && hasFilter && !lineToIndexMap.has(logIndex)
         const isHighlight = logLine >= 0 && logLine === highlightLine
         const onClick = (): void => setHighlightLine(logLine !== highlightLine ? logLine : -1)
         const opacity = isExculed ? EXCLUDED_OPACITY : undefined

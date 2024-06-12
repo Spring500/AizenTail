@@ -18,7 +18,16 @@ export const MenuBar: React.FC<{
     loadRule: (filepath: string) => void
     saveRule: (filepath: string) => void
 }> = function (props) {
-    const setting = React.useContext(SettingContext)
+    const {
+        isAutoScroll,
+        isAlwaysOnTop,
+        isShowHoverText,
+        isFiltering,
+        setIsAutoScroll,
+        setIsAlwaysOnTop,
+        setIsShowHoverText,
+        setIsFiltering
+    } = React.useContext(SettingContext)
 
     const fileMenuItems: MenuProps['items'] = [
         { key: 'file', label: '打开日志...', onClick: () => openLogFile() },
@@ -31,18 +40,18 @@ export const MenuBar: React.FC<{
     const viewMenuItems: MenuProps['items'] = [
         {
             key: 'autoScroll',
-            label: `自动滚动: ${setting?.isAutoScroll ? '开' : '关'}`,
-            onClick: () => setting?.setIsAutoScroll(!setting?.isAutoScroll)
+            label: `自动滚动: ${isAutoScroll ? '开' : '关'}`,
+            onClick: () => setIsAutoScroll(!isAutoScroll)
         },
         {
             key: 'alwaysOnTop',
-            label: `窗口置顶: ${setting?.isAlwaysOnTop ? '开' : '关'}`,
-            onClick: () => setting?.setIsAlwaysOnTop(!setting.isAlwaysOnTop)
+            label: `窗口置顶: ${isAlwaysOnTop ? '开' : '关'}`,
+            onClick: () => setIsAlwaysOnTop(!isAlwaysOnTop)
         },
         {
             key: 'showHoverText',
-            label: `悬浮提示: ${setting?.isShowHoverText ? '开' : '关'}`,
-            onClick: () => setting?.setIsShowHoverText(!setting.isShowHoverText)
+            label: `悬浮提示: ${isShowHoverText ? '开' : '关'}`,
+            onClick: () => setIsShowHoverText(!isShowHoverText)
         }
     ]
 
@@ -99,12 +108,12 @@ export const MenuBar: React.FC<{
                     规则面板
                 </Button>
                 <Button
-                    type={setting?.isFiltering ? 'primary' : 'text'}
-                    onClick={() => setting?.setIsFiltering(!setting?.isFiltering)}
+                    type={isFiltering ? 'primary' : 'text'}
+                    onClick={() => setIsFiltering(!isFiltering)}
                     title="暂时开关日志筛选功能 (ctrl+H)"
                     icon={<FilterFilled />}
                 >
-                    {setting?.isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
+                    {isFiltering ? '日志筛选: 开' : '日志筛选: 关'}
                 </Button>
                 <Input
                     type="text"

@@ -4,11 +4,11 @@ import { RuleTable } from '../rule_table'
 import { RegExInput } from './regex_input'
 
 export const ReplaceRulePanel: React.FC = function () {
-    const ruleContext = React.useContext(RuleContext)
-    const settingContext = React.useContext(SettingContext)
-    const ruleSetKey = settingContext?.currentRuleSet ?? ''
+    const { ruleSets, addReplace, setReplace, delReplace, insertReplace, resetRules } =
+        React.useContext(RuleContext)
+    const { currentRuleSet, setCurrentHoverFilter } = React.useContext(SettingContext)
     const datas =
-        ruleContext?.ruleSets?.[ruleSetKey]?.replaceRules?.map((rule, index) => {
+        ruleSets?.[currentRuleSet]?.replaceRules?.map((rule, index) => {
             return { ...rule, key: index + '' }
         }) ?? []
 
@@ -17,12 +17,12 @@ export const ReplaceRulePanel: React.FC = function () {
         if (datas[index].enable) enabledRules.push(index)
 
     const onEnabledChanged = (newEnabledRules: number[]): void => {
-        const newRules = { ...ruleContext?.ruleSets }
-        const ruleSet = newRules[ruleSetKey]
+        const newRules = { ...ruleSets }
+        const ruleSet = newRules[currentRuleSet]
         ruleSet.replaceRules = ruleSet.replaceRules?.map((rule, index) => {
             return { ...rule, enable: newEnabledRules.includes(index) }
         })
-        ruleContext?.resetRules(newRules)
+        resetRules(newRules)
     }
 
     return (
@@ -38,9 +38,7 @@ export const ReplaceRulePanel: React.FC = function () {
                             value={text}
                             regexEnable={rule.regexEnable}
                             title="根据输入的正则表达式匹配日志条目"
-                            onChange={(reg) =>
-                                ruleContext?.setReplace(ruleSetKey, index, { ...rule, reg })
-                            }
+                            onChange={(reg) => setReplace(currentRuleSet, index, { ...rule, reg })}
                         />
                     )
                 },
@@ -54,13 +52,11 @@ export const ReplaceRulePanel: React.FC = function () {
             ]}
             selectedRowKeys={enabledRules}
             onSelectionChanged={onEnabledChanged}
-            onAddRule={(rule) => ruleContext?.addReplace(ruleSetKey, rule)}
-            onChangeRule={(index, rule) => ruleContext?.setReplace(ruleSetKey, index, rule)}
-            onDeleteRule={(index) => ruleContext?.delReplace(ruleSetKey, index)}
-            onInsertRule={(oldIndex, newIndex) =>
-                ruleContext?.insertReplace(ruleSetKey, oldIndex, newIndex)
-            }
-            onHoverRow={(index) => settingContext?.setCurrentHoverFilter?.(index)}
+            onAddRule={(rule) => addReplace(currentRuleSet, rule)}
+            onChangeRule={(index, rule) => setReplace(currentRuleSet, index, rule)}
+            onDeleteRule={(index) => delReplace(currentRuleSet, index)}
+            onInsertRule={(oldIndex, newIndex) => insertReplace(currentRuleSet, oldIndex, newIndex)}
+            onHoverRow={(index) => setCurrentHoverFilter?.(index)}
         />
     )
 }

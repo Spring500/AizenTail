@@ -22,7 +22,7 @@ import { MessageContext, RuleContext, SettingContext } from './context'
 const AppMainComponent: React.FC = function () {
     const { messageApi } = React.useContext(MessageContext) ?? {}
     const { token } = theme.useToken()
-    const ruleContext = React.useContext(RuleContext)
+    const { ruleSets } = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
     const [hint, setHint] = React.useState('')
     const [fileUrl, setFileUrl] = React.useState('file directory')
@@ -94,7 +94,7 @@ const AppMainComponent: React.FC = function () {
                 switchRulePanelVisible={() => switchCurrentPanel('rule')}
                 rulePanelVisible={currentPanel === 'rule'}
                 loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-                saveRule={(filepath) => ruleManager.saveFile(filepath, ruleContext?.ruleSets)}
+                saveRule={(filepath) => ruleManager.saveFile(filepath, ruleSets)}
                 openLogFile={(filepath) => {
                     logManager.openFile(filepath)
                     setFileUrl(filepath)
@@ -137,7 +137,7 @@ export const AppMain: React.FC<{
     initSetting: TSettings
 }> = function ({ initSetting }) {
     const [messageApi, contextHolder] = message.useMessage()
-    const [rules, setRulesInternal] = React.useState(initSetting.rules ?? {})
+    const [ruleSets, setRuleSetsInternal] = React.useState(initSetting.rules ?? {})
     const [isFiltering, setIsFiltering] = React.useState(initSetting.isFiltering ?? true)
     const [isAutoScroll, setIsAutoScroll] = React.useState(initSetting.isAutoScroll ?? true)
     const [isAlwaysOnTop, setIsAlwaysOnTop] = React.useState(initSetting.isAlwaysOnTop ?? false)
@@ -152,10 +152,10 @@ export const AppMain: React.FC<{
     })
     const setRules = (newRules: TRules): void => {
         logManager.setFilterRules(newRules?.[currentRuleSet]?.filterRules)
-        setRulesInternal(newRules)
+        setRuleSetsInternal(newRules)
     }
     const setCurrentRuleSet = (ruleSet: string): void => {
-        logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
+        logManager.setFilterRules(ruleSets?.[currentRuleSet]?.filterRules)
         setCurrentRuleSetInternal(ruleSet)
     }
 
@@ -182,10 +182,10 @@ export const AppMain: React.FC<{
     }
 
     const ruleContext: React.ContextType<typeof RuleContext> = {
-        ruleSets: rules,
+        ruleSets,
         addFilter: (setKey, rule) => {
             if (!rule) return
-            const newRules: TRules = { ...rules }
+            const newRules: TRules = { ...ruleSets }
             const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             filters.push(rule)
@@ -193,7 +193,7 @@ export const AppMain: React.FC<{
         },
         setFilter: (setKey, index, rule) => {
             if (!rule) return
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
             if (index < 0 || index >= filters.length) return
@@ -201,7 +201,7 @@ export const AppMain: React.FC<{
             setRules(newRules)
         },
         delFilter: (setKey, index) => {
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey]
             if (!ruleSet) return
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
@@ -210,7 +210,7 @@ export const AppMain: React.FC<{
             setRules(newRules)
         },
         insertFilter: (setKey, index1, index2) => {
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey]
             if (!ruleSet) return
             const filters = ruleSet.filterRules ?? (ruleSet.filterRules = [])
@@ -222,7 +222,7 @@ export const AppMain: React.FC<{
         },
         addReplace: (setKey, rule) => {
             if (!rule) return
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
             const replaces = ruleSet.replaceRules ?? (ruleSet.replaceRules = [])
             replaces.push(rule)
@@ -230,7 +230,7 @@ export const AppMain: React.FC<{
         },
 
         delReplace: (setKey, index) => {
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey]
             if (!ruleSet) return
 
@@ -241,7 +241,7 @@ export const AppMain: React.FC<{
             setRules(newRules)
         },
         insertReplace: (setKey, index1, index2) => {
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey]
             if (!ruleSet) return
 
@@ -256,7 +256,7 @@ export const AppMain: React.FC<{
         },
         setReplace: (setKey, index, rule) => {
             if (!rule) return
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             const ruleSet = newRules[setKey] ?? (newRules[setKey] = {})
             const replaces = ruleSet.replaceRules ?? (ruleSet.replaceRules = [])
             if (index < 0 || index >= replaces.length) return
@@ -265,38 +265,40 @@ export const AppMain: React.FC<{
         },
         resetRules: setRules,
         newRuleSet: (ruleSetName) => {
-            if (rules[ruleSetName]) {
+            if (ruleSets[ruleSetName]) {
                 messageApi.error(`规则集 ${ruleSetName} 已存在`)
                 return
             }
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             newRules[ruleSetName] = { filterRules: [], replaceRules: [] }
             setRules(newRules)
         },
         copyRuleSet: (oldName, newName) => {
-            if (!oldName || !newName || !rules || !rules[oldName] || oldName === newName) return
-            if (rules[newName]) {
+            if (!oldName || !newName || !ruleSets || !ruleSets[oldName] || oldName === newName)
+                return
+            if (ruleSets[newName]) {
                 messageApi.error(`规则集 ${newName} 已存在`)
                 return
             }
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             newRules[newName] = JSON.parse(JSON.stringify(newRules[oldName]))
             setRules(newRules)
         },
         deleteRuleSet: (ruleSetName) => {
             if (!ruleSetName) return
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             delete newRules[ruleSetName]
             setRules(newRules)
             setCurrentRuleSet('default')
         },
         renameRuleSet: (oldName, newName) => {
-            if (!oldName || !newName || !rules || !rules[oldName] || oldName === newName) return
-            if (rules[newName]) {
+            if (!oldName || !newName || !ruleSets || !ruleSets[oldName] || oldName === newName)
+                return
+            if (ruleSets[newName]) {
                 messageApi.error(`规则集 ${newName} 已存在`)
                 return
             }
-            const newRules = { ...rules }
+            const newRules = { ...ruleSets }
             newRules[newName] = newRules[oldName]
             delete newRules[oldName]
             setRules(newRules)
@@ -304,11 +306,11 @@ export const AppMain: React.FC<{
         }
     }
     React.useEffect(() => {
-        logManager.setFilterRules(rules?.[currentRuleSet]?.filterRules)
-    }, [rules, currentRuleSet])
+        logManager.setFilterRules(ruleSets?.[currentRuleSet]?.filterRules)
+    }, [ruleSets, currentRuleSet])
     React.useEffect(() => {
         const newSetting = {
-            rules,
+            rules: ruleSets,
             isAlwaysOnTop,
             isShowHoverText,
             isFiltering,
@@ -320,7 +322,7 @@ export const AppMain: React.FC<{
         ruleManager.saveConfig(newSetting)
         console.log('save config', newSetting)
     }, [
-        rules,
+        ruleSets,
         isAlwaysOnTop,
         isShowHoverText,
         isFiltering,

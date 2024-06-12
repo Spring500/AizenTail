@@ -37,23 +37,42 @@ type TSettingContext = {
     setCurrentHoverFilter?: (v: number | undefined) => void
 }
 
+const noImpl = (): void => {
+    console.error('No implementation')
+}
+
 export const RuleContext = React.createContext<TRuleContext>({
     ruleSets: {},
-    addFilter: () => {},
-    setFilter: () => {},
-    delFilter: () => {},
-    insertFilter: () => {},
-    addReplace: () => {},
-    setReplace: () => {},
-    delReplace: () => {},
-    insertReplace: () => {},
-    resetRules: () => {},
-    newRuleSet: () => {},
-    copyRuleSet: () => {},
-    deleteRuleSet: () => {},
-    renameRuleSet: () => {}
+    addFilter: noImpl,
+    setFilter: noImpl,
+    delFilter: noImpl,
+    insertFilter: noImpl,
+    addReplace: noImpl,
+    setReplace: noImpl,
+    delReplace: noImpl,
+    insertReplace: noImpl,
+    resetRules: noImpl,
+    newRuleSet: noImpl,
+    copyRuleSet: noImpl,
+    deleteRuleSet: noImpl,
+    renameRuleSet: noImpl
 })
-export const SettingContext = React.createContext<TSettingContext | null>(null)
+export const SettingContext = React.createContext<TSettingContext>({
+    isAlwaysOnTop: false,
+    setIsAlwaysOnTop: noImpl,
+    isShowHoverText: true,
+    setIsShowHoverText: noImpl,
+    isFiltering: true,
+    setIsFiltering: noImpl,
+    isAutoScroll: true,
+    setIsAutoScroll: noImpl,
+    currentRuleSet: 'default',
+    setCurrentRuleSet: noImpl,
+    colorTheme: 'light',
+    setColorTheme: noImpl,
+    isCompactMode: false,
+    setIsCompactMode: noImpl
+})
 export const MessageContext = React.createContext<{
     messageApi: MessageInstance
     contextHolder: React.ReactNode

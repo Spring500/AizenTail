@@ -37,12 +37,12 @@ const RenameButton: React.FC<{
 }
 
 export const RulePanel: React.FC = function () {
-    const ruleContext = React.useContext(RuleContext)
-    const settingContext = React.useContext(SettingContext)
-    const selectedRule = settingContext?.currentRuleSet
+    const { ruleSets, newRuleSet, copyRuleSet, deleteRuleSet, renameRuleSet } =
+        React.useContext(RuleContext)
+    const { currentRuleSet, setCurrentRuleSet } = React.useContext(SettingContext)
 
     let options: string[] = []
-    for (const ruleName in ruleContext?.ruleSets ?? {}) {
+    for (const ruleName in ruleSets ?? {}) {
         if (!options.includes(ruleName) && ruleName !== 'default') options.push(ruleName)
     }
     options = ['default', ...options.sort()]
@@ -67,8 +67,8 @@ export const RulePanel: React.FC = function () {
                 <Space>
                     <Typography.Text>规则集</Typography.Text>
                     <Radio.Group
-                        value={selectedRule}
-                        onChange={(e) => settingContext?.setCurrentRuleSet(e.target.value)}
+                        value={currentRuleSet}
+                        onChange={(e) => setCurrentRuleSet(e.target.value)}
                         optionType="button"
                         buttonStyle="solid"
                         options={options}
@@ -76,24 +76,19 @@ export const RulePanel: React.FC = function () {
                 </Space>
                 <Space wrap>
                     <Typography.Text>规则集操作</Typography.Text>
-                    <Button
-                        icon={<FileAddFilled />}
-                        onClick={() => ruleContext?.newRuleSet(genNewSetName())}
-                    >
+                    <Button icon={<FileAddFilled />} onClick={() => newRuleSet(genNewSetName())}>
                         新建
                     </Button>
                     <Button
                         icon={<CopyFilled />}
-                        onClick={() =>
-                            ruleContext?.copyRuleSet(selectedRule, genCopySetName(selectedRule))
-                        }
+                        onClick={() => copyRuleSet(currentRuleSet, genCopySetName(currentRuleSet))}
                     >
                         复制
                     </Button>
                     <RenameButton
-                        value={selectedRule}
-                        disabled={selectedRule === 'default'}
-                        onChange={(newName) => ruleContext?.renameRuleSet(selectedRule, newName)}
+                        value={currentRuleSet}
+                        disabled={currentRuleSet === 'default'}
+                        onChange={(newName) => renameRuleSet(currentRuleSet, newName)}
                     />
                     {/* <Button icon={<UploadOutlined />} disabled>
                         读取规则
@@ -103,11 +98,11 @@ export const RulePanel: React.FC = function () {
                     </Button> */}
 
                     <Popconfirm
-                        title={`确定删除规则集${selectedRule}？`}
-                        onConfirm={() => ruleContext?.deleteRuleSet(selectedRule)}
+                        title={`确定删除规则集${currentRuleSet}？`}
+                        onConfirm={() => deleteRuleSet(currentRuleSet)}
                     >
                         <Button
-                            disabled={selectedRule === 'default'}
+                            disabled={currentRuleSet === 'default'}
                             icon={<DeleteFilled />}
                             danger
                         >

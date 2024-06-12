@@ -4,21 +4,22 @@ import { RuleTable } from '../rule_table'
 import { RegExInput } from './regex_input'
 
 export const FilterRulePanel: React.FC = function () {
-    const ruleContext = React.useContext(RuleContext)
-    const settingContext = React.useContext(SettingContext)
-    const ruleSetKey = settingContext?.currentRuleSet ?? ''
-    const datas = ruleContext?.ruleSets?.[ruleSetKey]?.filterRules ?? []
+    const { ruleSets, addFilter, setFilter, delFilter, insertFilter, resetRules } =
+        React.useContext(RuleContext)
+    const { currentRuleSet } = React.useContext(SettingContext)
+    const ruleSetKey = currentRuleSet ?? ''
+    const datas = ruleSets?.[ruleSetKey]?.filterRules ?? []
     const enabledRules: number[] = []
     for (let index = 0; index < datas.length; index++)
         if (datas[index].enable) enabledRules.push(index)
 
     const onEnabledChanged = (newEnabledRules: number[]): void => {
-        const newRules = { ...ruleContext?.ruleSets }
+        const newRules = { ...ruleSets }
         const ruleSet = newRules[ruleSetKey]
         ruleSet.filterRules = ruleSet.filterRules?.map((rule, index) => {
             return { ...rule, enable: newEnabledRules.includes(index) }
         })
-        ruleContext?.resetRules(newRules)
+        resetRules(newRules)
     }
 
     return (
@@ -35,9 +36,7 @@ export const FilterRulePanel: React.FC = function () {
                             regexEnable={rule.regexEnable}
                             style={{ color: rule.color, backgroundColor: rule.background }}
                             title="根据输入的正则表达式匹配日志条目"
-                            onChange={(reg) =>
-                                ruleContext?.setFilter(ruleSetKey, index, { ...rule, reg })
-                            }
+                            onChange={(reg) => setFilter(ruleSetKey, index, { ...rule, reg })}
                         />
                     )
                 },
@@ -65,12 +64,10 @@ export const FilterRulePanel: React.FC = function () {
             ]}
             selectedRowKeys={enabledRules}
             onSelectionChanged={onEnabledChanged}
-            onAddRule={(rule) => ruleContext?.addFilter(ruleSetKey, rule)}
-            onChangeRule={(index, rule) => ruleContext?.setFilter(ruleSetKey, index, rule)}
-            onDeleteRule={(index) => ruleContext?.delFilter(ruleSetKey, index)}
-            onInsertRule={(oldIndex, newIndex) =>
-                ruleContext?.insertFilter(ruleSetKey, oldIndex, newIndex)
-            }
+            onAddRule={(rule) => addFilter(ruleSetKey, rule)}
+            onChangeRule={(index, rule) => setFilter(ruleSetKey, index, rule)}
+            onDeleteRule={(index) => delFilter(ruleSetKey, index)}
+            onInsertRule={(oldIndex, newIndex) => insertFilter(ruleSetKey, oldIndex, newIndex)}
         />
     )
 }
