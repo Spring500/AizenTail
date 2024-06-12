@@ -42,7 +42,7 @@ export const RulePanel: React.FC = function () {
     const selectedRule = settingContext?.currentRuleSet
 
     let options: string[] = []
-    for (const ruleName in ruleContext?.rules ?? {}) {
+    for (const ruleName in ruleContext?.ruleSets ?? {}) {
         if (!options.includes(ruleName) && ruleName !== 'default') options.push(ruleName)
     }
     options = ['default', ...options.sort()]

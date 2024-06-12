@@ -94,7 +94,7 @@ const AppMainComponent: React.FC = function () {
                 switchRulePanelVisible={() => switchCurrentPanel('rule')}
                 rulePanelVisible={currentPanel === 'rule'}
                 loadRule={(filepath) => ruleManager.reloadConfig(filepath)}
-                saveRule={(filepath) => ruleManager.saveFile(filepath, ruleContext?.rules)}
+                saveRule={(filepath) => ruleManager.saveFile(filepath, ruleContext?.ruleSets)}
                 openLogFile={(filepath) => {
                     logManager.openFile(filepath)
                     setFileUrl(filepath)
@@ -182,7 +182,7 @@ export const AppMain: React.FC<{
     }
 
     const ruleContext: React.ContextType<typeof RuleContext> = {
-        rules,
+        ruleSets: rules,
         addFilter: (setKey, rule) => {
             if (!rule) return
             const newRules: TRules = { ...rules }

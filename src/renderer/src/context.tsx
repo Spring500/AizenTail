@@ -1,9 +1,9 @@
 import React from 'react'
-import { TRules } from './managers/rule_manager'
+import { TRules as TRuleSets } from './managers/rule_manager'
 import { MessageInstance } from 'antd/es/message/interface'
 
 type TRuleContext = {
-    rules: TRules | undefined
+    ruleSets: TRuleSets | undefined
     addFilter(ruleSetName: string, rule: FilterConfig): void
     setFilter(ruleSetName: string, index: number, rule: FilterConfig): void
     delFilter(ruleSetName: string, index: number): void
@@ -12,7 +12,7 @@ type TRuleContext = {
     setReplace(ruleSetName: string, index: number, rule: ReplaceConfig): void
     delReplace(ruleSetName: string, index: number): void
     insertReplace(ruleSetName: string, index1: number, index2: number): void
-    resetRules(rules: TRules): void
+    resetRules(rules: TRuleSets): void
     newRuleSet(ruleSetName: string): void
     copyRuleSet(oldName: string | undefined, newName: string | undefined): void
     deleteRuleSet(ruleSetName: string | undefined): void
@@ -37,7 +37,22 @@ type TSettingContext = {
     setCurrentHoverFilter?: (v: number | undefined) => void
 }
 
-export const RuleContext = React.createContext<TRuleContext | null>(null)
+export const RuleContext = React.createContext<TRuleContext>({
+    ruleSets: {},
+    addFilter: () => {},
+    setFilter: () => {},
+    delFilter: () => {},
+    insertFilter: () => {},
+    addReplace: () => {},
+    setReplace: () => {},
+    delReplace: () => {},
+    insertReplace: () => {},
+    resetRules: () => {},
+    newRuleSet: () => {},
+    copyRuleSet: () => {},
+    deleteRuleSet: () => {},
+    renameRuleSet: () => {}
+})
 export const SettingContext = React.createContext<TSettingContext | null>(null)
 export const MessageContext = React.createContext<{
     messageApi: MessageInstance

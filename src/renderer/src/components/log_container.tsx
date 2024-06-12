@@ -129,7 +129,7 @@ const LogLine: React.FC<{
     const settingContext = React.useContext(SettingContext)
     const currentHoverFilter = settingContext?.currentHoverFilter ?? -1
     const ruleContext = React.useContext(RuleContext)
-    const replaceRules = ruleContext?.rules?.[settingContext?.currentRuleSet ?? '']?.replaceRules
+    const replaceRules = ruleContext?.ruleSets?.[settingContext?.currentRuleSet ?? '']?.replaceRules
     const logText = replaceLog(props.rawLogText ?? '', replaceRules, currentHoverFilter)
 
     return (
@@ -160,7 +160,7 @@ export const LogContainer: React.FC<{
     const [filtedLogIds, setFiltedLogIds] = useState<number[]>([])
     const [lineToIndexMap, setLineToIndexMap] = useState<Map<number, number>>(new Map())
 
-    const currentRuleSet = ruleContext?.rules?.[settingContext?.currentRuleSet ?? '']
+    const currentRuleSet = ruleContext?.ruleSets?.[settingContext?.currentRuleSet ?? '']
     const replaceRules = currentRuleSet?.replaceRules ?? []
     const filterRules = currentRuleSet?.filterRules ?? []
 

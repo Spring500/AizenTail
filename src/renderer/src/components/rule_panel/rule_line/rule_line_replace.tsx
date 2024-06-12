@@ -8,7 +8,7 @@ export const ReplaceRulePanel: React.FC = function () {
     const settingContext = React.useContext(SettingContext)
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
     const datas =
-        ruleContext?.rules?.[ruleSetKey]?.replaceRules?.map((rule, index) => {
+        ruleContext?.ruleSets?.[ruleSetKey]?.replaceRules?.map((rule, index) => {
             return { ...rule, key: index + '' }
         }) ?? []
 
@@ -17,7 +17,7 @@ export const ReplaceRulePanel: React.FC = function () {
         if (datas[index].enable) enabledRules.push(index)
 
     const onEnabledChanged = (newEnabledRules: number[]): void => {
-        const newRules = { ...ruleContext?.rules }
+        const newRules = { ...ruleContext?.ruleSets }
         const ruleSet = newRules[ruleSetKey]
         ruleSet.replaceRules = ruleSet.replaceRules?.map((rule, index) => {
             return { ...rule, enable: newEnabledRules.includes(index) }

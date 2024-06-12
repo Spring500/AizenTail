@@ -7,13 +7,13 @@ export const FilterRulePanel: React.FC = function () {
     const ruleContext = React.useContext(RuleContext)
     const settingContext = React.useContext(SettingContext)
     const ruleSetKey = settingContext?.currentRuleSet ?? ''
-    const datas = ruleContext?.rules?.[ruleSetKey]?.filterRules ?? []
+    const datas = ruleContext?.ruleSets?.[ruleSetKey]?.filterRules ?? []
     const enabledRules: number[] = []
     for (let index = 0; index < datas.length; index++)
         if (datas[index].enable) enabledRules.push(index)
 
     const onEnabledChanged = (newEnabledRules: number[]): void => {
-        const newRules = { ...ruleContext?.rules }
+        const newRules = { ...ruleContext?.ruleSets }
         const ruleSet = newRules[ruleSetKey]
         ruleSet.filterRules = ruleSet.filterRules?.map((rule, index) => {
             return { ...rule, enable: newEnabledRules.includes(index) }

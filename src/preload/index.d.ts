@@ -1,5 +1,7 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
 declare global {
-    interface Window {electron: CustomAPI}
+    interface Window {
+        electron: CustomAPI
+    }
 }
