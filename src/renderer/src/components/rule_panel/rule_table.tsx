@@ -93,11 +93,9 @@ const RuleTableRow: React.FC<RowProps> = (props) => {
 
 const renderEmptyTable = function (): React.ReactNode {
     return (
-        <Space direction="vertical" style={{ width: '100%' }}>
-            <Typography.Text disabled italic>
-                暂无数组
-            </Typography.Text>
-        </Space>
+        <Typography.Text disabled italic>
+            暂无数组
+        </Typography.Text>
     )
 }
 
