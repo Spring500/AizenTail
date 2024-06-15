@@ -22,7 +22,6 @@ export type TSettings = {
 
 class RuleManager {
     async saveFile(filepath: string = SETTING_PATH, setting: TSettings | undefined): Promise<void> {
-        console.log('保存文件', filepath)
         if (!filepath) return
         await window.electron.writeFile(filepath, JSON.stringify(setting ?? {}, undefined, 4))
     }
