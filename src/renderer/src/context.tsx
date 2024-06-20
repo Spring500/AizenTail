@@ -35,6 +35,8 @@ type TSettingContext = {
     setIsCompactMode: (v: boolean) => void
     currentHoverFilter?: number
     setCurrentHoverFilter?: (v: number | undefined) => void
+    /** 特殊处理，用于触发滚动到高亮日志 */
+    scrollToHighlightSignal: number
 }
 
 const noImpl = (): void => {
@@ -71,7 +73,8 @@ export const SettingContext = React.createContext<TSettingContext>({
     colorTheme: 'light',
     setColorTheme: noImpl,
     isCompactMode: false,
-    setIsCompactMode: noImpl
+    setIsCompactMode: noImpl,
+    scrollToHighlightSignal: 0
 })
 export const MessageContext = React.createContext<{
     messageApi: MessageInstance

@@ -150,7 +150,8 @@ export const LogContainer: React.FC<{
     onChangeFile: (file: File | null) => void
 }> = function (props) {
     const { token } = theme.useToken()
-    const { currentRuleSet, isAutoScroll, isFiltering } = React.useContext(SettingContext)
+    const { currentRuleSet, isAutoScroll, isFiltering, scrollToHighlightSignal } =
+        React.useContext(SettingContext)
     const { ruleSets } = React.useContext(RuleContext)
     const mainRef = createRef<HTMLDivElement>()
     const listRef = createRef<IListView>()
@@ -240,14 +241,17 @@ export const LogContainer: React.FC<{
     }, [mainRef])
 
     useEffect(() => {
-        if (!isAutoScroll) return
-        if (highlightLine !== -1) {
-            const index = lineToIndex(highlightLine)
-            if (index !== -1) scrollToItem(index)
-        } else {
-            scrollToItem(isFiltering ? filtedLogIds.length - 1 : props.manager.logs.length - 1)
-        }
+        // 如果当前没有高亮行、且开启了自动滚动，则滚动到底部
+        if (!isAutoScroll || highlightLine >= 0) return
+        scrollToItem(isFiltering ? filtedLogIds.length - 1 : props.manager.logs.length - 1)
     }, [logCount, isFiltering])
+
+    useEffect(() => {
+        // 如果有高亮行，则在收到信号时滚动到高亮行
+        if (highlightLine < 0) return
+        const targetIndex = lineToIndex(highlightLine)
+        if (targetIndex >= 0) scrollToItem(targetIndex)
+    }, [scrollToHighlightSignal])
 
     const rexCache = new Map<string, RegExp | undefined>()
     const getRegExp = function (matchText: string): RegExp | undefined {

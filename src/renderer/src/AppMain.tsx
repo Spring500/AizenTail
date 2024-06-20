@@ -150,9 +150,11 @@ export const AppMain: React.FC<{
         const ruleSet = initSetting.currentRuleSet
         return !ruleSet || !initSetting.rules?.[ruleSet] ? 'default' : ruleSet
     })
+    const [scrollToHighlightSignal, setScrollToHighlightSignal] = React.useState(0)
     const setRules = (newRules: TRules): void => {
         logManager.setFilterRules(newRules?.[currentRuleSet]?.filterRules)
         setRuleSetsInternal(newRules)
+        setScrollToHighlightSignal((v) => (v + 1) % 10)
     }
     const setCurrentRuleSet = (ruleSet: string): void => {
         logManager.setFilterRules(ruleSets?.[currentRuleSet]?.filterRules)
@@ -178,7 +180,8 @@ export const AppMain: React.FC<{
         isCompactMode,
         setIsCompactMode,
         currentHoverFilter,
-        setCurrentHoverFilter
+        setCurrentHoverFilter,
+        scrollToHighlightSignal
     }
 
     const ruleContext: React.ContextType<typeof RuleContext> = {
