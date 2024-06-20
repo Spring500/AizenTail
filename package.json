@@ -1,6 +1,6 @@
 {
     "name": "aizen-tail",
-    "version": "2.0.10",
+    "version": "2.0.11",
     "description": "实时日志查看工具",
     "main": "./out/main/index.js",
     "scripts": {
