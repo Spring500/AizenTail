@@ -3,7 +3,7 @@ import React from 'react'
 import { MinusOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons'
 import * as packageJson from '../../../../package.json'
 export const TitleBar: React.FC = function () {
-    const [version, setVersion] = React.useState(packageJson.version)
+    const [version] = React.useState(packageJson.version)
     return (
         <div className="titleBar">
             <Typography.Text className="titleBarText">
