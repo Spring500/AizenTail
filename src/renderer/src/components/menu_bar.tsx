@@ -26,7 +26,8 @@ export const MenuBar: React.FC<{
         setIsAutoScroll,
         setIsAlwaysOnTop,
         setIsShowHoverText,
-        setIsFiltering
+        setIsFiltering,
+        setInputFilter
     } = React.useContext(SettingContext)
 
     const fileMenuItems: MenuProps['items'] = [
@@ -119,7 +120,7 @@ export const MenuBar: React.FC<{
                     type="text"
                     placeholder="搜索日志"
                     spellCheck={false}
-                    onChange={(e) => logManager.setInputFilter(e.target.value)}
+                    onChange={(e) => setInputFilter(e.target.value)}
                     prefix={<SearchOutlined />}
                 ></Input>
             </div>

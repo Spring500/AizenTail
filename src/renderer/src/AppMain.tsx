@@ -160,7 +160,10 @@ export const AppMain: React.FC<{
         logManager.setFilterRules(ruleSets?.[currentRuleSet]?.filterRules)
         setCurrentRuleSetInternal(ruleSet)
     }
-
+    const setInputFilter = (v: string): void => {
+        logManager.setInputFilter(v)
+        setScrollToHighlightSignal((v) => (v + 1) % 10)
+    }
     const [currentHoverFilter, setCurrentHoverFilter] = React.useState<number | undefined>(
         undefined
     )
@@ -181,6 +184,7 @@ export const AppMain: React.FC<{
         setIsCompactMode,
         currentHoverFilter,
         setCurrentHoverFilter,
+        setInputFilter,
         scrollToHighlightSignal
     }
 

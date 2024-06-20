@@ -35,7 +35,8 @@ type TSettingContext = {
     setIsCompactMode: (v: boolean) => void
     currentHoverFilter?: number
     setCurrentHoverFilter?: (v: number | undefined) => void
-    /** 特殊处理，用于触发滚动到高亮日志 */
+    setInputFilter: (v: string) => void
+    /** 特殊处理，用于触发滚动到高亮日志。后续应该考虑改成在logManager抛事件的时候直接标明本次变化是新增日志还是改变规则 */
     scrollToHighlightSignal: number
 }
 
@@ -74,6 +75,7 @@ export const SettingContext = React.createContext<TSettingContext>({
     setColorTheme: noImpl,
     isCompactMode: false,
     setIsCompactMode: noImpl,
+    setInputFilter: noImpl,
     scrollToHighlightSignal: 0
 })
 export const MessageContext = React.createContext<{
