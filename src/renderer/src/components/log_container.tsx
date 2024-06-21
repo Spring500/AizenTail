@@ -238,14 +238,14 @@ export const LogContainer: React.FC<{
         // 如果当前没有高亮行、且开启了自动滚动，则滚动到底部
         if (!isAutoScroll || highlightLine >= 0) return
         scrollToItem(isFiltering ? filtedLogIds.length - 1 : props.manager.logs.length - 1)
-    }, [logCount, isFiltering])
+    }, [logCount])
 
     useEffect(() => {
         // 如果有高亮行，则在收到信号时滚动到高亮行
         if (highlightLine < 0) return
         const targetIndex = lineToIndex(highlightLine)
         if (targetIndex >= 0) scrollToItem(targetIndex)
-    }, [scrollToHighlightSignal])
+    }, [scrollToHighlightSignal, isFiltering])
 
     const rexCache = new Map<string, RegExp | undefined>()
     const getRegExp = function (matchText: string): RegExp | undefined {
