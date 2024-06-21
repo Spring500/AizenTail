@@ -117,25 +117,19 @@ const splitLog = function (text: string, keywords: string[]): React.ReactNode {
 
 const LogLine: React.FC<{
     rawLogText: string
-    logIndex: number
-    logLine: number
     isHighlight: boolean
-    isExculed: boolean
     manager: ILogManager
     getLogColor: (log: string) => React.CSSProperties
-    setHighlightLine: (line: number) => void
-    onClick: () => void
 }> = function (props) {
-    const settingContext = React.useContext(SettingContext)
-    const currentHoverFilter = settingContext?.currentHoverFilter ?? -1
+    const { currentHoverFilter, currentRuleSet, isShowHoverText } = React.useContext(SettingContext)
     const { ruleSets } = React.useContext(RuleContext)
-    const replaceRules = ruleSets?.[settingContext?.currentRuleSet ?? '']?.replaceRules
-    const logText = replaceLog(props.rawLogText ?? '', replaceRules, currentHoverFilter)
+    const replaceRules = ruleSets?.[currentRuleSet ?? '']?.replaceRules
+    const logText = replaceLog(props.rawLogText ?? '', replaceRules, currentHoverFilter ?? -1)
 
     return (
         <Typography.Text
             className={`logText${props.isHighlight ? ' highlightLogText' : ''}`}
-            title={settingContext?.isShowHoverText ? logText : undefined}
+            title={isShowHoverText ? logText : undefined}
             style={{ ...props.getLogColor(props.rawLogText), whiteSpace: 'pre' }}
         >
             {splitLog(logText, props.manager.inputFilters)}
@@ -317,43 +311,38 @@ export const LogContainer: React.FC<{
     const hasFilter = filterRules.length > 0 && filterRules.some((rule) => rule.enable)
 
     const LogRowRenderer = function (logIndex: number): React.ReactNode {
+        const logLine = indexToLine(logIndex)
+        if (logLine < 0) return null
         const manager = props.manager
         const rawLogText = manager.logs[indexToLine(logIndex)]?.text ?? ''
         const logText = replaceLog(rawLogText)
-        const logLine = indexToLine(logIndex)
         const isExculed = !isFiltering && hasFilter && !lineToIndexMap.has(logIndex)
         const isHighlight = logLine >= 0 && logLine === highlightLine
-        const onClick = (): void => setHighlightLine(logLine !== highlightLine ? logLine : -1)
         const opacity = isExculed ? EXCLUDED_OPACITY : undefined
+        const lockLabel = highlightLine !== logLine ? '锁定该行' : '取消锁定'
+        const switchHighlight = (): void =>
+            setHighlightLine(logLine !== highlightLine ? logLine : -1)
+        const copyLog = (): Promise<void> => navigator.clipboard.writeText(logText)
         return (
             <Dropdown
                 trigger={['contextMenu']}
                 menu={{
                     items: [
-                        { key: 'choose', label: '选择', onClick: () => setHighlightLine(logLine) },
-                        {
-                            key: 'copy',
-                            label: '复制',
-                            onClick: () => navigator.clipboard.writeText(logText)
-                        }
+                        { key: 'choose', label: lockLabel, onClick: switchHighlight },
+                        { key: 'copy', label: '复制', onClick: copyLog }
                     ]
                 }}
             >
-                <div className="log" style={{ opacity }} onClick={onClick}>
+                <div className="log" style={{ opacity }} onClick={switchHighlight}>
                     <Typography.Text className="logIndex" italic type="secondary">
                         {isHighlight ? <CaretRightOutlined /> : undefined}
                         {logLine >= 0 ? logLine : ''}
                     </Typography.Text>
                     <LogLine
                         rawLogText={rawLogText}
-                        logIndex={indexToLine(logIndex)}
-                        logLine={logLine}
                         isHighlight={isHighlight}
-                        isExculed={isExculed}
                         manager={manager}
                         getLogColor={getLogColor}
-                        setHighlightLine={setHighlightLine}
-                        onClick={onClick}
                     />
                 </div>
             </Dropdown>
