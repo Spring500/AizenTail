@@ -1,13 +1,14 @@
 {
-    "name": "node-addon-api",
-    "version": "0.0.0",
-    "private": true,
-    "dependencies": {
-        "bindings": "1.5.0",
-        "node-addon-api": "8.1.0"
-    },
-    "scripts": {
-        "test": "node addon.js"
-    },
-    "gypfile": true
+  "name": "addon-api",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "bindings": "1.5.0",
+    "node-addon-api": "8.1.0"
+  },
+  "scripts": {
+    "test": "node addon.js",
+    "install": "node-gyp rebuild"
+  },
+  "gypfile": true
 }

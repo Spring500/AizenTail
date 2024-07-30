@@ -29,4 +29,6 @@ node_modules/
 out/
 
 dist/
+node-addon-api/build/
+
 setting.json
