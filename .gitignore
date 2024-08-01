@@ -30,5 +30,6 @@ out/
 
 dist/
 node-addon-api/build/
+build/Release/
 
 setting.json
