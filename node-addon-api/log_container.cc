@@ -1,4 +1,3 @@
-// compile with: /W1
 #include "log_container.h"
 #include "utils/macros.h"
 #include <sstream>
