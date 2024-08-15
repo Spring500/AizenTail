@@ -1,6 +1,7 @@
 #ifndef RING_BUFFER_H
 #define RING_BUFFER_H
 
+// 环形缓冲区
 template <typename T>
 class RingBuffer
 {
@@ -24,7 +25,8 @@ public:
 
    bool empty(){ return _start == _end;}
    bool full(){ return (_end + 1) % _size == _start;}
-   int length(){ return (_end - _start + _size) % _size;}
+   int size(){ return (_end - _start + _size) % _size;}
+   int max_size(){ return _size - 1;}
 
    T& get(int index){ return _arr[indexToReal(index)];}
    const T& operator[](int index){ return _arr[indexToReal(index)];}
