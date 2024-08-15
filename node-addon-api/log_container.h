@@ -59,12 +59,12 @@ class LogContainer : public Napi::ObjectWrap<LogContainer> {
 public:
    static Napi::Object Init(Napi::Env env, Napi::Object exports);
    LogContainer(const Napi::CallbackInfo& info);
-   ~LogContainer();
+   ~LogContainer() {}
 
    // 返回日志容器中（不论是否筛选的）的日志数量
-   int size() { return logs->size(); }
+   int size() { return logs.size(); }
    // 返回日志容器的最大容量
-   int max_size() { return logs->max_size(); }
+   int max_size() { return logs.max_size(); }
    // 返回日志容器中（不论是否筛选的）的日志数量(javascript调用)
    Napi::Value length_Wrapper(const Napi::CallbackInfo& info);
    // 返回日志容器中筛选后的日志数量(javascript调用)
@@ -103,9 +103,9 @@ public:
 
 private:
    // 筛选后的日志列表，filtedLines[i]=j表示筛选后的日志中的第i行对应logs内部真实id为j的日志
-   RingBuffer<int> *filtedLines;
+   RingBuffer<int> filtedLines;
    // 未经筛选的日志列表
-   RingBuffer<LogData> *logs;
+   RingBuffer<LogData> logs;
 
    IndexedSet<MatchPattern> patterns;
    std::vector<MatchRule> rules;

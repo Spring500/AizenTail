@@ -8,14 +8,14 @@
 const int HOLE_LIMIT = 1000;
 
 // 内部对value进行索引，可以通过value获取index，也可以通过index获取value
-template <typename T>
+template <typename TValue>
 class IndexedSet
 {
 public:
     IndexedSet(){};
     ~IndexedSet(){};
 
-    int push(const T &value){
+    int push(const TValue &value){
         if(valueToIndex.find(value) != valueToIndex.end()){
             auto index = valueToIndex[value];
             counts[index]++;
@@ -45,7 +45,7 @@ public:
         return nextIndex;
     }
 
-    void erase(const T &value){
+    void erase(const TValue &value){
         if(valueToIndex.find(value) == valueToIndex.end())
             return;
         int index = valueToIndex[value];
@@ -60,20 +60,20 @@ public:
     }
 
     // 只要还没有被回收，就可以通过index获取value
-    int get_index(const T &value){
+    int get_index(const TValue &value){
         if(valueToIndex.find(value) == valueToIndex.end())
             return -1;
         return valueToIndex[value];
     }
 
-    T& get_value(int index){
+    TValue& get_value(int index){
         return indexToValue[index];
     }
 
     int size(){ return valueToIndex.size(); }
 public:
-    std::map<T, int> valueToIndex;
-    std::vector<T> indexToValue;
+    std::map<TValue, int> valueToIndex;
+    std::vector<TValue> indexToValue;
     std::vector<int> counts;
     std::vector<int> holes;
 };

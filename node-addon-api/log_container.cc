@@ -37,13 +37,8 @@ LogContainer::LogContainer(const Napi::CallbackInfo &info)
     else
         size = info[0].As<Napi::Number>().Int32Value();
 
-    logs = new RingBuffer<LogData>(size);
-    filtedLines = new RingBuffer<int>(size);
-}
-
-LogContainer::~LogContainer() {
-    delete logs;
-    delete filtedLines;
+    logs.resize(size);
+    filtedLines.resize(size);
 }
 
 Napi::Value LogContainer::length_Wrapper(const Napi::CallbackInfo &info)
@@ -55,26 +50,26 @@ Napi::Value LogContainer::length_Wrapper(const Napi::CallbackInfo &info)
 Napi::Value LogContainer::filtedLength_Wrapper(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    return Napi::Number::New(env, this->filtedLines->size());
+    return Napi::Number::New(env, filtedLines.size());
 }
 
 void LogContainer::pop_log()
 {
     if(size() <= 0) return;
-    // 如果删除的是筛选后的第一行，则删除筛选后列表中的对应行（必定也是第一行）
-    if(filtedLines->get(0) == logs->indexToReal(0))
-        filtedLines->pop();
-    logs->pop();
+    // 如果删除的是满足筛选条件的日志(必定是筛选后日志的第一行)，则删除筛选后列表中的对应行
+    if(filtedLines.get(0) == logs.indexToReal(0))
+        filtedLines.pop();
+    logs.pop();
 }
 
 void LogContainer::push_log(std::string log)
 {
-    if(logs->full()) pop_log();
-    logs->push({log});
+    if(logs.full()) pop_log();
+    logs.push({log});
     
-    const auto index = logs->size() - 1;
-    if(check_log(logs->get(index)))
-        filtedLines->push(logs->indexToReal(index));
+    const auto index = logs.size() - 1;
+    if(check_log(logs.get(index)))
+        filtedLines.push(logs.indexToReal(index));
 }
 
 void LogContainer::push_Wrapper(const Napi::CallbackInfo &info)
@@ -178,8 +173,8 @@ void LogContainer::setRules_Wrapper(const Napi::CallbackInfo &info)
 
 void LogContainer::clear()
 {
-    logs->clear();
-    filtedLines->clear();
+    logs.clear();
+    filtedLines.clear();
 }
 
 void LogContainer::clear_Wrapper(const Napi::CallbackInfo &info)
@@ -190,19 +185,19 @@ void LogContainer::clear_Wrapper(const Napi::CallbackInfo &info)
 void LogContainer::refresh_rules()
 {
     try{
-        filtedLines->clear();
+        filtedLines.clear();
         if(rules.size() == 0){
-            for(int i = 0; i < logs->size(); i++)
-                filtedLines->push(logs->indexToReal(i));
+            for(int i = 0; i < logs.size(); i++)
+                filtedLines.push(logs.indexToReal(i));
             return;
         }
-        for(int i = 0; i < logs->size(); i++) {
+        for(int i = 0; i < logs.size(); i++) {
             for(const auto &rule : rules){
                 auto pattern_index = rule.patternIndex;
                 auto pattern = patterns.get_value(rule.patternIndex);
-                if(check_one_rule(pattern, pattern_index, logs->get(i))) {
-                    const auto realIndex = logs->indexToReal(i);
-                    filtedLines->push(realIndex);
+                if(check_one_rule(pattern, pattern_index, logs.get(i))) {
+                    const auto realIndex = logs.indexToReal(i);
+                    filtedLines.push(realIndex);
                 }
             }
         }
@@ -214,10 +209,10 @@ void LogContainer::refresh_rules()
 
 int LogContainer::get_index(const int line)
 {
-    if(line < 0 || line >= filtedLines->size())
+    if(line < 0 || line >= filtedLines.size())
         return -1;
-    const auto realIndex = filtedLines->get(line);
-    return logs->realToIndex(realIndex);
+    const auto realIndex = filtedLines.get(line);
+    return logs.realToIndex(realIndex);
 }
 
 Napi::Value LogContainer::get_Wrapper(const Napi::CallbackInfo &info)
@@ -235,21 +230,21 @@ Napi::Value LogContainer::get_Wrapper(const Napi::CallbackInfo &info)
     }
 
 
-    return Napi::String::New(env, logs->get(index).log);
+    return Napi::String::New(env, logs.get(index).log);
 }
 
 Napi::Value LogContainer::debugStr_Wrapper(const Napi::CallbackInfo &info)
 {
     std::stringstream result;
-    result << "日志总数:" << logs->size()  
-        << " 筛选后的日志总数:" << filtedLines->size() << " 日志内容:\n";
+    result << "日志总数:" << logs.size()  
+        << " 筛选后的日志总数:" << filtedLines.size() << " 日志内容:\n";
     std::set<int> filtedLinesSet;
-    for(int i = 0; i < filtedLines->size(); i++) {
-        filtedLinesSet.insert(filtedLines->get(i));
+    for(int i = 0; i < filtedLines.size(); i++) {
+        filtedLinesSet.insert(filtedLines.get(i));
     }
-    for(int i = 0; i < logs->size(); i++) {
-        const auto &log = logs->get(i);
-        const auto realIndex = logs->indexToReal(i);
+    for(int i = 0; i < logs.size(); i++) {
+        const auto &log = logs.get(i);
+        const auto realIndex = logs.indexToReal(i);
         bool isFiltered = filtedLinesSet.find(realIndex) != filtedLinesSet.end();
         result << "    #" << i << "("<< "logs内部序列号" << realIndex << "): " 
             << (isFiltered?"\033[32m": "\033[35m") << log.log << "\033[0m\n";
