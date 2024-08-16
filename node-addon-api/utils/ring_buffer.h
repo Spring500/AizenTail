@@ -10,7 +10,7 @@ public:
    RingBuffer(int bufferSize) : _size(bufferSize + 1), _arr(new TValue[bufferSize + 1]){}
    ~RingBuffer(){ delete[] _arr;}
 
-   void push(TValue data)
+   void push(const TValue &data)
    {
       _arr[_end] = data;
       _end = (_end + 1) % _size;
@@ -18,8 +18,8 @@ public:
          _start = (_start + 1) % _size;
    }
    void pop(){ if (!empty()) _start = (_start + 1) % _size;}
-   TValue& front(){ return _arr[_start];}
-   TValue& back(){ return _arr[(_end - 1 + _size) % _size];}
+   const TValue& front(){ return _arr[_start];}
+   const TValue& back(){ return _arr[(_end - 1 + _size) % _size];}
 
    void clear(){ _start = _end = 0;}
 
@@ -45,18 +45,66 @@ public:
    }
 
    TValue& get(int index){ return _arr[indexToReal(index)];}
-   const TValue& operator[](int index){ return _arr[indexToReal(index)];}
+   TValue& operator[](int index){ return _arr[indexToReal(index)];}
 
    // 获取第index个元素的真实位置
    int indexToReal(int index){ return (_start + index) % _size;}
    // 获取真实位置的元素对应的index
    int realToIndex(int real){ return (real - _start + _size) % _size;}
 
-private:
+protected:
    TValue *_arr;
    int _start = 0;
    int _end = 0;
    int _size;
+};
+
+template <typename TValue>
+class SearchableRingBuffer : public RingBuffer<TValue>
+{
+public:
+   SearchableRingBuffer() : RingBuffer<TValue>(){}
+   SearchableRingBuffer(int bufferSize) : RingBuffer<TValue>(bufferSize){}
+
+   void push(TValue data)
+   {
+      RingBuffer<TValue>::push(data);
+      _set.insert(data);
+   }
+   void pop()
+   {
+      if (empty()) return;
+      _set.erase(front());
+      RingBuffer<TValue>::pop();
+   }
+
+   void clear()
+   {
+      RingBuffer<TValue>::clear();
+      _set.clear();
+   }
+
+   bool has(const TValue &data)
+   {
+      return _set.find(data) != _set.end();
+   }
+
+   void resize(int newBufferSize)
+   {
+      RingBuffer<TValue>::resize(newBufferSize);
+      _set.clear();
+      for (int i = _start; i != _end; i = (i + 1) % _size)
+         _set.insert(_arr[i]);
+   }
+
+protected:
+   std::multiset<TValue> _set;
+   using RingBuffer<TValue>::_arr;
+   using RingBuffer<TValue>::_start;
+   using RingBuffer<TValue>::_end;
+   using RingBuffer<TValue>::_size;
+   using RingBuffer<TValue>::empty;
+   using RingBuffer<TValue>::front;
 };
 
 #endif

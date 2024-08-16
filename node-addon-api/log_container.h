@@ -86,6 +86,13 @@ public:
    void clear_rules();
    // 重设日志容器筛选规则(javascript调用)
    void setRules_Wrapper(const Napi::CallbackInfo& info);
+
+   // 根据筛选前行数获取日志容器中指定行的日志
+   std::string get_log(int line);
+   // 根据筛选后行数获取日志容器中指定行的日志
+   std::string get_filted_log(int line);
+   // 根据筛选前行数获取日志容器中指定行的日志是否被筛选
+   bool is_filtered(int line);
    
    // 清空日志容器
    void clear();
@@ -96,14 +103,18 @@ public:
 
    // 根据行数获得日志对应的index
    int get_index(const int line);
-   // 获取日志容器中的日志
-   Napi::Value get_Wrapper(const Napi::CallbackInfo& info);
+   // 根据筛选前行数获取日志容器中指定行的日志(javascript调用)
+   Napi::Value getUnfilted_Wrapper(const Napi::CallbackInfo& info);
+   // 根据筛选后行数获取日志容器中指定行的日志(javascript调用)
+   Napi::Value getFilted_Wrapper(const Napi::CallbackInfo& info);
+   // 根据筛选前行数获取日志容器中指定行的日志是否被筛选(javascript调用)
+   Napi::Value isFilted_Wrapper(const Napi::CallbackInfo& info);
    // 打印调试信息
    Napi::Value debugStr_Wrapper(const Napi::CallbackInfo &info);
 
 private:
    // 筛选后的日志列表，filtedLines[i]=j表示筛选后的日志中的第i行对应logs内部真实id为j的日志
-   RingBuffer<int> filtedLines;
+   SearchableRingBuffer<int> filtedLines;
    // 未经筛选的日志列表
    RingBuffer<LogData> logs;
 

@@ -7,7 +7,9 @@ type TLogContainer = {
     push(log: string): void
     pushMulti(logs: string): void
     clear(): void
-    get(index: number): string
+    getUnfilted(index: number): string
+    getFilted(index: number): string
+    isFilted(index: number): boolean
     debugStr(): string
     setRules(
         rules: {

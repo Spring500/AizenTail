@@ -5,6 +5,19 @@ SegfaultHandler.registerHandler('crash.log')
 console.log('===================\n测试开始')
 console.log('开始测试，初始化容器大小为', 4)
 let logMgr: typeof LogContainer | undefined = undefined
+function printLogMgr(logMgr: typeof LogContainer | undefined): void {
+    if (!logMgr) {
+        console.log('logMgr 未初始化')
+        return
+    }
+    console.log('logMgr.length():', logMgr.length())
+    console.log('logMgr.filtedLength():', logMgr.filtedLength())
+    for (let i = 0; i < logMgr.length(); i++) {
+        const matched = logMgr.isFilted(i)
+        const text = logMgr.getUnfilted(i)
+        console.log('第', i, `行: ${matched ? '\x1b[33m\x1b[4m' : '\x1b[2m'}${text}\x1b[0m`)
+    }
+}
 try {
     logMgr = new LogContainer(4)
 } catch (e) {
@@ -49,14 +62,14 @@ logMgr.pushMulti('new line 7\nnew line 8\nnew line 9\n')
 console.log('插入', 3, '条批量数据\n', logMgr.debugStr())
 
 console.log('-----------------\n获取第', 3, '个条目...')
-console.log('第', 3, '个条目：', logMgr.get(3))
+console.log('第', 3, '个条目：', logMgr.getFilted(3))
 
 console.log('-----------------\n获取第', 0, '个条目...')
-console.log('第', 0, '个条目：', logMgr.get(0))
+console.log('第', 0, '个条目：', logMgr.getFilted(0))
 
 console.log('-----------------\n获取第', 8, '个条目...')
 try {
-    console.log('第', 8, '个条目：', logMgr.get(8))
+    console.log('第', 8, '个条目：', logMgr.getFilted(8))
 } catch (e) {
     console.error('获取失败，错误信息：', e)
 }
@@ -91,18 +104,19 @@ try {
 }
 console.log('规则添加完毕, ', logMgr.length(), '条数据，', logMgr.filtedLength(), '条命中')
 console.log(logMgr.debugStr())
+// printLogMgr(logMgr)
 
 console.log('-----------------\n添加筛选规则...')
 logMgr.setRules([
     {
         enable: true,
-        reg: 'line\\s*([1234567])',
-        regexEnable: false,
-        ignoreCase: false,
+        reg: 'LINE\\s*([1234567])',
+        regexEnable: true,
+        ignoreCase: true,
         exclude: false
     }
 ])
 console.log('规则添加完毕, ', logMgr.length(), '条数据，', logMgr.filtedLength(), '条命中')
 console.log(logMgr.debugStr())
-
+// printLogMgr(logMgr)
 console.log('-----------------\n测试结束')
