@@ -1,6 +1,6 @@
 #include <string>
 #include <napi.h>
-#include "log_container.h"
+#include "node_log_container.h"
 
 Napi::String Method(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -10,7 +10,7 @@ Napi::String Method(const Napi::CallbackInfo& info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "hello"),
               Napi::Function::New(env, Method));
-  return LogContainer::Init(env, exports);
+  return NodeLogContainer::Init(env, exports);
 }
 
 NODE_API_MODULE(addon, Init)

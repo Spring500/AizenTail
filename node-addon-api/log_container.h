@@ -55,37 +55,27 @@ struct MatchRule
    bool isExclude;
 };
 
-class LogContainer : public Napi::ObjectWrap<LogContainer> {
+class LogContainer{
 public:
-   static Napi::Object Init(Napi::Env env, Napi::Object exports);
-   LogContainer(const Napi::CallbackInfo& info);
+   LogContainer() {};
+   LogContainer(int size) : logs(size), filtedLines(size) {}
    ~LogContainer() {}
 
    // 返回日志容器中（不论是否筛选的）的日志数量
    int size() { return logs.size(); }
    // 返回日志容器的最大容量
    int max_size() { return logs.max_size(); }
-   // 返回日志容器中（不论是否筛选的）的日志数量(javascript调用)
-   Napi::Value length_Wrapper(const Napi::CallbackInfo& info);
-   // 返回日志容器中筛选后的日志数量(javascript调用)
-   Napi::Value filtedLength_Wrapper(const Napi::CallbackInfo& info);
 
    // 删除日志中的第一条日志
    void pop_log();
 
    // 在日志容器中添加日志
    void push_log(std::string log);
-   // 在日志容器中添加日志(javascript调用)
-   void push_Wrapper(const Napi::CallbackInfo& info);
-   // 在日志容器中添加多行日志(javascript调用)
-   void pushMulti_Wrapper(const Napi::CallbackInfo& info);
 
    // 在日志容器中添加筛选规则
    void push_rule(std::string pattern, bool isRegex, bool ignoreCase, bool isExclude);
    // 删除日志容器中的筛选规则
    void clear_rules();
-   // 重设日志容器筛选规则(javascript调用)
-   void setRules_Wrapper(const Napi::CallbackInfo& info);
 
    // 根据筛选前行数获取日志容器中指定行的日志
    std::string get_log(int line);
@@ -96,23 +86,15 @@ public:
    
    // 清空日志容器
    void clear();
-   // 清空日志容器(javascript调用)
-   void clear_Wrapper(const Napi::CallbackInfo& info);
+
    // 刷新所有日志的筛选状态
    void refresh_rules();
 
    // 根据行数获得日志对应的index
    int get_index(const int line);
-   // 根据筛选前行数获取日志容器中指定行的日志(javascript调用)
-   Napi::Value getUnfilted_Wrapper(const Napi::CallbackInfo& info);
-   // 根据筛选后行数获取日志容器中指定行的日志(javascript调用)
-   Napi::Value getFilted_Wrapper(const Napi::CallbackInfo& info);
-   // 根据筛选前行数获取日志容器中指定行的日志是否被筛选(javascript调用)
-   Napi::Value isFilted_Wrapper(const Napi::CallbackInfo& info);
-   // 打印调试信息
-   Napi::Value debugStr_Wrapper(const Napi::CallbackInfo &info);
 
-private:
+
+protected:
    // 筛选后的日志列表，filtedLines[i]=j表示筛选后的日志中的第i行对应logs内部真实id为j的日志
    SearchableRingBuffer<int> filtedLines;
    // 未经筛选的日志列表
@@ -127,5 +109,7 @@ private:
    // 检查日志是否在筛选后的日志中
    bool check_log(LogData &text);
 };
+
+
 
 #endif
