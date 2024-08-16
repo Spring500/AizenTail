@@ -5,8 +5,6 @@
 #include <regex>
 #include <napi.h>
 
-
-
 void LogContainer::pop_log()
 {
     if(size() <= 0) return;
@@ -26,9 +24,6 @@ void LogContainer::push_log(std::string log)
         filtedLines.push(logs.indexToReal(index));
 }
 
-
-
-
 void LogContainer::clear_rules()
 {
     for(auto &rule : rules)
@@ -39,8 +34,6 @@ void LogContainer::clear_rules()
         logs.get(i).results.clear();
     }
 }
-
-
 
 std::string LogContainer::get_log(int line)
 {

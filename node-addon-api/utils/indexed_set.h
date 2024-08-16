@@ -71,7 +71,7 @@ public:
     }
 
     int size(){ return valueToIndex.size(); }
-public:
+protected:
     std::map<TValue, int> valueToIndex;
     std::vector<TValue> indexToValue;
     std::vector<int> counts;
