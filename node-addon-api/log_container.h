@@ -21,7 +21,10 @@ enum EMatchResult
 struct LogData
 {
 public:
-   std::string log;
+   std::string text;
+   // Cached match results.
+   // - results[i] = j means the i-th rule matches the log and the result is j
+   // - results[i] will be recalculated when the i-th rule are changed
    std::vector<EMatchResult> results;
 };
 

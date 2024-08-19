@@ -37,13 +37,13 @@ void LogContainer::clear_rules()
 
 std::string LogContainer::get_log(int line)
 {
-    return logs.get(line).log;
+    return logs.get(line).text;
 }
 
 std::string LogContainer::get_filted_log(int line)
 {
     const auto realIndex = filtedLines.get(line);
-    return logs.get(logs.realToIndex(realIndex)).log;
+    return logs.get(logs.realToIndex(realIndex)).text;
 }
 
 bool LogContainer::is_filtered(int line)
@@ -68,8 +68,8 @@ void LogContainer::refresh_rules()
     }
     for(int i = 0; i < logs.size(); i++) {
         for(const auto &rule : rules){
-            auto pattern_index = rule.patternIndex;
-            auto pattern = patterns.get_value(rule.patternIndex);
+            const auto pattern_index = rule.patternIndex;
+            const auto &pattern = patterns.get_value(pattern_index);
             if(check_one_rule(pattern, pattern_index, logs.get(i))) {
                 const auto realIndex = logs.indexToReal(i);
                 filtedLines.push(realIndex);
@@ -101,13 +101,13 @@ bool LogContainer::check_one_rule(const MatchPattern &pattern, const int pattern
         std::regex::flag_type flag = std::regex::ECMAScript;
         if(pattern.ignoreCase) flag |= std::regex::icase;
         std::regex reg(pattern.text, flag);
-        result = std::regex_search(data.log, reg);
+        result = std::regex_search(data.text, reg);
     } else {
         // TODO: 暂未实现非正则匹配的忽略大小写
         if (pattern.ignoreCase) {
-            result = data.log.find(pattern.text) != std::string::npos;
+            result = data.text.find(pattern.text) != std::string::npos;
         } else {
-            result = data.log.find(pattern.text) != std::string::npos;
+            result = data.text.find(pattern.text) != std::string::npos;
         }
     }
     results[pattern_index] = result ? MATCHED : NOT_MATCHED;

@@ -140,7 +140,7 @@ Napi::Value NodeLogContainer::getFilted_Wrapper(const Napi::CallbackInfo &info)
         "Line #" + std::to_string(line) + " not found",
         env.Null()
     );
-    return Napi::String::New(env, logs.get(index).log);
+    return Napi::String::New(env, logs.get(index).text);
 }
 
 Napi::Value NodeLogContainer::isFilted_Wrapper(const Napi::CallbackInfo &info)
@@ -170,7 +170,7 @@ Napi::Value NodeLogContainer::debugStr_Wrapper(const Napi::CallbackInfo &info)
         const auto realIndex = logs.indexToReal(i);
         bool isFiltered = filtedLinesSet.find(realIndex) != filtedLinesSet.end();
         result << "    #\033[33m" << i << "\033[0m("<< "realIndex=\033[33m" << realIndex << "\033[0m): " 
-            << (isFiltered?"\033[33m\033[4m": "\033[2m") << log.log << "\033[0m\n";
+            << (isFiltered?"\033[33m\033[4m": "\033[2m") << log.text << "\033[0m\n";
     }
     if(rules.size() == 0) {
         result << "\n筛选规则: 无\n";
