@@ -5,7 +5,7 @@
 #include <vector>
 
 // 限制最多有多少个hole，超过这个数目就开始回收
-const int HOLE_LIMIT = 1000;
+const size_t HOLE_LIMIT = 1000;
 
 // 内部对value进行索引，可以通过value获取index，也可以通过index获取value
 template <typename TValue>
@@ -15,14 +15,14 @@ public:
     IndexedSet(){};
     ~IndexedSet(){};
 
-    int push(const TValue &value){
+    size_t push(const TValue &value){
         if(valueToIndex.find(value) != valueToIndex.end()){
             auto index = valueToIndex[value];
             counts[index]++;
             return -1;
         }
 
-        int nextIndex = 0;
+        size_t nextIndex = 0;
         if(holes.size() > HOLE_LIMIT){
             nextIndex = holes.back();
             holes.pop_back();
@@ -48,11 +48,11 @@ public:
     void erase(const TValue &value){
         if(valueToIndex.find(value) == valueToIndex.end())
             return;
-        int index = valueToIndex[value];
+        size_t index = valueToIndex[value];
         erase_by_index(index);
     }
 
-    void erase_by_index(int index){
+    void erase_by_index(size_t index){
         if(counts[index] <= 0) return;
         counts[index]--;
         if(counts[index] <= 0)
@@ -60,22 +60,22 @@ public:
     }
 
     // 只要还没有被回收，就可以通过index获取value
-    int get_index(const TValue &value){
+    size_t get_index(const TValue &value){
         if(valueToIndex.find(value) == valueToIndex.end())
             return -1;
         return valueToIndex[value];
     }
 
-    TValue& get_value(int index){
+    TValue& get_value(size_t index){
         return indexToValue[index];
     }
 
-    int size(){ return valueToIndex.size(); }
+    size_t size(){ return valueToIndex.size(); }
 protected:
-    std::map<TValue, int> valueToIndex;
+    std::map<TValue, size_t> valueToIndex;
     std::vector<TValue> indexToValue;
     std::vector<int> counts;
-    std::vector<int> holes;
+    std::vector<size_t> holes;
 };
 
 #endif
