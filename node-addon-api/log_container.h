@@ -39,6 +39,7 @@ struct MatchPattern{
          }
       }
    std::string text;
+   // Cached regex object.
    std::regex reg;
    bool isRegex;
    bool ignoreCase;

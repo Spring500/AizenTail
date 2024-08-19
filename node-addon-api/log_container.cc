@@ -97,12 +97,8 @@ bool LogContainer::check_one_rule(const MatchPattern &pattern, const int pattern
         return results[pattern_index] == MATCHED;
     }
     bool result = false;
-    if(pattern.isRegex) {
-        std::regex::flag_type flag = std::regex::ECMAScript;
-        if(pattern.ignoreCase) flag |= std::regex::icase;
-        std::regex reg(pattern.text, flag);
-        result = std::regex_search(data.text, reg);
-    } else {
+    if(pattern.isRegex) result = std::regex_search(data.text, pattern.reg);
+    else {
         // TODO: 暂未实现非正则匹配的忽略大小写
         if (pattern.ignoreCase) {
             result = data.text.find(pattern.text) != std::string::npos;
