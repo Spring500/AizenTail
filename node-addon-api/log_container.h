@@ -51,7 +51,7 @@ struct MatchPattern{
 
 struct MatchRule
 {
-   int patternIndex;
+   size_t patternIndex;
    bool isExclude;
 };
 
