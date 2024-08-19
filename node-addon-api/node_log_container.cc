@@ -88,30 +88,17 @@ void NodeLogContainer::setRules_Wrapper(const Napi::CallbackInfo &info)
         
         for(int i = 0; i < length; i++) {
             auto rule = rulesRaw.Get(i).As<Napi::Object>();
-            auto enableRaw = rule.Get("enable");
-            ASSERT_AND_THROW(enableRaw.IsBoolean(), "enable should be a boolean value",);
-            
-            auto enable = enableRaw.As<Napi::Boolean>().Value();
+            CAST_TO_BOOL(rule.Get("enable"), enable,);
+
             if(!enable) continue;
 
-            auto patternRaw = rule.Get("reg");
-            ASSERT_AND_THROW(patternRaw.IsString(), "reg should be an string",);
-            auto text = patternRaw.As<Napi::String>().Utf8Value();
+            CAST_TO_STRING(rule.Get("reg"), text,);
+            CAST_TO_BOOL(rule.Get("regexEnable"), regexEnable,);
+            CAST_TO_BOOL(rule.Get("ignoreCase"), ignoreCase,);
+            CAST_TO_BOOL(rule.Get("exclude"), exclude,);
 
-            auto isRegexRaw = rule.Get("regexEnable");
-            ASSERT_AND_THROW(isRegexRaw.IsBoolean(), "regexEnable should be a boolean value",);
-            auto isRegex = isRegexRaw.As<Napi::Boolean>().Value();
-
-            auto ignoreCaseRaw = rule.Get("ignoreCase");
-            ASSERT_AND_THROW(ignoreCaseRaw.IsBoolean(), "ignoreCase should be a boolean value",);
-            auto ignoreCase = ignoreCaseRaw.As<Napi::Boolean>().Value();
-
-            auto isExcludeRaw = rule.Get("exclude");
-            ASSERT_AND_THROW(isExcludeRaw.IsBoolean(), "exclude should be a boolean value",);
-            auto isExclude = isExcludeRaw.As<Napi::Boolean>().Value();
-
-            auto patternIndex = patterns.push({text, isRegex, ignoreCase});
-            if(patternIndex != -1) rules.push_back({patternIndex, isExclude});
+            auto patternIndex = patterns.push({text, regexEnable, ignoreCase});
+            if(patternIndex != -1) rules.push_back({patternIndex, exclude});
         }
         refresh_rules();
     } 

@@ -56,6 +56,36 @@
         return returnValue; \
     }
 
+#define CAST_TO_BOOL(value, bool_var, returnValue) \
+    bool bool_var; \
+    {   auto _temp = (value); \
+        if (_temp.IsBoolean()) bool_var = _temp.As<Napi::Boolean>().Value(); \
+        else { \
+            Napi::Error::New(env, #bool_var " must be a boolean").ThrowAsJavaScriptException(); \
+            return returnValue; \
+        } \
+    } \
+
+#define CAST_TO_STRING(value, string_var, returnValue) \
+    std::string string_var; \
+    {   auto _temp = (value); \
+        if (_temp.IsString()) string_var = _temp.As<Napi::String>().Utf8Value(); \
+        else { \
+            Napi::Error::New(env, "Argument must be a string").ThrowAsJavaScriptException(); \
+            return returnValue; \
+        } \
+    } \
+
+#define CAST_TO_INT(value, int_var, returnValue) \
+    int int_var; \
+    {   auto _temp = (value); \
+        if (_temp.IsNumber()) int_var = _temp.As<Napi::Number>().Int32Value(); \
+        else { \
+            Napi::Error::New(env, "Argument must be a number").ThrowAsJavaScriptException(); \
+            return returnValue; \
+        } \
+    } \
+
 #define ASSERT_AND_THROW(condition, message, returnValue) \
     if (!(condition)) \
     { \
