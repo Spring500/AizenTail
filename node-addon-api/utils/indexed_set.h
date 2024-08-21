@@ -19,13 +19,16 @@ public:
         if(valueToIndex.find(value) != valueToIndex.end()){
             auto index = valueToIndex[value];
             counts[index]++;
-            return -1;
+            // if index in holes, remove it
+            holes.erase(index);
+            return index;
         }
 
         size_t nextIndex = 0;
         if(holes.size() > HOLE_LIMIT){
-            nextIndex = holes.back();
-            holes.pop_back();
+            nextIndex = *holes.begin();
+            holes.erase(nextIndex);
+
             auto oldValue = indexToValue[nextIndex];
             if(valueToIndex.find(oldValue) != valueToIndex.end())
                 valueToIndex.erase(oldValue);
@@ -53,10 +56,13 @@ public:
     }
 
     void erase_by_index(size_t index){
-        if(counts[index] <= 0) return;
-        counts[index]--;
-        if(counts[index] <= 0)
-            holes.push_back(index);
+        if(counts[index] > 0) counts[index]--;
+        if(counts[index] <= 0){
+            const auto &value = indexToValue[index];
+            if(valueToIndex.find(value) != valueToIndex.end())
+                valueToIndex.erase(indexToValue[index]);
+            holes.insert(index);
+        }
     }
 
     // 只要还没有被回收，就可以通过index获取value
@@ -75,7 +81,7 @@ protected:
     std::map<TValue, size_t> valueToIndex;
     std::vector<TValue> indexToValue;
     std::vector<int> counts;
-    std::vector<size_t> holes;
+    std::set<size_t> holes;
 };
 
 #endif

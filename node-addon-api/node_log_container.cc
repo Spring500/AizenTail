@@ -65,15 +65,16 @@ void NodeLogContainer::pushMulti_Wrapper(const Napi::CallbackInfo &info)
 {
     CHECK_FUNCTION(info, 1, );
     GET_STR_PARAM(info, env, 0, texts, );
-    auto startP = 0;
-    for(int i = 0; i < texts.length(); i++) {
+    const auto length = texts.length();
+    size_t startP = 0;
+    for(int i = 0; i < length; i++) {
         auto c = texts[i];
         if(texts[i] != '\n') continue;
         push_log(texts.substr(startP, i - startP));
         startP = i + 1;
     }
-    if(startP < texts.length()) {
-        push_log(texts.substr(startP, texts.length() - startP));
+    if(startP < length) {
+        push_log(texts.substr(startP, length - startP));
     }
 }
 
@@ -82,25 +83,25 @@ void NodeLogContainer::setRules_Wrapper(const Napi::CallbackInfo &info)
     CHECK_FUNCTION(info, 1, );
     GET_ARRAY_PARAM(info, env, 0, rulesRaw, );
 
-    int length = rulesRaw.Length();
+    const auto length = rulesRaw.Length();
     try{
-        clear_rules();
-        
-        for(int i = 0; i < length; i++) {
+        std::vector<RuleInfo> newRuleList;
+        for(uint32_t i = 0; i < length; i++) {
             auto rule = rulesRaw.Get(i).As<Napi::Object>();
             CAST_TO_BOOL(rule.Get("enable"), enable,);
-
-            if(!enable) continue;
-
             CAST_TO_STRING(rule.Get("reg"), text,);
             CAST_TO_BOOL(rule.Get("regexEnable"), regexEnable,);
             CAST_TO_BOOL(rule.Get("ignoreCase"), ignoreCase,);
             CAST_TO_BOOL(rule.Get("exclude"), exclude,);
-
-            auto patternIndex = patterns.push({text, regexEnable, ignoreCase});
-            if(patternIndex != -1) rules.push_back({patternIndex, exclude});
+            RuleInfo newRule;
+            newRule.text = text;
+            newRule.regexEnable = regexEnable;
+            newRule.ignoreCase = ignoreCase;
+            newRule.exclude = exclude;
+            newRule.enable = enable;
+            newRuleList.push_back(newRule);
         }
-        refresh_rules();
+        set_rules(newRuleList);
     } 
     catch(std::exception &e){
         std::string message = "运行时错误:";
@@ -161,27 +162,22 @@ Napi::Value NodeLogContainer::debugStr_Wrapper(const Napi::CallbackInfo &info)
     std::stringstream result;
     result << "日志总数:\033[33m" << logs.size()  
         << "\033[0m 筛选后的日志总数:\033[33m" << filtedLines.size() << "\033[0m 日志内容:\n";
-    std::set<int> filtedLinesSet;
-    for(int i = 0; i < filtedLines.size(); i++) {
-        filtedLinesSet.insert(filtedLines.get(i));
-    }
     for(int i = 0; i < logs.size(); i++) {
         const auto &log = logs.get(i);
         const auto realIndex = logs.indexToReal(i);
-        bool isFiltered = filtedLinesSet.find(realIndex) != filtedLinesSet.end();
-        result << "    #\033[33m" << i << "\033[0m("<< "realIndex=\033[33m" << realIndex << "\033[0m): " 
-            << (isFiltered?"\033[33m\033[4m": "\033[2m") << log.text << "\033[0m\n";
+        bool isFiltered = is_filtered(i);
+        result << "    #\033[33m" << i << "\033[0m("<< "realIndex=\033[33m" << realIndex << "\033[0m): "
+               << (isFiltered?"\033[33m\033[4m": "\033[2m") << log.text << "\033[0m\n";
     }
-    if(rules.size() == 0) {
-        result << "\n筛选规则: 无\n";
-    } else {
+    if(rules.size() == 0) result << "\n筛选规则: 无\n";
+    else {
         result << "\n筛选规则:\n";
         for(int i = 0; i < rules.size(); i++) {
             const auto &rule = rules[i];
             const auto &pattern = patterns.get_value(rule.patternIndex);
             result << "    #\033[33m" << i << "\033[0m(" << "patternIndex=\033[33m" << rule.patternIndex << "\033[0m): "
                 << "\033[32m\033[4m" << pattern.text << "\033[0m"
-                << (rule.isExclude ? " 排除" : " 包含") 
+                << (rule.exclude ? " 排除" : " 包含") 
                 << (pattern.ignoreCase ? " 忽略大小写" : "")  
                 << (pattern.isRegex ? " 正则" : "") << "\n";
         }

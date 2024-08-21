@@ -24,6 +24,48 @@ void LogContainer::push_log(std::string log)
         filtedLines.push(logs.indexToReal(index));
 }
 
+void LogContainer::set_rules(std::vector<RuleInfo> newRuleList)
+{
+    const auto length = newRuleList.size();
+    std::set<size_t> removedPatterns;
+    for(const auto &rule : rules){
+        removedPatterns.insert(rule.patternIndex);
+    }
+    // remove duplicated patterns in newRuleList
+    for(uint32_t i = 0; i < length; i++) {
+        const auto &rule = newRuleList[i];
+        auto patternIndex = patterns.push({rule.text, rule.regexEnable, rule.ignoreCase});
+        if(patternIndex != -1)
+            removedPatterns.erase(patternIndex);
+    }
+    
+    // delete removed patterns and corresponding cache
+    for(size_t i = 0; i < logs.size(); i++)
+        for(const auto &patternIndex : removedPatterns){
+            if(logs.get(i).results.size() > patternIndex)
+                logs.get(i).results[patternIndex] = UNKNOWN;
+        }
+
+    for(const auto &rule: rules)
+        patterns.erase_by_index(rule.patternIndex);
+    rules.clear();
+
+    // add new rules
+    for(uint32_t i = 0; i < length; i++) {
+        const auto &rule = newRuleList[i];
+        auto patternIndex = 
+            patterns.push({rule.text, rule.regexEnable, rule.ignoreCase});
+        if(patternIndex != -1){
+            MatchRule newRule;
+            newRule.patternIndex = patternIndex;
+            newRule.enable = rule.enable;
+            newRule.exclude = rule.exclude;
+            rules.push_back(newRule);
+        }
+    }
+    refresh_rules();
+}
+
 void LogContainer::clear_rules()
 {
     for(auto &rule : rules)
@@ -67,14 +109,9 @@ void LogContainer::refresh_rules()
         return;
     }
     for(int i = 0; i < logs.size(); i++) {
-        for(const auto &rule : rules){
-            const auto pattern_index = rule.patternIndex;
-            const auto &pattern = patterns.get_value(pattern_index);
-            if(check_one_rule(pattern, pattern_index, logs.get(i))) {
-                const auto realIndex = logs.indexToReal(i);
-                filtedLines.push(realIndex);
-            }
-        }
+        if(!check_log(logs.get(i))) continue;
+        const auto realIndex = logs.indexToReal(i);
+        filtedLines.push(realIndex);
     }
 }
 
@@ -115,11 +152,12 @@ bool LogContainer::check_log(LogData &data)
 {
     if(rules.size() == 0) return true;
     for(const auto &rule : rules) {
+        if(!rule.enable) continue;
         const auto pattern_index = rule.patternIndex;
         const auto pattern = patterns.get_value(pattern_index);
         const auto result = check_one_rule(pattern, pattern_index, data);
-        if(rule.isExclude && !result) return false;
-        if(!rule.isExclude && result) return true;
+        if(rule.exclude && !result) return false;
+        if(!rule.exclude && result) return true;
     }
     return false;
 }

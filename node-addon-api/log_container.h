@@ -55,8 +55,25 @@ struct MatchPattern{
 
 struct MatchRule
 {
+   MatchRule() : patternIndex(0), exclude(false), enable(false){};
+   MatchRule(size_t patternIndex, bool enable, bool isExclude)
+      : patternIndex(patternIndex), exclude(isExclude), enable(enable){};
    size_t patternIndex;
-   bool isExclude;
+   bool enable;
+   bool exclude;
+};
+
+struct RuleInfo
+{
+public:
+   RuleInfo() : text(""), regexEnable(false), ignoreCase(false), exclude(false), enable(false){};
+   RuleInfo(std::string text, bool regexEnable, bool ignoreCase, bool exclude, bool enable)
+      : text(text), regexEnable(regexEnable), ignoreCase(ignoreCase), exclude(exclude), enable(enable){};
+   std::string text;
+   bool regexEnable;
+   bool ignoreCase;
+   bool exclude;
+   bool enable;
 };
 
 class LogContainer{
@@ -77,7 +94,9 @@ public:
    void push_log(std::string log);
 
    // 在日志容器中添加筛选规则
-   void push_rule(std::string pattern, bool isRegex, bool ignoreCase, bool isExclude);
+   void set_rules(std::vector<RuleInfo> newRuleList);
+   // 获取日志容器中的规则数量
+   int rules_size() { return rules.size(); }
    // 删除日志容器中的筛选规则
    void clear_rules();
 
