@@ -111,7 +111,7 @@ app.whenReady().then(() => {
         })
     })
 
-    ipcMain.on('watch-file', (event, filename) => {
+    ipcMain.on('watch-log', (event, filename) => {
         watcher?.close()
         console.log('watching file', filename)
         fileCurrentSize = fs.statSync(filename).size
@@ -144,7 +144,7 @@ app.whenReady().then(() => {
             }
         })
     })
-    ipcMain.on('unwatch-file', () => {
+    ipcMain.on('unwatch-log', () => {
         watcher?.close()
         watcher = null
         fileCurrentSize = 0
