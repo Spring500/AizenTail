@@ -10,7 +10,7 @@ type CustomAPI = {
         filters?: Electron.FileFilter[]
     ) => Promise<string>
     openFile: (filename: string) => Promise<string | null>
-    writeFile: (filename: string, content: string) => Promise<void>
+    startWatchLog: (filename: string, content: string) => Promise<void>
     watchFile: (filename: string) => void
     watchLogChange: (
         callback: (event: Electron.IpcRendererEvent, type: 'add' | 'clear', text: string) => void
@@ -18,7 +18,7 @@ type CustomAPI = {
     removeLogChange: (
         callback: (event: Electron.IpcRendererEvent, type: 'add' | 'clear', text: string) => void
     ) => void
-    unwatchFile: () => void
+    stopWatchLog: () => void
     openDevTools: () => void
     windowMinimize: () => void
     windowMaximize: () => void

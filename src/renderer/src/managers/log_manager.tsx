@@ -26,7 +26,7 @@ class LogManager {
         if (!filepath) return
         const start = Date.now()
 
-        window.electron.unwatchFile()
+        window.electron.stopWatchLog()
         const resultText = await window.electron.openFile(filepath)
         if (resultText === null) return
         window.electron.watchFile(filepath)

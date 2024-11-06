@@ -23,7 +23,7 @@ export type TSettings = {
 class RuleManager {
     async saveFile(filepath: string = SETTING_PATH, setting: TSettings | undefined): Promise<void> {
         if (!filepath) return
-        await window.electron.writeFile(filepath, JSON.stringify(setting ?? {}, undefined, 4))
+        await window.electron.startWatchLog(filepath, JSON.stringify(setting ?? {}, undefined, 4))
     }
 
     async reloadConfig(filepath: string = 'setting.json'): Promise<TSettings | undefined> {
