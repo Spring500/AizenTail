@@ -29,7 +29,7 @@ class LogManager {
         window.electron.stopWatchLog()
         const resultText = await window.electron.openFile(filepath)
         if (resultText === null) return
-        window.electron.watchFile(filepath)
+        window.electron.startWatchLog(filepath)
         this.logs.length = 0
         await this.updateFile(null, 'add', resultText)
         this.onSetHint?.(`打开文件耗时：${Date.now() - start}ms`)

@@ -6,8 +6,8 @@ const api: CustomAPI = {
     openSaveDialog: (title, defaultPath?, filters?) =>
         ipcRenderer.invoke('open-save-dialog', title, defaultPath, filters),
     openFile: (filename) => ipcRenderer.invoke('open-file', filename),
-    startWatchLog: (filename, content) => ipcRenderer.invoke('write-file', filename, content),
-    watchFile: (filename) => ipcRenderer.send('watch-file', filename),
+    writeFile: (filename, content) => ipcRenderer.invoke('write-file', filename, content),
+    startWatchLog: (filename) => ipcRenderer.send('watch-file', filename),
     watchLogChange: (callback) => ipcRenderer.on('log-changed', callback),
     removeLogChange: (callback) => ipcRenderer.removeListener('log-changed', callback),
     stopWatchLog: () => ipcRenderer.send('unwatch-file'),
