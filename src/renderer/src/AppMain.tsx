@@ -101,7 +101,7 @@ const AppMainComponent: React.FC = function () {
                     setFileUrl(filepath)
                 }}
             />
-            <div style={{ margin: '2px 4px', flex: 1 }}>
+            <div style={{ margin: '2px 4px', flex: 1, overflow: 'hidden' }}>
                 <Splitter layout="vertical">
                     <Splitter.Panel min={'10%'}>
                         <div style={{ height: '100%' }}>
