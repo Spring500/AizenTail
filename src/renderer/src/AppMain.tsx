@@ -11,6 +11,7 @@ import {
     Flex,
     MappingAlgorithm,
     Space,
+    Splitter,
     Typography,
     message,
     theme
@@ -69,10 +70,10 @@ const AppMainComponent: React.FC = function () {
         const filepath = file.path
         await logManager.openFile(filepath)
     }
-    const logContainerStyle: React.CSSProperties =
-        currentPanel !== undefined
-            ? { resize: 'vertical', maxHeight: 'calc(100% - 120px)', height: '50%' }
-            : { resize: 'none', height: 'auto', flex: '1 1 auto' }
+    const logContainerStyle: React.CSSProperties = {
+        resize: 'none',
+        height: '100%'
+    }
     const style = {
         width: '100%',
         height: '100%',
@@ -100,17 +101,27 @@ const AppMainComponent: React.FC = function () {
                     setFileUrl(filepath)
                 }}
             />
-            <LogContainer
-                manager={logManager}
-                style={logContainerStyle}
-                onChangeFile={OnChangeFile}
-            />
-            {currentPanel && (
-                <div className="ruleContainer" style={{ padding: '4px', margin: '4px' }}>
-                    {currentPanel === 'rule' && <RulePanel />}
-                    {currentPanel === 'setting' && <SettingPanel />}
-                </div>
-            )}
+            <div style={{ margin: '2px 4px', flex: 1 }}>
+                <Splitter layout="vertical">
+                    <Splitter.Panel min={'10%'}>
+                        <div style={{ height: '100%' }}>
+                            <LogContainer
+                                manager={logManager}
+                                style={logContainerStyle}
+                                onChangeFile={OnChangeFile}
+                            />
+                        </div>
+                    </Splitter.Panel>
+                    {currentPanel && (
+                        <Splitter.Panel min={'10%'}>
+                            <div style={{ height: '100%' }}>
+                                {currentPanel === 'rule' && <RulePanel />}
+                                {currentPanel === 'setting' && <SettingPanel />}
+                            </div>
+                        </Splitter.Panel>
+                    )}
+                </Splitter>
+            </div>
             <Flex justify="space-between" align="center" style={{ margin: '2px 4px' }}>
                 <Space>
                     <Space.Compact>

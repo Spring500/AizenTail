@@ -51,9 +51,7 @@ body,
 }
 
 .logContainer{
-    margin: 0 4px 4px 4px;
     flex: 0 0 auto;
-    min-height: 40px;
     width: auto;
     overflow: hidden;
 }
