@@ -4,8 +4,9 @@ type FilterConfig = {
     background?: string
     reg?: string
     enable?: boolean
-    exclude?: boolean
     regexEnable?: boolean
+    filterType?: 'INCLUDE' | 'EXCLUDE' | undefined
+    dyeing?: boolean
 }
 
 type ReplaceConfig = {

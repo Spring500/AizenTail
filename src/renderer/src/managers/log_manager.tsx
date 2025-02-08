@@ -42,7 +42,10 @@ class LogManager {
 
     hasFilter(): boolean {
         return (
-            this.inputFilters.length > 0 || this.GetCurrentFilterRules().some((rule) => rule.enable)
+            this.inputFilters.length > 0 ||
+            this.GetCurrentFilterRules().some(
+                (rule) => rule.enable && rule.filterType !== undefined
+            )
         )
     }
 
@@ -304,12 +307,12 @@ class LogManager {
         let include = false
         let hasIncludeFilter = false
         for (const rule of rules) {
-            if (!rule.enable) continue
-            if (!rule.exclude) hasIncludeFilter = true
+            if (!(rule.enable && rule.filterType !== undefined)) continue
+            if (rule.filterType === 'INCLUDE') hasIncludeFilter = true
             if (!this.testRule(rule, log)) {
                 continue
             }
-            if (rule.exclude) return true
+            if (rule.filterType === 'EXCLUDE') return true
             include = true
         }
         if (!include && hasIncludeFilter) return true

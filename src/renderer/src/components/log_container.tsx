@@ -281,14 +281,14 @@ export const LogContainer: React.FC<{
     // 获取日志颜色
     const getLogColor = function (log: string): React.CSSProperties {
         for (const rule of filterRules) {
-            if (!rule.enable) continue
+            if (!rule.enable || !rule.dyeing) continue
             let hitted = false
             if (rule.regexEnable) {
                 hitted = getRegExp(rule.reg ?? '')?.test(log) ?? false
             } else {
                 hitted = log.includes(rule.reg ?? '')
             }
-            if (rule.exclude) continue
+            if (rule.filterType === 'EXCLUDE') continue
             if (!hitted) continue
 
             return {
@@ -308,7 +308,9 @@ export const LogContainer: React.FC<{
     const lineToIndex = (line: number): number => {
         return hasFilterResult() ? lineToIndexMap.get(line) ?? -1 : line
     }
-    const hasFilter = filterRules.length > 0 && filterRules.some((rule) => rule.enable)
+    const hasFilter =
+        filterRules.length > 0 &&
+        filterRules.some((rule) => rule.enable && rule.filterType !== undefined)
 
     const LogRowRenderer = function (logIndex: number): React.ReactNode {
         const logLine = indexToLine(logIndex)
